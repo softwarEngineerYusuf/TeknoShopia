@@ -1,0 +1,15 @@
+.adminFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+
+  span {
+    &:first-child {
+      font-weight: bold;
+    }
+    &:last-child {
+      font-size: 0.8rem;
+    }
+  }
+}
