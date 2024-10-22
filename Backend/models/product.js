@@ -3,8 +3,8 @@ const Schema = mongoose.Schema;
 
 const productSchema = new Schema({
   name: { type: String, required: true },
-  brand: { type: Schema.Types.ObjectId, ref: 'Brand' }, 
-  category: { type: String, required: true }, 
+  brand: { type: Schema.Types.ObjectId, ref: 'Brand' , required: true}, 
+  category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
   price: { type: Number, required: true },
   stock: { type: Number, required: true },
   description: { type: String },
@@ -14,8 +14,6 @@ const productSchema = new Schema({
     contentType: String 
   }],
   reviews: [{ type: Schema.Types.ObjectId, ref: 'Review' }],
-  rating: { type: Number, default: 0 } ,
-
   discount: { type: Number, default: 0 }, // İndirim yüzdesi (%)
   discountStartDate: { type: Date }, 
   discountEndDate: { type: Date }, 

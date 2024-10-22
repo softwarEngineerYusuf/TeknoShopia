@@ -9,7 +9,7 @@ require('dotenv').config();
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key'; 
 const JWT_EXPIRATION = '1d'; // Token süresini 1 gün olarak belirliyorum.
 
-router.post('/createUser', registerValidation, validate, async (req, res) => {
+router.post('/register', registerValidation, validate, async (req, res) => {
   console.log(req.body);
     const { name, email, password } = req.body;
   

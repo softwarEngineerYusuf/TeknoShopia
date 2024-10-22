@@ -2,7 +2,7 @@ const express =require("express");
 const bodyParser = require('body-parser');
 const dotenv = require("dotenv"); 
 const dbConnect =require("./dbConnect/db.js")
-const routes = require("./routes/routes.js")
+const routes = require("./route/routes.js")
 const cookieParser = require('cookie-parser');
 dotenv.config();
 
