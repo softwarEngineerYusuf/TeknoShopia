@@ -3,15 +3,15 @@ const bodyParser = require('body-parser');
 const dotenv = require("dotenv"); 
 const dbConnect =require("./dbConnect/db.js")
 const routes = require("./routes/routes.js")
+const cookieParser = require('cookie-parser');
 dotenv.config();
 
 const app =express();
 app.use(bodyParser.json());
 
+app.use(cookieParser());
 app.use("/",routes)
-app.get("/", (req,res)=>{
-    res.send("first request")
-})
+
 
 
 app.listen(process.env.PORT || 5000,()=>{
