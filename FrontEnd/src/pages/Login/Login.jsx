@@ -1,25 +1,73 @@
-
+import React, { useState } from 'react';
 import '../Login/Login.css'
 
-function Login() {
+const LoginForm = ({ toggleForm }) => {
   return (
-    <>
     <div className='LoginPageMain'>
      
-     <div className='LoginAndRegisterButton'>
-     <div className='UnderLoginAndRegisterButton' style={{backgroundColor:'##2C2C2C'}}><button>Login</button></div>
-     <div className='UnderLoginAndRegisterButton'><button>Register</button></div>
-     </div>
+      <div className='LoginAndRegisterButton'>
+      <div className='LoginInRegisterPage'><h2>Login</h2></div>
+      <div className='RegisterInRegisterPage'><button onClick={toggleForm}>Register</button></div>
+      </div>
 
-     <div><input className='inputsOfLogin' type="text" name="Ad Soyad" placeholder='Ad Soyad' /></div>
-     <div><input className='inputsOfLogin' type="email" name="E-Posta" placeholder="E-Posta" /></div>
-     <div><input className='inputsOfLogin' type="tel" placeholder="(5XX) XXX XX XX"/></div>
-     <div><input className='inputsOfLogin' type="checkbox"/> İletişim izinleri </div>
-     <div><button>Login</button></div>
+      <form>
+        <div>
+          <input className='inputsLoginAndRegister' type="email" placeholder="E Posta" />
+        </div>
+        <div>
+       <input className='inputsLoginAndRegister' type="password" placeholder="Password " />
+        </div>
+        <button className='ButtonOfSubmit' type="submit">Login</button>
+      </form>
+    </div>
+  );
+};
+
+const RegisterForm = ({ toggleForm }) => {
+  return (
+    <div  className='LoginPageMain'>
+     
+     <div className='LoginAndRegisterButton'>
+       <div className='RegisterInLoginRegisterPage'><h2>Register</h2></div>
+      <div className='LoginButtonInLoginRegisterPage'><button onClick={toggleForm}>Login</button></div> 
+      </div>
+
+      <form>
+        <div>
+          <input className='inputsLoginAndRegister' type="text" placeholder='Name Surname' />
+        </div>
+        <div>
+          <input className='inputsLoginAndRegister' type="email" placeholder="E Posta" />
+        </div>
+        <div>
+          <input className='inputsLoginAndRegister' type="tel" placeholder='(5xx) xxx xx xx' />
+        </div>
+        <div>
+          <input className='inputsLoginAndRegister' type="text" placeholder='Password' />
+        </div>
+        <div>
+          <input className='inputsLoginAndRegister' type="text" placeholder='Password again' />
+        </div>
+        <div className='checkboxInRegister'><input type="checkbox" /> KVKK izinlerini onaylıyorum.</div>
+        <button className='ButtonOfSubmit'  type="submit">Register</button>
+      </form>
 
     </div>
-    </>
-  )
-}
-    
-export default Login
+  );
+};
+
+const App = () => {
+  const [isLogin, setIsLogin] = useState(true);
+
+  const toggleForm = () => {
+    setIsLogin(!isLogin);
+  };
+
+  return (
+    <div style={{ textAlign: 'center', marginTop: '50px' }}>
+      {isLogin ? <LoginForm toggleForm={toggleForm} /> : <RegisterForm toggleForm={toggleForm} />}
+    </div>
+  );
+};
+
+export default App;

@@ -3,18 +3,61 @@
     flex-direction: column;
     justify-content: center; 
     align-items: center; 
-    height: 100vh; 
-}
-.LoginAndRegisterButton{
-    display: flex;
-}
-.UnderLoginAndRegisterButton{
-    padding: 2px 5px;
-    margin: 10px;
+    height: 80vh; 
+    width: 400px; /* Genişliği küçülttüm */
+    margin: 0 auto; /* Ortalamak için */
+    padding: 20px; /* İçerideki öğelerin kenarlara yapışmaması için padding ekledim */
+    border-radius: 10px; /* Daha şık görünmesi için köşeleri yumuşattım */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Hafif bir gölge ekledim */
 }
 
-.inputsOfLogin{
+.LoginAndRegisterButton{
+    display: flex;
+    padding: 2px 5px;
+}
+.RegisterInLoginRegisterPage{
 border: 1px solid black;
-padding: 2px 100px;
-margin-top: 10px;
+padding: 2px 10px;
+background-color: #2C2C2C;
+color: white;
+border-radius: 8px;
+margin-right: 1px;
+}
+.LoginButtonInLoginRegisterPage{
+    border: 1px solid black;
+    border-radius: 8px;
+    padding: 2px 10px;
+}
+.LoginInRegisterPage{
+    border: 1px solid black;
+    padding: 2px 10px;
+    background-color: #2C2C2C;
+    color: white;
+    border-radius: 8px;
+    margin-right: 1px;
+}
+.RegisterInRegisterPage{
+    border: 1px solid black;
+    border-radius: 8px;
+    padding: 2px 10px;
+}
+
+.inputsLoginAndRegister{
+    border: 1px solid black;
+    margin-top: 10px;
+    padding: 3px 30px;
+}
+.inputsLoginAndRegister::placeholder{
+   text-align: left;
+}
+
+.ButtonOfSubmit{
+    background-color: #21005D;
+    color: white;
+    margin-top: 10px;
+    padding: 2px 30px; 
+    border-radius: 18px;
+}
+.checkboxInRegister{
+    margin-top: 5px;
 }
