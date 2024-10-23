@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require("../models/user"); 
 const authenticateToken = require("../middleware/authenticateToken.js")
 
-router.get('/',  authenticateToken, async (req, res) => {
+router.get('/',  async (req, res) => {   //authenticateToken
     try {
       
       const users = await User.find().select('-password'); 
