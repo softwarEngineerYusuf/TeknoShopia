@@ -77,7 +77,6 @@ router.delete("/deleteReview/:id", async (req, res) => {
     }
 });
 
-
 router.put("/updateReview/:id", async (req, res) => {
     try {
         const { comment, rating } = req.body;
