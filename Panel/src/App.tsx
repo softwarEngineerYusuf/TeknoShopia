@@ -1,49 +1,34 @@
-import AdminFooter from "./adminPanel/components/adminFooter/AdminFooter";
-import AdminMenu from "./adminPanel/components/adminMenu/AdminMenu";
-import AdminNavbar from "./adminPanel/components/adminNavbar/AdminNavbar";
-import Home from "./adminPanel/pages/home/Home";
-import Login from "./adminPanel/pages/login/Login";
-import PanelProducts from "./adminPanel/pages/panelProducts/PanelProducts";
-import PanelUsers from "./adminPanel/pages/panelUsers/PanelUsers";
-import ProductDetail from "./adminPanel/pages/productDetail/ProductDetail";
-import UserDetail from "./adminPanel/pages/userDetail/UserDetail";
-
-
-import "./styles/global.scss";
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
-
+import "./App.css";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Home from "./pages/Home";
+import Navbar from "./components/navbar/Navbar";
+import Footer from "./components/footer/Footer";
+import Order from "./pages/Order";
+import Product from "./pages/Product";
+import Menu from "./components/menu/Menu";
 function App() {
-  const Layout = () => {
-    return (
-      <div className="main">
-        <AdminNavbar />
-        <div className="appContainer">
-          <div className="menuContainer">
-            <AdminMenu />
-          </div>
-          <div className="contentContainer">
-            <Outlet />
-          </div>
-        </div>
-        <AdminFooter />
-      </div>
-    );
-  };
   return (
     <>
-      {" "}
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="/users" element={<PanelUsers />} />
-            <Route path="/products" element={<PanelProducts />} />
-            <Route path="/productDetail/:id" element={<ProductDetail />} />
-            <Route path="/userDetail/:id" element={<UserDetail />} />
-          </Route>
-          <Route path="/login" element={<Login />} />
-        </Routes>
-      </BrowserRouter>
+      <Router>
+        <div className="bg-gray-800 text-white min-h-screen flex flex-col">
+          {" "}
+          <Navbar />
+          <div className="flex flex-grow">
+            {/* flex flex-col menüyü sonuna kadar iter */}
+            <div className=" w-1/6 min-w-[12rem] bg-gray-700 ">
+              <Menu />
+            </div>
+            <div className="flex-grow ">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/products" element={<Product />} />
+                <Route path="/orders" element={<Order />} />
+              </Routes>
+            </div>
+          </div>
+          <Footer />
+        </div>
+      </Router>
     </>
   );
 }
