@@ -1,0 +1,47 @@
+.RegisterPageMain {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+    font-size: 17px;
+}
+
+.boxOfRegister {
+
+    padding: 100px 50px;
+    border-radius: 10px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    background-color: white;
+}
+
+.LoginAndRegisterButtonRgs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.UnderLoginAndRegisterButtonRgs {
+    padding: 2px 5px;
+    margin: 10px;
+}
+
+.inputsOfLoginRgs {
+    border: 1px solid black;
+    padding: 6px 90px 6px 10px;
+    margin-top: 14px;
+
+}
+
+.loginButtonRegister {
+    display: flex;
+    justify-content: center;
+    margin-top: 5%;
+}
+
+.loginButtonRegister button {
+    padding: 3px 110px;
+    background-color: #21005D;
+    color: white;
+    border-radius: 17px;
+}
