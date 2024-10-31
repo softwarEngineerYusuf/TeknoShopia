@@ -8,22 +8,22 @@ import Order from "./pages/Order";
 import Product from "./pages/Product";
 import Menu from "./components/menu/Menu";
 function App() {
-  const [isMenuCollapsed, setIsMenuCollapsed] = useState<boolean>(false);
+  const [isMenuClosed, setIsMenuClosed] = useState<boolean>(false);
   return (
     <>
       <Router>
         <div className="bg-gray-800 text-white min-h-screen flex flex-col">
           <Navbar
-            isMenuCollapsed={isMenuCollapsed}
-            setIsMenuCollapsed={setIsMenuCollapsed}
+            isMenuClosed={isMenuClosed}
+            setIsMenuClosed={setIsMenuClosed}
           />
           <div className="flex flex-grow">
             <div
               className={`${
-                isMenuCollapsed ? "w-1/6" : "w-1/6"
+                isMenuClosed ? "w-15" : "w-52"
               } min-w-[3rem] bg-gray-700 transition-all duration-300`}
             >
-              <Menu isCollapsed={isMenuCollapsed} />
+              <Menu isMenuClosed={isMenuClosed} />
             </div>
             <div className="flex-grow">
               <Routes>

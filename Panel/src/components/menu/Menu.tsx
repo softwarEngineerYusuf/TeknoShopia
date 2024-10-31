@@ -6,11 +6,11 @@ import CategoryIcon from "@mui/icons-material/Category";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import PersonIcon from "@mui/icons-material/Person";
 
-interface MenuProps {
-  isCollapsed: boolean;
+interface MenuClosedProps {
+  isMenuClosed: boolean;
 }
 
-const Menu: React.FC<MenuProps> = ({ isCollapsed }) => {
+const Menu: React.FC<MenuClosedProps> = ({ isMenuClosed }) => {
   return (
     <div className=" mt-10">
       <div className="flex items-center mb-4  ">
@@ -22,7 +22,7 @@ const Menu: React.FC<MenuProps> = ({ isCollapsed }) => {
           <span className="mr-2 flex items-center">
             <HomeIcon color="primary" />
           </span>
-          {!isCollapsed && "Home"}
+          {!isMenuClosed && "Home"}
         </Link>
       </div>
       <div className="flex items-center  mb-4 ">
@@ -34,7 +34,7 @@ const Menu: React.FC<MenuProps> = ({ isCollapsed }) => {
           <span className="mr-2 flex items-center">
             <PersonIcon color="primary" />
           </span>
-          Users
+          {!isMenuClosed && "User"}
         </Link>
       </div>
       <div className="flex items-center  mb-4 ">
@@ -46,7 +46,7 @@ const Menu: React.FC<MenuProps> = ({ isCollapsed }) => {
           <span className="mr-2 flex items-center">
             <ProductionQuantityLimitsIcon color="primary" />
           </span>
-          Products
+          {!isMenuClosed && "Product"}
         </Link>
       </div>
       <div className="flex items-center mb-4  ">
@@ -58,7 +58,7 @@ const Menu: React.FC<MenuProps> = ({ isCollapsed }) => {
           <span className="mr-2 flex items-center">
             <CategoryIcon color="primary" />
           </span>
-          Category
+          {!isMenuClosed && "Category"}
         </Link>
       </div>
       <div className="flex items-center mb-4  ">
@@ -70,7 +70,7 @@ const Menu: React.FC<MenuProps> = ({ isCollapsed }) => {
           <span className="mr-2 flex items-center">
             <BrandingWatermarkIcon color="primary" />
           </span>
-          Brands
+          {!isMenuClosed && "Brands"}
         </Link>
       </div>
 
@@ -83,7 +83,7 @@ const Menu: React.FC<MenuProps> = ({ isCollapsed }) => {
           <span className="mr-2 flex items-center">
             <AttachMoneyIcon color="primary" />
           </span>
-          Orders
+          {!isMenuClosed && "Orders"}
         </Link>
       </div>
     </div>

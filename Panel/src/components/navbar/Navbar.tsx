@@ -1,14 +1,14 @@
 import { Button } from "@mui/material";
-import HomeIcon from "@mui/icons-material/Home";
+import FormatAlignCenterIcon from "@mui/icons-material/FormatAlignCenter";
 
-interface NavbarProps {
-  isMenuCollapsed: boolean;
-  setIsMenuCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+interface NavbarClosedProps {
+  isMenuClosed: boolean;
+  setIsMenuClosed: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Navbar: React.FC<NavbarProps> = ({
-  isMenuCollapsed,
-  setIsMenuCollapsed,
+const Navbar: React.FC<NavbarClosedProps> = ({
+  isMenuClosed,
+  setIsMenuClosed,
 }) => {
   return (
     <div className="flex justify-between items-center px-6 text-red-600 border-b-2 border-b-gray-400 py-7">
@@ -16,9 +16,9 @@ const Navbar: React.FC<NavbarProps> = ({
         <div>
           <Button
             variant="contained"
-            onClick={() => setIsMenuCollapsed(!isMenuCollapsed)}
+            onClick={() => setIsMenuClosed(!isMenuClosed)}
           >
-            <HomeIcon />
+            <FormatAlignCenterIcon />
           </Button>
         </div>
         <div className="text-2xl ml-6">TeknoShopia</div>
