@@ -11,7 +11,7 @@ const Navbar: React.FC<NavbarClosedProps> = ({
   setIsMenuClosed,
 }) => {
   return (
-    <div className="flex justify-between items-center px-6 text-red-600 border-b-2 border-b-gray-400 py-7">
+    <div className="flex justify-between items-center px-6 text-red-600 border-b-2 border-b-gray-500 py-7">
       <div className="flex">
         <div>
           <Button

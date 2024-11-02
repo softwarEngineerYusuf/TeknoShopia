@@ -7,8 +7,9 @@ import Footer from "./components/footer/Footer";
 import Order from "./pages/Order";
 import Product from "./pages/Product";
 import Menu from "./components/menu/Menu";
+import User from "./pages/User";
 function App() {
-  const [isMenuClosed, setIsMenuClosed] = useState<boolean>(false);
+  const [isMenuClosed, setIsMenuClosed] = useState<boolean>(false); //butona basıldığında menümüz daha küçük hale gelir.
   return (
     <>
       <Router>
@@ -21,13 +22,14 @@ function App() {
             <div
               className={`${
                 isMenuClosed ? "w-15" : "w-52"
-              } min-w-[3rem] bg-gray-700 transition-all duration-300`}
+              } min-w-[3rem] bg-gray-700 transition-all duration-300  flex-shrink-0`}
             >
               <Menu isMenuClosed={isMenuClosed} />
             </div>
-            <div className="flex-grow">
+            <div className="flex-grow overflow-auto">
               <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/user" element={<User />} />
                 <Route path="/products" element={<Product />} />
                 <Route path="/orders" element={<Order />} />
               </Routes>
