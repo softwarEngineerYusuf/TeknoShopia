@@ -1,5 +1,5 @@
 function Navbar() {
-  return <div>arif ve nazlı</div>;
+  return <div> </div>;
 }
 
 export default Navbar;

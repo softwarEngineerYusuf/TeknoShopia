@@ -1,0 +1,36 @@
+.allMainHomePage {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    width: 80%;
+    margin: 0 auto; /* Yatayda ortalama unutma!*/
+}
+
+.DiscountsTextOnHomePage {
+    margin-top: 5%;
+    font-size: xx-large;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif
+}
+
+.discountsListOnHomePage {
+    margin-top: 2%;
+}
+
+.pricesOnDiscountsList {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.canceledPriceOnDiscound p {
+    text-decoration: line-through;
+    color: #999;
+    margin: 0;
+}
+
+.lastPriceOnDiscound p {
+    font-weight: bold; 
+    color: #ff0000; 
+    margin: 0;
+}
+
