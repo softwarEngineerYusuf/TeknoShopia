@@ -6,11 +6,48 @@ const {
   registerValidation,
   validate,
 } = require("../middleware/registerValidation");
+const passport = require("../config/passport.js");
 const router = express.Router();
 require("dotenv").config();
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
 const JWT_EXPIRATION = "1d"; // Token süresini 1 gün olarak belirliyorum.
+
+// Google ile kimlik doğrulama isteği
+router.get(
+  "/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"], // İhtiyacınız olan izinleri belirtin
+  })
+);
+
+// Google'ın yönlendirdiği geri dönüş yolu
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  (req, res) => {
+    // Kullanıcı bilgilerini token ile yanıtla
+    const token = jwt.sign(
+      {
+        userId: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+      },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRATION }
+    );
+
+    // Token'ı httpOnly cookie olarak ekle
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: "lax",
+    });
+
+    res.redirect("http://localhost:5173"); // Girişten sonra yönlendirme yapılacak URL
+  }
+);
 
 router.post("/register", registerValidation, validate, async (req, res) => {
   console.log(req.body);

@@ -13,7 +13,10 @@ router.post("/addProduct", async (req, res) => {
       price,
       stock,
       description,
-      images,
+      mainImage,
+      additionalImages,
+      imageFiles,
+      additionalImageFiles,
       attributes,
       discount,
       discountStartDate,
@@ -24,18 +27,18 @@ router.post("/addProduct", async (req, res) => {
       return res.status(400).json({ message: "Gerekli alanları doldurunuz." });
     }
 
-    // Brandinini isim olarak alıyorum ve id sini yakalıyorum .
+    // Brand ve Category ID'lerini isimden bululuyorm.
     const brandFind = await Brand.findOne({ name: brand });
     if (!brandFind)
       return res.status(404).json({ message: "Belirtilen marka bulunamadı." });
 
-    // categoriyide isim olarak alıyorum ve id sini yakalıyorum .
     const categoryFind = await Category.findOne({ name: category });
     if (!categoryFind)
       return res
         .status(404)
         .json({ message: "Belirtilen kategori bulunamadı." });
 
+    // Yeni ürün oluşturuyorum.
     const newProduct = new Product({
       name,
       brand: brandFind._id,
@@ -43,7 +46,10 @@ router.post("/addProduct", async (req, res) => {
       price,
       stock,
       description,
-      images,
+      mainImage,
+      additionalImages,
+      imageFiles,
+      additionalImageFiles,
       attributes,
       discount,
       discountStartDate,
@@ -52,7 +58,7 @@ router.post("/addProduct", async (req, res) => {
 
     await newProduct.save();
 
-    // Brand ve Categorilerede ürünü ekliyorum.
+    // Brand ve Category belgelerinde ürün ID'sini ekliyorum.
     brandFind.products.push(newProduct._id);
     await brandFind.save();
 
@@ -123,7 +129,7 @@ router.delete("/deleteProduct/:id", async (req, res) => {
       { $pull: { products: product._id } }
     );
 
-    //ürün siliniyor.
+    //ürün burada siliniyor
     await Product.findByIdAndDelete(req.params.id);
 
     res.status(200).json({ message: "Ürün başarıyla silindi." });
@@ -139,27 +145,31 @@ router.put("/updateProduct/:id", async (req, res) => {
       price,
       stock,
       description,
-      images,
+      mainImage,
+      additionalImages,
+      imageFiles,
+      additionalImageFiles,
       attributes,
       discount,
       discountStartDate,
       discountEndDate,
     } = req.body;
 
-    // Alanları burada alıyorum ve eşitliyorum
     const updatedProductData = {
       name,
       price,
       stock,
       description,
-      images,
+      mainImage,
+      additionalImages,
+      imageFiles,
+      additionalImageFiles,
       attributes,
       discount,
       discountStartDate,
       discountEndDate,
     };
 
-    // Ürünü güncelliyorum
     const product = await Product.findByIdAndUpdate(
       req.params.id,
       updatedProductData,

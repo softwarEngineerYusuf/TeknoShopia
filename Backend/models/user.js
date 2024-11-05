@@ -4,9 +4,9 @@ const Schema = mongoose.Schema;
 const userSchema = new Schema(
   {
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    phone: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    email: { type: String, required: false, unique: true },
+    phone: { type: String, required: false, unique: true, sparse: true },
+    password: { type: String, required: false },
     addresses: [{ type: Schema.Types.ObjectId, ref: "Address" }],
     favorites: [{ type: Schema.Types.ObjectId, ref: "Product" }],
     cart: [

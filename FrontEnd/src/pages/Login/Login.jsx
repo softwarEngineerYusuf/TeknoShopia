@@ -2,6 +2,17 @@ import "../Login/Login.css";
 import { useNavigate } from "react-router-dom";
 function Login() {
   const navigate = useNavigate();
+
+  const handleGoogleLogin = () => {
+    window.open("http://localhost:5000/api/auth/google", "_self");
+  };
+
+  const handleGoogleLogout = () => {
+    // Kullanıcıyı Google'dan çıkış yaptırmak için Google'ın logout URL'sini açıyoruz
+    window.open("https://accounts.google.com/Logout", "_self");
+    navigate("/");
+  };
+
   return (
     <>
       <div className="LoginPageMain">
@@ -49,6 +60,10 @@ function Login() {
             <div className="forgotPasswordLink">
               {" "}
               <a href="">Forgot Password</a>{" "}
+            </div>
+            <button onClick={handleGoogleLogin}>Google ile Giriş Yap</button>
+            <div>
+              <button onClick={handleGoogleLogout}>Çıkış</button>
             </div>
           </div>
         </div>
