@@ -30,6 +30,22 @@ const rows: Product[] = [
     stock: 50,
     discountedPrice: 90,
   },
+  {
+    image: "https://via.placeholder.com/50",
+    brand: "Brand 1",
+    name: "Sample Product",
+    price: 100,
+    stock: 50,
+    discountedPrice: 90,
+  },
+  {
+    image: "https://via.placeholder.com/50",
+    brand: "Brand 1",
+    name: "Sample Product",
+    price: 100,
+    stock: 50,
+    discountedPrice: 90,
+  },
 ];
 
 export default function ProductTable() {
@@ -54,72 +70,81 @@ export default function ProductTable() {
   };
 
   return (
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 500 }} aria-label="product table">
-        <TableHead>
-          <TableRow>
-            <TableCell>Image</TableCell>
-            <TableCell>Name</TableCell>
-            <TableCell>Price</TableCell>
-            <TableCell>Stock</TableCell>
-            <TableCell>Discounted Price</TableCell>
-            <TableCell>Action</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {(rowsPerPage > 0
-            ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            : rows
-          ).map((row) => (
-            <TableRow key={row.name}>
-              <TableCell component="th" scope="row">
-                <img
-                  src={row.image}
-                  alt={row.name}
-                  style={{ width: "50px", height: "50px", objectFit: "cover" }}
-                />
-              </TableCell>
-              <TableCell>{row.name}</TableCell>
-              <TableCell>{`$${row.price.toFixed(2)}`}</TableCell>
-              <TableCell>{row.stock}</TableCell>
-              <TableCell>
-                {row.discountedPrice
-                  ? `$${row.discountedPrice.toFixed(2)}`
-                  : "No Discount"}
-              </TableCell>
-              <TableCell align="right">
-                <div className="flex space-x-2">
-                  <button className="px-3 py-1 text-white bg-blue-500 rounded hover:bg-blue-600">
-                    Update
-                  </button>
-                  <button className="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600">
-                    Delete
-                  </button>
-                </div>
-              </TableCell>
+    <>
+      <TableContainer component={Paper}>
+        <Table sx={{ minWidth: 500 }} aria-label="product table">
+          <TableHead>
+            <TableRow>
+              <TableCell>Image</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Price</TableCell>
+              <TableCell>Stock</TableCell>
+              <TableCell>Discounted Price</TableCell>
+              <TableCell>Action</TableCell>
             </TableRow>
-          ))}
-          {emptyRows > 0 && (
-            <TableRow style={{ height: 53 * emptyRows }}>
-              <TableCell colSpan={5} />
+          </TableHead>
+          <TableBody>
+            {(rowsPerPage > 0
+              ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              : rows
+            ).map((row) => (
+              <TableRow key={row.name}>
+                <TableCell component="th" scope="row">
+                  <img
+                    src={row.image}
+                    alt={row.name}
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      objectFit: "cover",
+                    }}
+                  />
+                </TableCell>
+                <TableCell>{row.name}</TableCell>
+                <TableCell>{`$${row.price.toFixed(2)}`}</TableCell>
+                <TableCell>{row.stock}</TableCell>
+                <TableCell>
+                  {row.discountedPrice
+                    ? `$${row.discountedPrice.toFixed(2)}`
+                    : "No Discount"}
+                </TableCell>
+                <TableCell align="right">
+                  <div className="flex space-x-2">
+                    <button className="px-3 py-1 text-white bg-blue-500 rounded hover:bg-blue-600">
+                      Update
+                    </button>
+                    <button className="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600">
+                      Delete
+                    </button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+            {emptyRows > 0 && (
+              <TableRow style={{ height: 53 * emptyRows }}>
+                <TableCell colSpan={5} />
+              </TableRow>
+            )}
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                colSpan={5}
+                count={rows.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                ActionsComponent={TablePaginationActions}
+              />
             </TableRow>
-          )}
-        </TableBody>
-        <TableFooter>
-          <TableRow>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
-              colSpan={5}
-              count={rows.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              ActionsComponent={TablePaginationActions}
-            />
-          </TableRow>
-        </TableFooter>
-      </Table>
-    </TableContainer>
+          </TableFooter>
+        </Table>
+      </TableContainer>
+      <button className="px-4 py-2 mt-2 text-white bg-green-500 rounded hover:bg-green-600">
+        Add Product
+      </button>
+    </>
   );
 }
