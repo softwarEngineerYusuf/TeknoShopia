@@ -1,6 +1,6 @@
 import ProductTable from "../components/productTable/ProductTable";
 
-function Product() {
+const Product = () => {
   return (
     <div className="mr-5 ml-5">
       {" "}
@@ -8,6 +8,6 @@ function Product() {
       <ProductTable />
     </div>
   );
-}
+};
 
 export default Product;

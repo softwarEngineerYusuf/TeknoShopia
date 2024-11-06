@@ -8,6 +8,7 @@ import Order from "./pages/Order";
 import Product from "./pages/Product";
 import Menu from "./components/menu/Menu";
 import User from "./pages/User";
+import Brand from "./pages/Brand";
 function App() {
   const [isMenuClosed, setIsMenuClosed] = useState<boolean>(false); //butona basıldığında menümüz daha küçük hale gelir.
   return (
@@ -32,6 +33,7 @@ function App() {
                 <Route path="/user" element={<User />} />
                 <Route path="/products" element={<Product />} />
                 <Route path="/orders" element={<Order />} />
+                <Route path="/brands" element={<Brand />} />
               </Routes>
             </div>
           </div>

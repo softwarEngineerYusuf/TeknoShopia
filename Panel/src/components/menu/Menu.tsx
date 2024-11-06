@@ -63,7 +63,7 @@ const Menu: React.FC<MenuClosedProps> = ({ isMenuClosed }) => {
       </div>
       <div className="flex items-center mb-4  ">
         <Link
-          to="/"
+          to="/brands"
           className="mx-1 flex flex-1 items-center p-2  hover:bg-gray-400 rounded-md transition-colors duration-200 text-xl"
         >
           {" "}
