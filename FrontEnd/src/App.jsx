@@ -9,6 +9,7 @@ import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import Home from "./pages/Home/Home";
 import Navbar from "./components/Navbar/Navbar";
+import Basket from "./pages/Basket/Basket";
 
 function Layout() {
   return (
@@ -23,10 +24,11 @@ function App() {
     <Router>
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home />} />
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/basket" element={<Basket />} />
       </Routes>
     </Router>
   );
