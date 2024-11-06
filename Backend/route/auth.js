@@ -45,13 +45,23 @@ router.get(
       sameSite: "lax",
     });
 
+    res.status(200).json({
+      message: "Google ile başarılı giriş",
+      user: {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+      },
+      token: token,
+    });
+
     res.redirect("http://localhost:5173"); // Girişten sonra yönlendirme yapılacak URL
   }
 );
 
 router.post("/register", registerValidation, validate, async (req, res) => {
   console.log(req.body);
-  const { name, email, password, phone } = req.body;
+  const { name, email, password } = req.body;
 
   try {
     const existingUser = await User.findOne({ email });
@@ -71,7 +81,7 @@ router.post("/register", registerValidation, validate, async (req, res) => {
         id: newUser._id,
         name: newUser.name,
         email: newUser.email,
-        phone: newUser.phone,
+
         addresses: newUser.addresses,
         favorites: newUser.favorites,
         cart: newUser.cart,
@@ -125,7 +135,7 @@ router.post("/login", async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        phone: user.phone,
+
         addresses: user.addresses,
         favorites: user.favorites,
         cart: user.cart,

@@ -19,8 +19,9 @@ passport.use(
           user = new User({
             name,
             email,
-            password: " ", // Google kullanıcılarının şifresi olmayacak
-            phone: " ", // Gerekli değilse null bırakılabilir
+            password: "", // Şifreyi boş bırakıyoruz
+
+            isGoogleUser: true,
           });
           await user.save();
         }
