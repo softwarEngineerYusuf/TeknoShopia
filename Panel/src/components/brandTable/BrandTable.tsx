@@ -12,8 +12,10 @@ import {
   Paper,
 } from "@mui/material";
 import BrandPaginationActions from "./BrandTablePagination";
+import BrandAddDialog from "./BrandAddDialog";
 
 interface Brand {
+  _id: string;
   name: string;
   description?: string;
   imageUrl?: string;
@@ -26,28 +28,44 @@ export default function BrandTable() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const handleClickOpenDialog = () => {
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+  };
+
+  const fetchBrands = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        "http://localhost:5000/api/brand/getAllBrands"
+      );
+      setBrands(response.data);
+    } catch (error) {
+      setError("Failed to fetch brands.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteBrand = async (id: string) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/brand/deleteBrand/${id}`);
+      setBrands(brands.filter((brand) => brand._id !== id));
+    } catch (error) {
+      console.error("Failed to delete brand:", error);
+      setError("Failed to delete brand.");
+    }
+  };
 
   useEffect(() => {
-    const fetchBrands = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:5000/api/brand/getAllBrands"
-        );
-        setBrands(response.data);
-        console.log("Brandsler:", brands);
-      } catch (error) {
-        setError("Failed to fetch brands.");
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchBrands();
   }, []);
-
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - brands.length) : 0;
 
   const handleChangePage = (
     event: React.MouseEvent<HTMLButtonElement> | null,
@@ -95,7 +113,7 @@ export default function BrandTable() {
               <TableRow key={brand.name}>
                 <TableCell component="th" scope="row">
                   <img
-                    src={brand.logo || "https://via.placeholder.com/50"} // Logo image
+                    src={brand.logo || "https://via.placeholder.com/50"}
                     alt={brand.name}
                     style={{
                       width: "50px",
@@ -108,7 +126,7 @@ export default function BrandTable() {
                 <TableCell>{brand.description || "No Description"}</TableCell>
                 <TableCell>
                   <img
-                    src={brand.imageUrl || "https://via.placeholder.com/50"} // Image URL for the brand
+                    src={brand.imageUrl || "https://via.placeholder.com/50"}
                     alt={brand.name}
                     style={{
                       width: "50px",
@@ -118,23 +136,20 @@ export default function BrandTable() {
                   />
                 </TableCell>
                 <TableCell>
-                  {/* Add Update and Delete buttons */}
                   <div className="flex space-x-2">
                     <button className="px-3 py-1 text-white bg-blue-500 rounded hover:bg-blue-600">
                       Update
                     </button>
-                    <button className="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600">
+                    <button
+                      className="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600"
+                      onClick={() => handleDeleteBrand(brand._id)}
+                    >
                       Delete
                     </button>
                   </div>
                 </TableCell>
               </TableRow>
             ))}
-            {emptyRows > 0 && (
-              <TableRow style={{ height: 53 * emptyRows }}>
-                <TableCell colSpan={5} />
-              </TableRow>
-            )}
           </TableBody>
           <TableFooter>
             <TableRow>
@@ -152,9 +167,17 @@ export default function BrandTable() {
           </TableFooter>
         </Table>
       </TableContainer>
-      <button className="px-4 py-2 mt-2 text-white bg-green-500 rounded hover:bg-green-600">
+      <button
+        onClick={handleClickOpenDialog}
+        className="px-4 py-2 mt-2 text-white bg-green-500 rounded hover:bg-green-600"
+      >
         Add Brand
       </button>
+      <BrandAddDialog
+        open={dialogOpen}
+        onClose={handleCloseDialog}
+        onBrandAdded={fetchBrands}
+      />
     </>
   );
 }
