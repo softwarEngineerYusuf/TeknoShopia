@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import {
   Table,
   TableBody,
@@ -12,7 +11,9 @@ import {
   Paper,
 } from "@mui/material";
 import BrandPaginationActions from "./BrandTablePagination";
+import { getAllBrands, deleteBrand } from "../../allAPIs/api";
 import BrandAddDialog from "./BrandAddDialog";
+import BrandDeleteDialog from "./BrandDeleteDialog";
 
 interface Brand {
   _id: string;
@@ -29,6 +30,9 @@ export default function BrandTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedBrandId, setSelectedBrandId] = useState<string | null>(null);
+  const [selectedBrandName, setSelectedBrandName] = useState<string>("");
 
   const handleClickOpenDialog = () => {
     setDialogOpen(true);
@@ -41,26 +45,37 @@ export default function BrandTable() {
   const fetchBrands = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        "http://localhost:5000/api/brand/getAllBrands"
-      );
-      setBrands(response.data);
+      const data = await getAllBrands();
+      setBrands(data);
     } catch (error) {
-      setError("Failed to fetch brands.");
+      setError("Markalar alınırken bir hata oluştu.");
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteBrand = async (id: string) => {
-    try {
-      await axios.delete(`http://localhost:5000/api/brand/deleteBrand/${id}`);
-      setBrands(brands.filter((brand) => brand._id !== id));
-    } catch (error) {
-      console.error("Failed to delete brand:", error);
-      setError("Failed to delete brand.");
+  const handleDeleteBrand = async () => {
+    if (selectedBrandId) {
+      try {
+        await deleteBrand(selectedBrandId);
+        setBrands(brands.filter((brand) => brand._id !== selectedBrandId));
+        setDeleteDialogOpen(false);
+      } catch (error) {
+        console.error("Marka silinirken bir hata oluştu:", error);
+        setError("Marka silinirken bir hata oluştu.");
+      }
     }
+  };
+
+  const openDeleteDialog = (id: string, name: string) => {
+    setSelectedBrandId(id);
+    setSelectedBrandName(name);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
   };
 
   useEffect(() => {
@@ -82,7 +97,7 @@ export default function BrandTable() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Yükleniyor...</div>;
   }
 
   if (error) {
@@ -96,10 +111,10 @@ export default function BrandTable() {
           <TableHead>
             <TableRow>
               <TableCell>Logo</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell>Image</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell>İsim</TableCell>
+              <TableCell>Açıklama</TableCell>
+              <TableCell>Resim</TableCell>
+              <TableCell>İşlemler</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -110,7 +125,7 @@ export default function BrandTable() {
                 )
               : brands
             ).map((brand) => (
-              <TableRow key={brand.name}>
+              <TableRow key={brand._id}>
                 <TableCell component="th" scope="row">
                   <img
                     src={brand.logo || "https://via.placeholder.com/50"}
@@ -123,7 +138,7 @@ export default function BrandTable() {
                   />
                 </TableCell>
                 <TableCell>{brand.name}</TableCell>
-                <TableCell>{brand.description || "No Description"}</TableCell>
+                <TableCell>{brand.description || "Açıklama yok"}</TableCell>
                 <TableCell>
                   <img
                     src={brand.imageUrl || "https://via.placeholder.com/50"}
@@ -138,13 +153,13 @@ export default function BrandTable() {
                 <TableCell>
                   <div className="flex space-x-2">
                     <button className="px-3 py-1 text-white bg-blue-500 rounded hover:bg-blue-600">
-                      Update
+                      Güncelle
                     </button>
                     <button
                       className="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600"
-                      onClick={() => handleDeleteBrand(brand._id)}
+                      onClick={() => openDeleteDialog(brand._id, brand.name)}
                     >
-                      Delete
+                      Sil
                     </button>
                   </div>
                 </TableCell>
@@ -154,7 +169,7 @@ export default function BrandTable() {
           <TableFooter>
             <TableRow>
               <TablePagination
-                rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                rowsPerPageOptions={[5, 10, 25, { label: "Tümü", value: -1 }]}
                 colSpan={5}
                 count={brands.length}
                 rowsPerPage={rowsPerPage}
@@ -171,12 +186,18 @@ export default function BrandTable() {
         onClick={handleClickOpenDialog}
         className="px-4 py-2 mt-2 text-white bg-green-500 rounded hover:bg-green-600"
       >
-        Add Brand
+        Marka Ekle
       </button>
       <BrandAddDialog
         open={dialogOpen}
         onClose={handleCloseDialog}
         onBrandAdded={fetchBrands}
+      />
+      <BrandDeleteDialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        onDelete={handleDeleteBrand}
+        brandName={selectedBrandName}
       />
     </>
   );

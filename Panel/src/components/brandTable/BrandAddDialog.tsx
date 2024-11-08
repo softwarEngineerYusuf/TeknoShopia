@@ -5,12 +5,12 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import axios from "axios";
+import { addBrand } from "../../allAPIs/api";
 
 interface BrandDialogProps {
   open: boolean;
   onClose: () => void;
-  onBrandAdded: () => void; // Callback to refresh the brand list after adding
+  onBrandAdded: () => void;
 }
 
 const BrandAddDialog: React.FC<BrandDialogProps> = ({
@@ -34,16 +34,13 @@ const BrandAddDialog: React.FC<BrandDialogProps> = ({
     }
 
     try {
-      await axios.post("http://localhost:5000/api/brand/addBrand", {
-        name: brandName,
-      });
+      await addBrand({ name: brandName });
       onBrandAdded();
       handleClose();
     } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || "Failed to add brand.");
-      } else {
-        setError("An unexpected error occurred.");
+      setError("Failed to add brand.");
+      if (err instanceof Error) {
+        setError(err.message || "An unexpected error occurred.");
       }
     }
   };

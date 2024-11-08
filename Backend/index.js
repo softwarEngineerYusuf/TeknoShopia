@@ -5,11 +5,20 @@ const dbConnect = require("./dbConnect/db.js");
 const routes = require("./route/routes.js");
 const session = require("express-session"); // Eklediğimiz paket
 const passport = require("passport"); // Eklediğimiz paket
+const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
 dotenv.config();
 
 const app = express();
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(bodyParser.json());
 
 app.use(cookieParser());
