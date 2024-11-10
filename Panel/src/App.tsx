@@ -9,6 +9,8 @@ import Product from "./pages/Product";
 import Menu from "./components/menu/Menu";
 import User from "./pages/User";
 import Brand from "./pages/Brand";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 function App() {
   const [isMenuClosed, setIsMenuClosed] = useState<boolean>(false); //butona basıldığında menümüz daha küçük hale gelir.
   return (
@@ -40,6 +42,7 @@ function App() {
           <Footer />
         </div>
       </Router>
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </>
   );
 }

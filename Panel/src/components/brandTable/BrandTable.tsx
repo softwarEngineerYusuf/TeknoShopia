@@ -10,6 +10,7 @@ import {
   TableRow,
   Paper,
 } from "@mui/material";
+import { toast } from "react-toastify";
 import BrandPaginationActions from "./BrandTablePagination";
 import { getAllBrands, deleteBrand } from "../../allAPIs/api";
 import BrandAddDialog from "./BrandAddDialog";
@@ -61,9 +62,11 @@ export default function BrandTable() {
         await deleteBrand(selectedBrandId);
         setBrands(brands.filter((brand) => brand._id !== selectedBrandId));
         setDeleteDialogOpen(false);
+        toast.success("Marka başarıyla silindi!");
       } catch (error) {
         console.error("Marka silinirken bir hata oluştu:", error);
         setError("Marka silinirken bir hata oluştu.");
+        toast.error("Marka Silinemedi");
       }
     }
   };
@@ -191,7 +194,7 @@ export default function BrandTable() {
       <BrandAddDialog
         open={dialogOpen}
         onClose={handleCloseDialog}
-        onBrandAdded={fetchBrands}
+        fetchBrands={fetchBrands}
       />
       <BrandDeleteDialog
         open={deleteDialogOpen}

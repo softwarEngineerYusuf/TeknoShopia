@@ -6,17 +6,18 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { addBrand } from "../../allAPIs/api";
+import { toast } from "react-toastify";
 
 interface BrandDialogProps {
   open: boolean;
   onClose: () => void;
-  onBrandAdded: () => void;
+  fetchBrands: () => void;
 }
 
 const BrandAddDialog: React.FC<BrandDialogProps> = ({
   open,
   onClose,
-  onBrandAdded,
+  fetchBrands,
 }) => {
   const [brandName, setBrandName] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +36,8 @@ const BrandAddDialog: React.FC<BrandDialogProps> = ({
 
     try {
       await addBrand({ name: brandName });
-      onBrandAdded();
+      fetchBrands();
+      toast.success(`${brandName} markası başarıyla eklendi`);
       handleClose();
     } catch (err: unknown) {
       setError("Failed to add brand.");
