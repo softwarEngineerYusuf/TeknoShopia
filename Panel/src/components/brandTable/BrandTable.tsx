@@ -15,6 +15,7 @@ import BrandPaginationActions from "./BrandTablePagination";
 import { getAllBrands, deleteBrand } from "../../allAPIs/api";
 import BrandAddDialog from "./BrandAddDialog";
 import BrandDeleteDialog from "./BrandDeleteDialog";
+import BrandUpdateDialog from "./BrandUpdateDialog";
 
 interface Brand {
   _id: string;
@@ -33,6 +34,8 @@ export default function BrandTable() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedBrandId, setSelectedBrandId] = useState<string | null>(null);
+  const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
   const [selectedBrandName, setSelectedBrandName] = useState<string>("");
 
   const handleClickOpenDialog = () => {
@@ -41,6 +44,15 @@ export default function BrandTable() {
 
   const handleCloseDialog = () => {
     setDialogOpen(false);
+  };
+
+  const openUpdateDialog = (brand: Brand) => {
+    setSelectedBrand(brand);
+    setUpdateDialogOpen(true);
+  };
+
+  const handleCloseUpdateDialog = () => {
+    setUpdateDialogOpen(false);
   };
 
   const fetchBrands = async () => {
@@ -155,7 +167,10 @@ export default function BrandTable() {
                 </TableCell>
                 <TableCell>
                   <div className="flex space-x-2">
-                    <button className="px-3 py-1 text-white bg-blue-500 rounded hover:bg-blue-600">
+                    <button
+                      className="px-3 py-1 text-white bg-blue-500 rounded hover:bg-blue-600"
+                      onClick={() => openUpdateDialog(brand)}
+                    >
                       Güncelle
                     </button>
                     <button
@@ -201,6 +216,14 @@ export default function BrandTable() {
         onClose={handleCloseDeleteDialog}
         onDelete={handleDeleteBrand}
         brandName={selectedBrandName}
+      />
+      <BrandUpdateDialog
+        open={updateDialogOpen}
+        onClose={handleCloseUpdateDialog}
+        fetchBrands={fetchBrands}
+        brandId={selectedBrand?._id || ""}
+        brandName={selectedBrand?.name || ""}
+        brandDescription={selectedBrand?.description || ""}
       />
     </>
   );

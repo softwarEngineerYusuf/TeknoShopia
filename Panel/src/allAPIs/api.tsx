@@ -13,7 +13,20 @@ export const deleteBrand = async (id: string) => {
   await api.delete(`/brand/deleteBrand/${id}`);
 };
 
-export const addBrand = async (brandData: { name: string }) => {
-  const response = await api.post("/brand/addBrand", brandData);
+export const addBrand = async (brandData: FormData) => {
+  const response = await api.post("/brand/addBrand", brandData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
+export const updateBrand = async (id: string, brandData: FormData) => {
+  const response = await api.put(`/brand/updateBrand/${id}`, brandData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 };
