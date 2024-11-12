@@ -58,6 +58,10 @@ function Basket() {
       <div className="summaryOrderList">
         <h3>Sipariş Özeti</h3>
         <p>Toplam: {totalOriginalPrice}$</p>
+        <div className="couponCodeEnterArea">
+        <input type="text" placeholder="Kupon Kodu" style={{border:'2px solid black'}} />
+        <button style={{padding:'4px 16px' , backgroundColor:'black',color:'white',borderRadius:'8px'}}>Use</button>
+        </div>
         <p>İndirimler Toplamı: {pricePerItemDiscount * quantity}$</p>
         <p>Toplam Fiyat: {totalDiscountedPrice}$</p>
         <button className="checkoutButton">Satın Al</button>
