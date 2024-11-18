@@ -9,7 +9,7 @@ const productSchema = new Schema(
     price: { type: Number, required: true },
     stock: { type: Number, required: true },
     description: { type: String },
-    mainImage: String,
+    mainImage: { String },
     additionalImages: [String],
     imageFiles: [
       {

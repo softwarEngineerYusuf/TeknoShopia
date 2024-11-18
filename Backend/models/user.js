@@ -5,11 +5,10 @@ const userSchema = new Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-
     password: {
       type: String,
       required: function () {
-        return !this.isGoogleUser; // Google kullanıcıları için zorunlu değil
+        return !this.isGoogleUser;
       },
     },
     isGoogleUser: { type: Boolean, default: false },

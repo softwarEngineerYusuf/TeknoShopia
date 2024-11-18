@@ -1,22 +1,28 @@
 const router = require("express").Router();
-const auth=require("./auth.js")
-const userRouter =require("./userRouter.js")
-const category=require("./category.js")
-const brand=require("./brand.js")
-const address=require("./address.js")
-const product=require("./product.js");
-const review=require("./review.js")
-const order =require("./order")
+const authRouter = require("./authRouter.js");
+const userRouter = require("./userRouter.js");
+const categoryRouter = require("./categoryRouter.js");
+const brandRouter = require("./brandRouter.js");
+const addressRouter = require("./addressRouter.js");
+const productRouter = require("./productRouter.js");
+const reviewRouter = require("./reviewRouter.js");
+const orderRouter = require("./orderRouter.js");
+const orderItemRouter = require("./orderItemRouter.js");
+const billingAddressRouter = require("./billingAddressRouter.js");
+const shippingAddressRouter = require("./shippingAddressRouter");
 
-const base = "/api" 
+const base = "/api";
 
-router.use(`${base}/auth`,auth) //localhost:3000/api/auth
+router.use(`${base}/auth`, authRouter); //localhost:3000/api/auth
 router.use(`${base}/user`, userRouter); //localhost:3000/api/user
-router.use(`${base}/category`, category); //localhost:3000/api/category
-router.use(`${base}/brand`, brand); //localhost:3000/api/category
-router.use(`${base}/address`, address); //localhost:3000/api/address
-router.use(`${base}/product`, product); //localhost:3000/api/product
-router.use(`${base}/review`, review); //localhost:3000/api/review
-router.use(`${base}/order`, order); //localhost:3000/api/order
+router.use(`${base}/category`, categoryRouter); //localhost:3000/api/category
+router.use(`${base}/brand`, brandRouter); //localhost:3000/api/category
+router.use(`${base}/address`, addressRouter); //localhost:3000/api/address
+router.use(`${base}/product`, productRouter); //localhost:3000/api/product
+router.use(`${base}/review`, reviewRouter); //localhost:3000/api/review
+router.use(`${base}/order`, orderRouter); //localhost:3000/api/order
+router.use(`${base}/orderItem`, orderItemRouter); //localhost:3000/api/orderItem
+router.use(`${base}/billingAddress`, billingAddressRouter); //localhost:3000/api/billingAddress
+router.use(`${base}/shippingAddress`, shippingAddressRouter); //localhost:3000/api/shippingAddress
 
-module.exports=router;
+module.exports = router;

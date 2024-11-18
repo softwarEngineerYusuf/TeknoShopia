@@ -1,17 +1,20 @@
 const express = require("express");
 const Brand = require("../models/brand");
 const router = express.Router();
+const multer = require("multer");
 
-router.post("/addBrand", async (req, res) => {
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+router.post("/addBrand", upload.single("logo"), async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, description, imageUrl } = req.body;
 
     if (!name) {
       return res.status(400).json({ message: "Marka ismi gerekli." });
     }
 
     const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
-
     const existingBrand = await Brand.findOne({ name: formattedName });
     if (existingBrand) {
       return res
@@ -19,8 +22,17 @@ router.post("/addBrand", async (req, res) => {
         .json({ message: "Bu isimde bir marka zaten mevcut." });
     }
 
+    // Yeni marka oluştur
     const newBrand = new Brand({
       name: formattedName,
+      description: description || "",
+      imageUrl: imageUrl || "",
+      logo: req.file
+        ? {
+            data: req.file.buffer,
+            contentType: req.file.mimetype,
+          }
+        : null,
     });
 
     await newBrand.save();
@@ -80,6 +92,41 @@ router.delete("/deleteBrand/:id", async (req, res) => {
 
     await Brand.findByIdAndDelete(brandId);
     res.status(200).json({ message: "Marka başarıyla silindi." });
+  } catch (error) {
+    res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
+  }
+});
+
+router.put("/updateBrand/:id", upload.single("logo"), async (req, res) => {
+  try {
+    const { name, description, imageUrl } = req.body; // imageUrl'yi almak için req.body'ye ekledik
+    const { id } = req.params;
+
+    const brand = await Brand.findById(id);
+    if (!brand) {
+      return res.status(404).json({ message: "Marka bulunamadı." });
+    }
+
+    if (name) {
+      brand.name = name;
+    }
+    if (description) {
+      brand.description = description;
+    }
+
+    if (req.file) {
+      brand.logo = {
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+      };
+    }
+
+    if (imageUrl) {
+      brand.imageUrl = imageUrl;
+    }
+
+    await brand.save();
+    res.status(200).json({ message: "Marka başarıyla güncellendi.", brand });
   } catch (error) {
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
   }
