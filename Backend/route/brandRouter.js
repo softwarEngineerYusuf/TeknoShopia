@@ -4,7 +4,19 @@ const router = express.Router();
 const multer = require("multer");
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ["image/jpeg", "image/png"];
+    if (!allowedTypes.includes(file.mimetype)) {
+      return cb(
+        new Error("Sadece JPEG veya PNG formatında dosya yüklenebilir."),
+        false
+      );
+    }
+    cb(null, true);
+  },
+});
 
 router.post("/addBrand", upload.single("logo"), async (req, res) => {
   try {
@@ -36,9 +48,14 @@ router.post("/addBrand", upload.single("logo"), async (req, res) => {
     });
 
     await newBrand.save();
-    res
-      .status(201)
-      .json({ message: "Marka başarıyla eklendi.", brand: newBrand });
+
+    const logoBase64 = req.file ? req.file.buffer.toString("base64") : null;
+
+    res.status(201).json({
+      message: "Marka başarıyla eklendi.",
+      brand: newBrand,
+      logoBase64,
+    });
   } catch (error) {
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
   }
@@ -46,8 +63,14 @@ router.post("/addBrand", upload.single("logo"), async (req, res) => {
 
 router.get("/getAllBrands", async (req, res) => {
   try {
-    const brands = await Brand.find().populate("products"); // 'products' alanını dolduruyoruz
-    res.status(200).json(brands);
+    const brands = await Brand.find().populate("products");
+    const brandsWithLogoBase64 = brands.map((brand) => {
+      return {
+        ...brand.toObject(),
+        logo: brand.logo ? brand.logo.data.toString("base64") : null,
+      };
+    });
+    res.status(200).json(brandsWithLogoBase64);
   } catch (error) {
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
   }

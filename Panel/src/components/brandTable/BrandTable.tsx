@@ -22,7 +22,10 @@ interface Brand {
   name: string;
   description?: string;
   imageUrl?: string;
-  logo?: string;
+  logo?: {
+    contentType: string;
+    data: { type: string; data: number[] };
+  };
 }
 
 export default function BrandTable() {
@@ -60,6 +63,7 @@ export default function BrandTable() {
     try {
       const data = await getAllBrands();
       setBrands(data);
+      console.log(data);
     } catch (error) {
       setError("Markalar alınırken bir hata oluştu.");
       console.error(error);
@@ -119,6 +123,12 @@ export default function BrandTable() {
     return <div>{error}</div>;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const bufferToBase64 = (buffer: number[]) => {
+    const binary = String.fromCharCode(...buffer);
+    return btoa(binary);
+  };
+
   return (
     <>
       <TableContainer component={Paper}>
@@ -143,7 +153,13 @@ export default function BrandTable() {
               <TableRow key={brand._id}>
                 <TableCell component="th" scope="row">
                   <img
-                    src={brand.logo || "https://via.placeholder.com/50"}
+                    src={
+                      brand.logo && brand.logo.data
+                        ? `data:${
+                            brand.logo.contentType
+                          };base64,${bufferToBase64(brand.logo.data.data)}`
+                        : "https://via.placeholder.com/50" // Logo yoksa gösterilecek yedek resim
+                    }
                     alt={brand.name}
                     style={{
                       width: "50px",
