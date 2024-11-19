@@ -1,6 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user.js");
+const Cart = require("../models/cart.js");
 const jwt = require("jsonwebtoken");
 const {
   registerValidation,
@@ -17,7 +18,7 @@ const JWT_EXPIRATION = "1d"; // Token süresini 1 gün olarak belirliyorum.
 router.get(
   "/google",
   passport.authenticate("google", {
-    scope: ["profile", "email"], // İhtiyacınız olan izinleri belirtin
+    scope: ["profile", "email"],
   })
 );
 
@@ -25,37 +26,61 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
-  (req, res) => {
-    // Kullanıcı bilgilerini token ile yanıtla
-    const token = jwt.sign(
-      {
-        userId: req.user._id,
-        name: req.user.name,
-        email: req.user.email,
-      },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRATION }
-    );
+  async (req, res) => {
+    try {
+      let user = req.user;
+      let cart = await Cart.findOne({ userId: user._id });
 
-    // Token'ı httpOnly cookie olarak ekle
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000,
-      sameSite: "lax",
-    });
+      if (!cart) {
+        // Eğer sepet yoksa yeni bir tane oluştur
+        cart = new Cart({
+          userId: user._id,
+          cartItems: [],
+          totalPrice: 0,
+        });
+        await cart.save();
 
-    res.status(200).json({
-      message: "Google ile başarılı giriş",
-      user: {
-        id: req.user._id,
-        name: req.user.name,
-        email: req.user.email,
-      },
-      token: token,
-    });
+        // Kullanıcının cart alanını güncelle
+        user.cart = cart._id;
+        await user.save();
+      }
 
-    res.redirect("http://localhost:5173"); // Girişten sonra yönlendirme yapılacak URL
+      // Kullanıcı bilgilerini token ile yanıtla
+      const token = jwt.sign(
+        {
+          userId: user._id,
+          name: user.name,
+          email: user.email,
+        },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRATION }
+      );
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 24 * 60 * 60 * 1000,
+        sameSite: "lax",
+      });
+
+      res.status(200).json({
+        message: "Google ile başarılı giriş",
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          cart: user.cart,
+        },
+        token,
+      });
+
+      // Girişten sonra yönlendirme yapılacak URL
+      res.redirect("http://localhost:5173");
+    } catch (error) {
+      res
+        .status(500)
+        .json({ message: "Bir hata oluştu.", error: error.message });
+    }
   }
 );
 
@@ -72,7 +97,25 @@ router.post("/register", registerValidation, validate, async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, email, password: hashedPassword });
+
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword,
+      cart: null, // Şimdilik boş bırakıyoruz, hemen aşağıda dolduracağız
+    });
+    await newUser.save();
+
+    // Kullanıcı için boş bir alışveriş sepeti oluşturuyorum.
+    const newCart = new Cart({
+      userId: newUser._id,
+      cartItems: [],
+      totalPrice: 0,
+    });
+    await newCart.save();
+
+    // Kullanıcının `cart` alanını güncelliyorum.
+    newUser.cart = newCart._id;
     await newUser.save();
 
     res.status(201).json({
@@ -81,10 +124,9 @@ router.post("/register", registerValidation, validate, async (req, res) => {
         id: newUser._id,
         name: newUser.name,
         email: newUser.email,
-
+        cart: newCart._id,
         addresses: newUser.addresses,
         favorites: newUser.favorites,
-        cart: newUser.cart,
         orders: newUser.orders,
         createdAt: newUser.createdAt,
         updatedAt: newUser.updatedAt,

@@ -27,7 +27,8 @@ router.get("/getUserById/:id", async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
       .select("-password")
-      .populate("addresses", "district city street postalCode");
+      .populate("addresses", "district city street postalCode")
+      .populate("cart.productId", "name price imageUrl");
 
     if (!user) {
       return res.status(404).json({ message: "Kullanıcı bulunamadı." });
@@ -65,7 +66,7 @@ router.delete("/deleteUser/:id", async (req, res) => {
     // Sepeti boşaltır
     if (user.cart.length > 0) {
       await Product.updateMany(
-        { _id: { $in: user.cart.map((item) => item.productId) } },
+        { _id: { $in: user.cart.map((item) => item.productId) } }, // `cart` artık `cartItem` dizisi olacak.
         { $pull: { inCarts: userId } }
       );
     }

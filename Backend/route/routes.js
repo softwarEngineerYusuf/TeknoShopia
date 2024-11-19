@@ -10,6 +10,8 @@ const orderRouter = require("./orderRouter.js");
 const orderItemRouter = require("./orderItemRouter.js");
 const billingAddressRouter = require("./billingAddressRouter.js");
 const shippingAddressRouter = require("./shippingAddressRouter");
+const cartRouter = require("./cartRouter");
+const cartItemRouter = require("./cartItemRouter");
 
 const base = "/api";
 
@@ -24,5 +26,7 @@ router.use(`${base}/order`, orderRouter); //localhost:3000/api/order
 router.use(`${base}/orderItem`, orderItemRouter); //localhost:3000/api/orderItem
 router.use(`${base}/billingAddress`, billingAddressRouter); //localhost:3000/api/billingAddress
 router.use(`${base}/shippingAddress`, shippingAddressRouter); //localhost:3000/api/shippingAddress
+router.use(`${base}/cart`, cartRouter); //localhost:3000/api/cart
+router.use(`${base}/cartItem`, cartItemRouter); //localhost:3000/api/cartItem
 
 module.exports = router;
