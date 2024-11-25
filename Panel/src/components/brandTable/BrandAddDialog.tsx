@@ -6,7 +6,7 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { addBrand } from "../../allAPIs/api";
+import { addBrand } from "../../allAPIs/BrandApi";
 import { toast } from "react-toastify";
 
 interface BrandDialogProps {

@@ -6,7 +6,7 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { updateBrand } from "../../allAPIs/api"; // Güncelleme fonksiyonunuzun yolu
+import { updateBrand } from "../../allAPIs/BrandApi"; // Güncelleme fonksiyonunuzun yolu
 import { toast } from "react-toastify";
 
 interface BrandUpdateDialogProps {

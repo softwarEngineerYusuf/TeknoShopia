@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -11,49 +11,47 @@ import {
   Paper,
 } from "@mui/material";
 import TablePaginationActions from "./ProductTablePagination";
+import { getAllProducts } from "../../allAPIs/ProductApi";
 
 interface Product {
-  image: string;
-  brand: string;
+  _id: string;
+  mainImage?: string;
+  brand: { name: string };
   name: string;
   price: number;
   stock: number;
   discountedPrice?: number;
 }
 
-const rows: Product[] = [
-  {
-    image: "https://via.placeholder.com/50",
-    brand: "Brand 1",
-    name: "Sample Product",
-    price: 100,
-    stock: 50,
-    discountedPrice: 90,
-  },
-  {
-    image: "https://via.placeholder.com/50",
-    brand: "Brand 1",
-    name: "Sample Product",
-    price: 100,
-    stock: 50,
-    discountedPrice: 90,
-  },
-  {
-    image: "https://via.placeholder.com/50",
-    brand: "Brand 1",
-    name: "Sample Product",
-    price: 100,
-    stock: 50,
-    discountedPrice: 90,
-  },
-];
-
 export default function ProductTable() {
+  const [products, setProducts] = useState<Product[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await getAllProducts();
+        console.log(data);
+        const formattedProducts = data.map((product: Product) => ({
+          _id: product._id,
+          mainImage: product.mainImage || "https://via.placeholder.com/50",
+          brand: product.brand?.name || "Unknown Brand",
+          name: product.name,
+          price: product.price,
+          stock: product.stock,
+          discountedPrice: product.discountedPrice,
+        }));
+        setProducts(formattedProducts);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+    fetchProducts();
+  }, []);
+
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - products.length) : 0;
 
   const handleChangePage = (
     event: React.MouseEvent<HTMLButtonElement> | null,
@@ -76,6 +74,7 @@ export default function ProductTable() {
           <TableHead>
             <TableRow>
               <TableCell>Image</TableCell>
+              <TableCell>Brand</TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Price</TableCell>
               <TableCell>Stock</TableCell>
@@ -85,14 +84,17 @@ export default function ProductTable() {
           </TableHead>
           <TableBody>
             {(rowsPerPage > 0
-              ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              : rows
-            ).map((row) => (
-              <TableRow key={row.name}>
-                <TableCell component="th" scope="row">
+              ? products.slice(
+                  page * rowsPerPage,
+                  page * rowsPerPage + rowsPerPage
+                )
+              : products
+            ).map((product) => (
+              <TableRow key={product._id}>
+                <TableCell>
                   <img
-                    src={row.image}
-                    alt={row.name}
+                    src={product.mainImage}
+                    alt={product.name}
                     style={{
                       width: "50px",
                       height: "50px",
@@ -100,12 +102,13 @@ export default function ProductTable() {
                     }}
                   />
                 </TableCell>
-                <TableCell>{row.name}</TableCell>
-                <TableCell>{`$${row.price.toFixed(2)}`}</TableCell>
-                <TableCell>{row.stock}</TableCell>
+                <TableCell>{product.brand || ""}</TableCell>
+                <TableCell>{product.name}</TableCell>
+                <TableCell>{`$${product.price.toFixed(2)}`}</TableCell>
+                <TableCell>{product.stock}</TableCell>
                 <TableCell>
-                  {row.discountedPrice
-                    ? `$${row.discountedPrice.toFixed(2)}`
+                  {product.discountedPrice
+                    ? `$${product.discountedPrice.toFixed(2)}`
                     : "No Discount"}
                 </TableCell>
                 <TableCell align="right">
@@ -122,7 +125,7 @@ export default function ProductTable() {
             ))}
             {emptyRows > 0 && (
               <TableRow style={{ height: 53 * emptyRows }}>
-                <TableCell colSpan={5} />
+                <TableCell colSpan={7} />
               </TableRow>
             )}
           </TableBody>
@@ -130,8 +133,8 @@ export default function ProductTable() {
             <TableRow>
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
-                colSpan={5}
-                count={rows.length}
+                colSpan={7}
+                count={products.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}

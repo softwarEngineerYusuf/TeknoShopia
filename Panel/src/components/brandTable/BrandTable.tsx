@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { toast } from "react-toastify";
 import BrandPaginationActions from "./BrandTablePagination";
-import { getAllBrands, deleteBrand } from "../../allAPIs/api";
+import { getAllBrands, deleteBrand } from "../../allAPIs/BrandApi";
 import BrandAddDialog from "./BrandAddDialog";
 import BrandDeleteDialog from "./BrandDeleteDialog";
 import BrandUpdateDialog from "./BrandUpdateDialog";
@@ -124,10 +124,10 @@ export default function BrandTable() {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const bufferToBase64 = (buffer: number[]) => {
-    const binary = String.fromCharCode(...buffer);
-    return btoa(binary);
-  };
+  // const bufferToBase64 = (buffer: number[]) => {
+  //   const binary = String.fromCharCode(...buffer);
+  //   return btoa(binary);
+  // };
 
   return (
     <>
@@ -151,22 +151,16 @@ export default function BrandTable() {
               : brands
             ).map((brand) => (
               <TableRow key={brand._id}>
-                <TableCell component="th" scope="row">
-                  <img
-                    src={
-                      brand.logo && brand.logo.data
-                        ? `data:${
-                            brand.logo.contentType
-                          };base64,${bufferToBase64(brand.logo.data.data)}`
-                        : "https://via.placeholder.com/50" // Logo yoksa gösterilecek yedek resim
-                    }
-                    alt={brand.name}
-                    style={{
-                      width: "50px",
-                      height: "50px",
-                      objectFit: "cover",
-                    }}
-                  />
+                <TableCell>
+                  {brand.logo ? (
+                    <img
+                      src={`data:image/png;base64,${brand.logo}`}
+                      alt={brand.name}
+                      style={{ width: 50, height: 50 }}
+                    />
+                  ) : (
+                    "No Logo"
+                  )}
                 </TableCell>
                 <TableCell>{brand.name}</TableCell>
                 <TableCell>{brand.description || "Açıklama yok"}</TableCell>

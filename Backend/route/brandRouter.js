@@ -67,7 +67,10 @@ router.get("/getAllBrands", async (req, res) => {
     const brandsWithLogoBase64 = brands.map((brand) => {
       return {
         ...brand.toObject(),
-        logo: brand.logo ? brand.logo.data.toString("base64") : null,
+        logo:
+          brand.logo && brand.logo.data
+            ? brand.logo.data.toString("base64")
+            : null,
       };
     });
     res.status(200).json(brandsWithLogoBase64);
