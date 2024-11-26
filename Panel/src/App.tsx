@@ -11,6 +11,7 @@ import User from "./pages/User";
 import Brand from "./pages/Brand";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ProductDetails from "./components/productTable/ProductDetails";
 function App() {
   const [isMenuClosed, setIsMenuClosed] = useState<boolean>(false); //butona basıldığında menümüz daha küçük hale gelir.
   return (
@@ -36,6 +37,10 @@ function App() {
                 <Route path="/products" element={<Product />} />
                 <Route path="/orders" element={<Order />} />
                 <Route path="/brands" element={<Brand />} />
+                <Route
+                  path="/productDetails/:id"
+                  element={<ProductDetails />}
+                />
               </Routes>
             </div>
           </div>

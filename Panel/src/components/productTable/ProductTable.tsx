@@ -12,7 +12,9 @@ import {
 } from "@mui/material";
 import TablePaginationActions from "./ProductTablePagination";
 import { getAllProducts } from "../../allAPIs/ProductApi";
-
+import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { useNavigate } from "react-router-dom";
 interface Product {
   _id: string;
   mainImage?: string;
@@ -28,20 +30,22 @@ export default function ProductTable() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
+  const navigate = useNavigate();
+
+  const handleProductDetails = (id: string) => {
+    navigate(`/productDetails/${id}`);
+  };
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const data = await getAllProducts();
-        console.log(data);
+
         const formattedProducts = data.map((product: Product) => ({
-          _id: product._id,
-          mainImage: product.mainImage || "https://via.placeholder.com/50",
-          brand: product.brand?.name || "Unknown Brand",
-          name: product.name,
-          price: product.price,
-          stock: product.stock,
-          discountedPrice: product.discountedPrice,
+          ...product,
+          brand: product?.brand?.name || "Unknown Brand",
         }));
+
         setProducts(formattedProducts);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -49,6 +53,8 @@ export default function ProductTable() {
     };
     fetchProducts();
   }, []);
+
+  //paginations
 
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - products.length) : 0;
@@ -102,7 +108,7 @@ export default function ProductTable() {
                     }}
                   />
                 </TableCell>
-                <TableCell>{product.brand || ""}</TableCell>
+                <TableCell>{product.brand}</TableCell>
                 <TableCell>{product.name}</TableCell>
                 <TableCell>{`$${product.price.toFixed(2)}`}</TableCell>
                 <TableCell>{product.stock}</TableCell>
@@ -113,11 +119,14 @@ export default function ProductTable() {
                 </TableCell>
                 <TableCell align="right">
                   <div className="flex space-x-2">
-                    <button className="px-3 py-1 text-white bg-blue-500 rounded hover:bg-blue-600">
-                      Update
+                    <button
+                      onClick={() => handleProductDetails(product._id)}
+                      className="px-3 py-1 text-white bg-blue-500 rounded hover:bg-blue-600"
+                    >
+                      <RemoveRedEyeIcon />
                     </button>
                     <button className="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600">
-                      Delete
+                      <DeleteIcon />
                     </button>
                   </div>
                 </TableCell>
