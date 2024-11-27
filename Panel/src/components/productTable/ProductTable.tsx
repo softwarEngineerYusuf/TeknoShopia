@@ -15,6 +15,10 @@ import { getAllProducts } from "../../allAPIs/ProductApi";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
+import ProductAddDialog from "./ProductAddDialog";
+import ProductDeleteDialog from "./ProductDeleteDialog";
+import { toast } from "react-toastify";
+import { deleteProduct } from "../../allAPIs/ProductApi";
 interface Product {
   _id: string;
   mainImage?: string;
@@ -29,28 +33,62 @@ export default function ProductTable() {
   const [products, setProducts] = useState<Product[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-
+  const [openAddProductDialog, setOpenAddProductDialog] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(
+    null
+  );
+  const [selectedProductName, setSelectedProductName] = useState<string>("");
   const navigate = useNavigate();
+
+  const handleOpenDialog = () => setOpenAddProductDialog(true); // Dialog açma
+  const handleCloseDialog = () => setOpenAddProductDialog(false);
 
   const handleProductDetails = (id: string) => {
     navigate(`/productDetails/${id}`);
   };
 
-  useEffect(() => {
-    const fetchProducts = async () => {
+  const fetchProducts = async () => {
+    try {
+      const data = await getAllProducts();
+
+      const formattedProducts = data.map((product: Product) => ({
+        ...product,
+        brand: product?.brand?.name || "Unknown Brand",
+      }));
+
+      setProducts(formattedProducts);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
+  const handleDeleteProduct = async () => {
+    if (selectedProductId) {
       try {
-        const data = await getAllProducts();
-
-        const formattedProducts = data.map((product: Product) => ({
-          ...product,
-          brand: product?.brand?.name || "Unknown Brand",
-        }));
-
-        setProducts(formattedProducts);
+        await deleteProduct(selectedProductId);
+        setProducts(
+          products.filter((product) => product._id !== selectedProductId)
+        );
+        setDeleteDialogOpen(false);
+        toast.success("Product deleted successfully!");
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error("Error deleting product:", error);
+        toast.error("Error deleting product.");
       }
-    };
+    }
+  };
+
+  const openDeleteDialog = (id: string, name: string) => {
+    setSelectedProductId(id);
+    setSelectedProductName(name);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+  };
+
+  useEffect(() => {
     fetchProducts();
   }, []);
 
@@ -125,7 +163,12 @@ export default function ProductTable() {
                     >
                       <RemoveRedEyeIcon />
                     </button>
-                    <button className="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600">
+                    <button
+                      onClick={() =>
+                        openDeleteDialog(product._id, product.name)
+                      }
+                      className="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600"
+                    >
                       <DeleteIcon />
                     </button>
                   </div>
@@ -154,9 +197,23 @@ export default function ProductTable() {
           </TableFooter>
         </Table>
       </TableContainer>
-      <button className="px-4 py-2 mt-2 text-white bg-green-500 rounded hover:bg-green-600">
+      <button
+        onClick={handleOpenDialog}
+        className="px-4 py-2 mt-2 text-white bg-green-500 rounded hover:bg-green-600"
+      >
         Add Product
       </button>
+      <ProductAddDialog
+        open={openAddProductDialog}
+        onClose={handleCloseDialog}
+        fetchProducts={fetchProducts}
+      />
+      <ProductDeleteDialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        onDelete={handleDeleteProduct}
+        productName={selectedProductName}
+      />
     </>
   );
 }
