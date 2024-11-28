@@ -19,6 +19,8 @@ import ProductAddDialog from "./ProductAddDialog";
 import ProductDeleteDialog from "./ProductDeleteDialog";
 import { toast } from "react-toastify";
 import { deleteProduct } from "../../allAPIs/ProductApi";
+import EditIcon from "@mui/icons-material/Edit";
+import ProductUpdateDialog from "./ProductUpdateDialog";
 interface Product {
   _id: string;
   mainImage?: string;
@@ -39,9 +41,13 @@ export default function ProductTable() {
     null
   );
   const [selectedProductName, setSelectedProductName] = useState<string>("");
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [selectedProductForUpdate, setSelectedProductForUpdate] = useState<
+    string | null
+  >(null);
   const navigate = useNavigate();
 
-  const handleOpenDialog = () => setOpenAddProductDialog(true); // Dialog açma
+  const handleOpenDialog = () => setOpenAddProductDialog(true);
   const handleCloseDialog = () => setOpenAddProductDialog(false);
 
   const handleProductDetails = (id: string) => {
@@ -76,6 +82,15 @@ export default function ProductTable() {
         toast.error("Error deleting product.");
       }
     }
+  };
+  const handleOpenUpdateDialog = (id: string) => {
+    setSelectedProductForUpdate(id);
+    setOpenUpdateDialog(true);
+  };
+
+  const handleCloseUpdateDialog = () => {
+    setOpenUpdateDialog(false);
+    setSelectedProductForUpdate(null);
   };
 
   const openDeleteDialog = (id: string, name: string) => {
@@ -164,6 +179,12 @@ export default function ProductTable() {
                       <RemoveRedEyeIcon />
                     </button>
                     <button
+                      onClick={() => handleOpenUpdateDialog(product._id)}
+                      className="px-3 py-1 text-white bg-blue-500 rounded hover:bg-blue-600"
+                    >
+                      <EditIcon />
+                    </button>
+                    <button
                       onClick={() =>
                         openDeleteDialog(product._id, product.name)
                       }
@@ -213,6 +234,12 @@ export default function ProductTable() {
         onClose={handleCloseDeleteDialog}
         onDelete={handleDeleteProduct}
         productName={selectedProductName}
+      />
+      <ProductUpdateDialog
+        open={openUpdateDialog}
+        onClose={handleCloseUpdateDialog}
+        productId={selectedProductForUpdate || ""}
+        fetchProducts={fetchProducts}
       />
     </>
   );

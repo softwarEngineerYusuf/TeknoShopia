@@ -39,3 +39,12 @@ export const deleteProduct = async (id: string) => {
     throw error;
   }
 };
+export const updateProduct = async (id: string, updatedData: any) => {
+  try {
+    const response = await api.put(`/product/updateProduct/${id}`, updatedData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating product:", error);
+    throw error;
+  }
+};

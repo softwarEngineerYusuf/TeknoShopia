@@ -140,6 +140,7 @@ router.delete("/deleteProduct/:id", async (req, res) => {
 
 router.put("/updateProduct/:id", async (req, res) => {
   try {
+    console.log("Request Body:", req.body); // Request body kontrolü
     const {
       name,
       price,
@@ -153,8 +154,11 @@ router.put("/updateProduct/:id", async (req, res) => {
       discount,
       discountStartDate,
       discountEndDate,
+      brand, // Brand ID
+      category, // Category ID
     } = req.body;
 
+    // Güncellenen veriyi oluşturuyoruz
     const updatedProductData = {
       name,
       price,
@@ -168,8 +172,13 @@ router.put("/updateProduct/:id", async (req, res) => {
       discount,
       discountStartDate,
       discountEndDate,
+      brand, // Brand ID'sini ekliyoruz (artık ObjectId)
+      category, // Category ID'sini ekliyoruz (artık ObjectId)
     };
 
+    console.log("Updated Product Data:", updatedProductData); // Güncellenen veri kontrolü
+
+    // Ürünü güncelliyoruz
     const product = await Product.findByIdAndUpdate(
       req.params.id,
       updatedProductData,
@@ -182,8 +191,8 @@ router.put("/updateProduct/:id", async (req, res) => {
 
     res.status(200).json({ message: "Ürün başarıyla güncellendi.", product });
   } catch (error) {
+    console.error("Error updating product:", error); // Detaylı hata logu
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
   }
 });
-
 module.exports = router;
