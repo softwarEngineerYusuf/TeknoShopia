@@ -10,7 +10,9 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  IconButton,
 } from "@mui/material";
+import { Add, Remove } from "@mui/icons-material";
 import { getAllBrands } from "../../allAPIs/BrandApi";
 import { getAllCategories } from "../../allAPIs/CategoryApi";
 import { getProductById, updateProduct } from "../../allAPIs/ProductApi";
@@ -19,15 +21,11 @@ import { getProductById, updateProduct } from "../../allAPIs/ProductApi";
 interface Brand {
   _id: string;
   name: string;
-  description: string;
-  logo: string | null;
-  imageUrl: string;
 }
 
 interface Category {
   _id: string;
   name: string;
-  subCategories: string[];
 }
 
 interface Product {
@@ -35,25 +33,9 @@ interface Product {
   name: string;
   price: number;
   stock: number;
-  description: string;
   brand: Brand;
   category: Category;
-  discount: number;
-  discountStartDate: string;
-  discountEndDate: string;
-  additionalImages: string[];
-  attributes: {
-    color: string;
-    size: string;
-    weight: string;
-  };
-}
-
-interface ProductUpdateDialogProps {
-  open: boolean;
-  onClose: () => void;
-  productId: string;
-  fetchProducts: () => void;
+  attributes: Record<string, string>;
 }
 
 interface ProductUpdateDialogProps {
@@ -74,6 +56,9 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedBrand, setSelectedBrand] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [attributes, setAttributes] = useState<
+    { key: string; value: string }[]
+  >([]);
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -90,8 +75,14 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
       const fetchProduct = async () => {
         const productData = await getProductById(productId);
         setProduct(productData);
-        setSelectedBrand(productData.brand._id); // Brand _id'sini kullanıyoruz
-        setSelectedCategory(productData.category._id); // Category _id'sini kullanıyoruz
+        setSelectedBrand(productData.brand._id);
+        setSelectedCategory(productData.category._id);
+
+        // Attributes'ı düzenlenebilir formata dönüştür
+        const formattedAttributes = Object.entries(productData.attributes).map(
+          ([key, value]) => ({ key, value })
+        );
+        setAttributes(formattedAttributes);
       };
       fetchProduct();
     }
@@ -102,52 +93,39 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
     }
   }, [open, productId]);
 
-  const handleBrandChange = (e: React.ChangeEvent<{ value: unknown }>) => {
-    const brandId = e.target.value as string;
-    setSelectedBrand(brandId);
-
-    // Update the product object with the new selected brand
-    if (product) {
-      setProduct((prevProduct) =>
-        prevProduct
-          ? {
-              ...prevProduct,
-              brand: brands.find((b) => b._id === brandId) ?? prevProduct.brand,
-            }
-          : null
-      );
-    }
+  const handleAttributeChange = (
+    index: number,
+    field: "key" | "value",
+    value: string
+  ) => {
+    const updatedAttributes = [...attributes];
+    updatedAttributes[index][field] = value;
+    setAttributes(updatedAttributes);
   };
 
-  const handleCategoryChange = (e: React.ChangeEvent<{ value: unknown }>) => {
-    const categoryId = e.target.value as string;
-    setSelectedCategory(categoryId);
+  const handleAddAttribute = () => {
+    setAttributes([...attributes, { key: "", value: "" }]);
+  };
 
-    // Update the product object with the new selected category
-    if (product) {
-      setProduct((prevProduct) =>
-        prevProduct
-          ? {
-              ...prevProduct,
-              category:
-                categories.find((c) => c._id === categoryId) ??
-                prevProduct.category,
-            }
-          : null
-      );
-    }
+  const handleRemoveAttribute = (index: number) => {
+    setAttributes(attributes.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
     if (product) {
       const updatedProduct = {
         name: product.name,
-        brand: selectedBrand, // Send the updated brand _id
-        category: selectedCategory, // Send the updated category _id
+        brand: selectedBrand,
+        category: selectedCategory,
         price: product.price,
         stock: product.stock,
+        attributes: attributes.reduce((acc, attr) => {
+          if (attr.key && attr.value) {
+            acc[attr.key] = attr.value;
+          }
+          return acc;
+        }, {} as Record<string, string>),
       };
-      console.log("Updated product:", updatedProduct);
 
       try {
         await updateProduct(productId, updatedProduct);
@@ -168,7 +146,7 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
           fullWidth
           margin="normal"
           value={product?.name || ""}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          onChange={(e) =>
             setProduct((prev) =>
               prev ? { ...prev, name: e.target.value } : null
             )
@@ -180,7 +158,7 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
           fullWidth
           margin="normal"
           value={product?.price || ""}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          onChange={(e) =>
             setProduct((prev) =>
               prev ? { ...prev, price: Number(e.target.value) } : null
             )
@@ -192,7 +170,7 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
           fullWidth
           margin="normal"
           value={product?.stock || ""}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          onChange={(e) =>
             setProduct((prev) =>
               prev ? { ...prev, stock: Number(e.target.value) } : null
             )
@@ -200,7 +178,10 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
         />
         <FormControl fullWidth margin="normal">
           <InputLabel>Brand</InputLabel>
-          <Select value={selectedBrand} onChange={handleBrandChange}>
+          <Select
+            value={selectedBrand}
+            onChange={(e) => setSelectedBrand(e.target.value as string)}
+          >
             {brands.map((brand) => (
               <MenuItem key={brand._id} value={brand._id}>
                 {brand.name}
@@ -210,7 +191,10 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
         </FormControl>
         <FormControl fullWidth margin="normal">
           <InputLabel>Category</InputLabel>
-          <Select value={selectedCategory} onChange={handleCategoryChange}>
+          <Select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value as string)}
+          >
             {categories.map((category) => (
               <MenuItem key={category._id} value={category._id}>
                 {category.name}
@@ -218,12 +202,47 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
             ))}
           </Select>
         </FormControl>
+        <div>
+          <h4>Attributes</h4>
+          {attributes.map((attribute, index) => (
+            <div key={index} style={{ display: "flex", marginBottom: "10px" }}>
+              <TextField
+                label="Key"
+                value={attribute.key}
+                onChange={(e) =>
+                  handleAttributeChange(index, "key", e.target.value)
+                }
+                style={{ marginRight: "10px", flex: 1 }}
+              />
+              <TextField
+                label="Value"
+                value={attribute.value}
+                onChange={(e) =>
+                  handleAttributeChange(index, "value", e.target.value)
+                }
+                style={{ marginRight: "10px", flex: 1 }}
+              />
+              <IconButton
+                onClick={() => handleRemoveAttribute(index)}
+                color="secondary"
+              >
+                <Remove />
+              </IconButton>
+            </div>
+          ))}
+          <Button
+            onClick={handleAddAttribute}
+            variant="outlined"
+            color="primary"
+            startIcon={<Add />}
+          >
+            Add Attribute
+          </Button>
+        </div>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="secondary">
-          Cancel
-        </Button>
-        <Button onClick={handleSubmit} color="primary">
+        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={handleSubmit} variant="contained" color="primary">
           Update
         </Button>
       </DialogActions>
