@@ -21,15 +21,16 @@ import { toast } from "react-toastify";
 import { deleteProduct } from "../../allAPIs/ProductApi";
 import EditIcon from "@mui/icons-material/Edit";
 import ProductUpdateDialog from "./ProductUpdateDialog";
-interface Product {
-  _id: string;
-  mainImage?: string;
-  brand: { name: string };
-  name: string;
-  price: number;
-  stock: number;
-  discountedPrice?: number;
-}
+import { Product } from "../../types/Product";
+// interface Product {
+//   _id: string;
+//   mainImage?: string;
+//   brand: { name: string };
+//   name: string;
+//   price: number;
+//   stock: number;
+//   discountedPrice?: number;
+// }
 
 export default function ProductTable() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -64,6 +65,7 @@ export default function ProductTable() {
       }));
 
       setProducts(formattedProducts);
+      console.log(" products", formattedProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
     }
@@ -166,8 +168,8 @@ export default function ProductTable() {
                 <TableCell>{`$${product.price.toFixed(2)}`}</TableCell>
                 <TableCell>{product.stock}</TableCell>
                 <TableCell>
-                  {product.discountedPrice
-                    ? `$${product.discountedPrice.toFixed(2)}`
+                  {product.discount
+                    ? `$${product.discount.toFixed(2)}`
                     : "No Discount"}
                 </TableCell>
                 <TableCell align="right">

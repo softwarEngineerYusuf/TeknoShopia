@@ -16,27 +16,9 @@ import { Add, Remove } from "@mui/icons-material";
 import { getAllBrands } from "../../allAPIs/BrandApi";
 import { getAllCategories } from "../../allAPIs/CategoryApi";
 import { getProductById, updateProduct } from "../../allAPIs/ProductApi";
-
-// Tiplerin belirlenmesi
-interface Brand {
-  _id: string;
-  name: string;
-}
-
-interface Category {
-  _id: string;
-  name: string;
-}
-
-interface Product {
-  _id: string;
-  name: string;
-  price: number;
-  stock: number;
-  brand: Brand;
-  category: Category;
-  attributes: Record<string, string>;
-}
+import { Brand } from "../../types/Brand";
+import { Category } from "../../types/Category";
+import { Product } from "../../types/Product";
 
 interface ProductUpdateDialogProps {
   open: boolean;

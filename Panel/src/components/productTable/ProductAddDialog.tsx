@@ -35,6 +35,8 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
   const [name, setName] = useState<string>("");
   const [price, setPrice] = useState<number | "">("");
   const [stock, setStock] = useState<number | "">("");
+  const [mainImage, setMainImage] = useState<string>("");
+  const [description, setDescription] = useState<string>(""); // New description state
   const [attributes, setAttributes] = useState<
     { key: string; value: string }[]
   >([{ key: "", value: "" }]);
@@ -82,6 +84,8 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
       category: selectedCategory,
       price,
       stock,
+      mainImage,
+      description, // Include description in the submission data
       attributes: attributes.reduce((acc, attr) => {
         if (attr.key && attr.value) {
           acc[attr.key] = attr.value;
@@ -126,6 +130,22 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
           margin="normal"
           value={stock}
           onChange={(e) => setStock(Number(e.target.value))}
+        />
+        <TextField
+          label="Main Image URL"
+          fullWidth
+          margin="normal"
+          value={mainImage}
+          onChange={(e) => setMainImage(e.target.value)}
+        />
+        <TextField
+          label="Description" // Add description input
+          multiline
+          rows={4}
+          fullWidth
+          margin="normal"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
         />
         <FormControl fullWidth margin="normal">
           <InputLabel>Brand</InputLabel>
