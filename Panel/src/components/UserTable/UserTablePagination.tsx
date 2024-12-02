@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
@@ -17,9 +17,7 @@ interface TablePaginationActionsProps {
   ) => void;
 }
 
-export default function TablePaginationActions(
-  props: TablePaginationActionsProps
-) {
+const UserTablePagination = (props: TablePaginationActionsProps) => {
   const theme = useTheme();
   const { count, page, rowsPerPage, onPageChange } = props;
 
@@ -87,4 +85,6 @@ export default function TablePaginationActions(
       </IconButton>
     </Box>
   );
-}
+};
+
+export default UserTablePagination;

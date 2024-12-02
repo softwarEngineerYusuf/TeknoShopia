@@ -85,7 +85,7 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
       price,
       stock,
       mainImage,
-      description, // Include description in the submission data
+      description,
       attributes: attributes.reduce((acc, attr) => {
         if (attr.key && attr.value) {
           acc[attr.key] = attr.value;
@@ -99,9 +99,21 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
 
       fetchProducts();
       onClose();
+      resetForm();
     } catch (error) {
       console.error("Error submitting product:", error);
     }
+  };
+
+  const resetForm = () => {
+    setName("");
+    setPrice("");
+    setStock("");
+    setMainImage("");
+    setDescription("");
+    setSelectedBrand("");
+    setSelectedCategory("");
+    setAttributes([{ key: "", value: "" }]);
   };
 
   return (

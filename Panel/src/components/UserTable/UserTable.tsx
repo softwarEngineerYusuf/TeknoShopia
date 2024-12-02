@@ -1,40 +1,38 @@
-import React from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableFooter,
-  TableHead,
-  TablePagination,
-  TableRow,
-  Paper,
-} from "@mui/material";
+import * as React from "react";
+import { useState, useEffect } from "react";
+import { getAllUsers } from "../../allAPIs/UserApi"; // Import the API request function
+import { User } from "../../types/User"; // Import the User interface
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableFooter from "@mui/material/TableFooter";
+import TablePagination from "@mui/material/TablePagination";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import TableHead from "@mui/material/TableHead";
 import UserTablePagination from "./UserTablePagination";
 
-function createData(
-  name: string,
-  email: string,
-  phone: string,
-  ordersNumber: number
-) {
-  return { name, email, phone, ordersNumber };
-}
+const UserTable = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
-const rows = [
-  createData("Cupcake", "cupcake@example.com", "123-456-7890", 5),
-  createData("Donut", "donut@example.com", "987-654-3210", 3),
-  createData("Eclair", "eclair@example.com", "555-555-5555", 7),
-  createData("Frozen yoghurt", "yoghurt@example.com", "444-444-4444", 2),
-  // Diğer satırlar...
-].sort((a, b) => (a.ordersNumber < b.ordersNumber ? -1 : 1));
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const fetchedUsers = await getAllUsers();
+        setUsers(fetchedUsers);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
 
-export default function UserTable() {
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+    fetchUsers();
+  }, []);
 
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - users.length) : 0;
 
   const handleChangePage = (
     event: React.MouseEvent<HTMLButtonElement> | null,
@@ -55,29 +53,31 @@ export default function UserTable() {
       <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
         <TableHead>
           <TableRow>
-            <TableCell>Name</TableCell>
+            <TableCell>İsim</TableCell>
             <TableCell>Email</TableCell>
-            <TableCell>Phone</TableCell>
-            <TableCell align="right">Orders Number</TableCell>
+            <TableCell>Google Kullanıcı</TableCell>
+            <TableCell>Orders Sayısı</TableCell>
+            <TableCell>Cart Ürün Sayısı</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {(rowsPerPage > 0
-            ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            : rows
-          ).map((row) => (
-            <TableRow key={row.name}>
+            ? users.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+            : users
+          ).map((user) => (
+            <TableRow key={user._id}>
               <TableCell component="th" scope="row">
-                {row.name}
+                {user.name}
               </TableCell>
-              <TableCell>{row.email}</TableCell>
-              <TableCell>{row.phone}</TableCell>
-              <TableCell align="right">{row.ordersNumber}</TableCell>
+              <TableCell>{user.email}</TableCell>
+              <TableCell>{user.isGoogleUser ? "Evet" : "Hayır"}</TableCell>
+              <TableCell>{user.ordersCount}</TableCell>
+              <TableCell>{user.cartProductCount}</TableCell>
             </TableRow>
           ))}
           {emptyRows > 0 && (
             <TableRow style={{ height: 53 * emptyRows }}>
-              <TableCell colSpan={4} />
+              <TableCell colSpan={6} />
             </TableRow>
           )}
         </TableBody>
@@ -85,10 +85,18 @@ export default function UserTable() {
           <TableRow>
             <TablePagination
               rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
-              colSpan={4}
-              count={rows.length}
+              colSpan={5}
+              count={users.length}
               rowsPerPage={rowsPerPage}
               page={page}
+              slotProps={{
+                select: {
+                  inputProps: {
+                    "aria-label": "rows per page",
+                  },
+                  native: true,
+                },
+              }}
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
               ActionsComponent={UserTablePagination}
@@ -98,4 +106,6 @@ export default function UserTable() {
       </Table>
     </TableContainer>
   );
-}
+};
+
+export default UserTable;
