@@ -12,7 +12,7 @@ function Navbar() {
       </div>
 
       <div className="navbar-search">
-        <input type="text" placeholder="Search" className="search-input" />
+        <input type="text" placeholder="Search Product" className="search-input" />
         <FaSearch className="search-icon" /> {/* Arama ikonu */}
       </div>
 
