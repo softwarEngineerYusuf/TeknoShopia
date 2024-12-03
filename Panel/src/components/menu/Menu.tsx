@@ -51,14 +51,26 @@ const Menu: React.FC<MenuClosedProps> = ({ isMenuClosed }) => {
       </div>
       <div className="flex items-center mb-4  ">
         <Link
-          to="/categories"
+          to="/paretCategories"
           className="mx-1 flex flex-1 items-center p-2  hover:bg-gray-400 rounded-md transition-colors duration-200 text-xl"
         >
           {" "}
           <span className="mr-2 flex items-center">
             <CategoryIcon color="primary" />
           </span>
-          {!isMenuClosed && "Category"}
+          {!isMenuClosed && "ParentCategory"}
+        </Link>
+      </div>
+      <div className="flex items-center mb-4  ">
+        <Link
+          to="/subCategories"
+          className="mx-1 flex flex-1 items-center p-2  hover:bg-gray-400 rounded-md transition-colors duration-200 text-xl"
+        >
+          {" "}
+          <span className="mr-2 flex items-center">
+            <CategoryIcon color="primary" />
+          </span>
+          {!isMenuClosed && "SubCategory"}
         </Link>
       </div>
       <div className="flex items-center mb-4  ">

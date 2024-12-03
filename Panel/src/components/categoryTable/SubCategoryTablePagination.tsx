@@ -17,7 +17,7 @@ interface TablePaginationActionsProps {
   ) => void;
 }
 
-const CategoryTablePagination: React.FC<TablePaginationActionsProps> = ({
+const SubCategoryTablePagination: React.FC<TablePaginationActionsProps> = ({
   count,
   page,
   rowsPerPage,
@@ -91,4 +91,4 @@ const CategoryTablePagination: React.FC<TablePaginationActionsProps> = ({
   );
 };
 
-export default CategoryTablePagination;
+export default SubCategoryTablePagination;

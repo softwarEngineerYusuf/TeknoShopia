@@ -1,60 +1,55 @@
 const express = require("express");
 const Brand = require("../models/brand");
 const router = express.Router();
+const cloudinary = require("../config/cloudinaryConfig");
 const multer = require("multer");
 
 const storage = multer.memoryStorage();
-const upload = multer({
-  storage: storage,
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = ["image/jpeg", "image/png"];
-    if (!allowedTypes.includes(file.mimetype)) {
-      return cb(
-        new Error("Sadece JPEG veya PNG formatında dosya yüklenebilir."),
-        false
-      );
-    }
-    cb(null, true);
-  },
-});
+const upload = multer({ storage: storage });
 
 router.post("/addBrand", upload.single("logo"), async (req, res) => {
   try {
-    const { name, description, imageUrl } = req.body;
+    const { name, description } = req.body;
 
-    if (!name) {
-      return res.status(400).json({ message: "Marka ismi gerekli." });
+    // Logo kontrolü
+    if (!req.file) {
+      return res.status(400).json({ message: "Lütfen bir logo yükleyin." });
     }
 
-    const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
-    const existingBrand = await Brand.findOne({ name: formattedName });
-    if (existingBrand) {
-      return res
-        .status(400)
-        .json({ message: "Bu isimde bir marka zaten mevcut." });
-    }
-
-    // Yeni marka oluştur
-    const newBrand = new Brand({
-      name: formattedName,
-      description: description || "",
-      imageUrl: imageUrl || "",
-      logo: req.file
-        ? {
-            data: req.file.buffer,
-            contentType: req.file.mimetype,
+    // Cloudinary'e yükleme
+    const streamUpload = (file) => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "brands" },
+          (error, result) => {
+            if (result) {
+              resolve(result);
+            } else {
+              reject(error);
+            }
           }
-        : null,
+        );
+        stream.end(file.buffer);
+      });
+    };
+
+    const uploadResult = await streamUpload(req.file);
+
+    // MongoDB'ye kaydetme
+    const newBrand = new Brand({
+      name,
+      description,
+      logo: {
+        public_id: uploadResult.public_id,
+        url: uploadResult.secure_url,
+      },
     });
 
     await newBrand.save();
 
-    const logoBase64 = req.file ? req.file.buffer.toString("base64") : null;
-
     res.status(201).json({
       message: "Marka başarıyla eklendi.",
       brand: newBrand,
-      logoBase64,
     });
   } catch (error) {
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
@@ -64,16 +59,19 @@ router.post("/addBrand", upload.single("logo"), async (req, res) => {
 router.get("/getAllBrands", async (req, res) => {
   try {
     const brands = await Brand.find().populate("products");
-    const brandsWithLogoBase64 = brands.map((brand) => {
+
+    // Brand'ler üzerinde işlem yaparak logo URL'sini döndürme
+    const brandsWithLogo = brands.map((brand) => {
       return {
-        ...brand.toObject(),
-        logo:
-          brand.logo && brand.logo.data
-            ? brand.logo.data.toString("base64")
-            : null,
+        ...brand.toObject(), // Brand modelini nesneye çevir
+        logo: {
+          public_id: brand.logo.public_id,
+          url: brand.logo.url, // Cloudinary URL'sini döndürüyoruz
+        },
       };
     });
-    res.status(200).json(brandsWithLogoBase64);
+
+    res.status(200).json(brandsWithLogo);
   } catch (error) {
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
   }
@@ -116,6 +114,10 @@ router.delete("/deleteBrand/:id", async (req, res) => {
       return res.status(404).json({ message: "Marka bulunamadı." });
     }
 
+    if (brand.logo && brand.logo.public_id) {
+      await cloudinary.uploader.destroy(brand.logo.public_id);
+    }
+
     await Brand.findByIdAndDelete(brandId);
     res.status(200).json({ message: "Marka başarıyla silindi." });
   } catch (error) {
@@ -125,7 +127,7 @@ router.delete("/deleteBrand/:id", async (req, res) => {
 
 router.put("/updateBrand/:id", upload.single("logo"), async (req, res) => {
   try {
-    const { name, description, imageUrl } = req.body; // imageUrl'yi almak için req.body'ye ekledik
+    const { name, description } = req.body;
     const { id } = req.params;
 
     const brand = await Brand.findById(id);
@@ -141,14 +143,15 @@ router.put("/updateBrand/:id", upload.single("logo"), async (req, res) => {
     }
 
     if (req.file) {
-      brand.logo = {
-        data: req.file.buffer,
-        contentType: req.file.mimetype,
-      };
-    }
+      if (brand.logo && brand.logo.public_id) {
+        await cloudinary.uploader.destroy(brand.logo.public_id);
+      }
 
-    if (imageUrl) {
-      brand.imageUrl = imageUrl;
+      const uploadResult = await streamUpload(req.file);
+      brand.logo = {
+        public_id: uploadResult.public_id,
+        url: uploadResult.secure_url,
+      };
     }
 
     await brand.save();

@@ -23,8 +23,8 @@ interface Brand {
   description?: string;
   imageUrl?: string;
   logo?: {
-    contentType: string;
-    data: { type: string; data: number[] };
+    public_id: string;
+    url: string;
   };
 }
 
@@ -123,12 +123,6 @@ export default function BrandTable() {
     return <div>{error}</div>;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // const bufferToBase64 = (buffer: number[]) => {
-  //   const binary = String.fromCharCode(...buffer);
-  //   return btoa(binary);
-  // };
-
   return (
     <>
       <TableContainer component={Paper}>
@@ -152,11 +146,11 @@ export default function BrandTable() {
             ).map((brand) => (
               <TableRow key={brand._id}>
                 <TableCell>
-                  {brand.logo ? (
+                  {brand.logo?.url ? (
                     <img
-                      src={`data:image/png;base64,${brand.logo}`}
+                      src={brand.logo.url}
                       alt={brand.name}
-                      style={{ width: 50, height: 50 }}
+                      style={{ width: 50, height: 50, objectFit: "cover" }}
                     />
                   ) : (
                     "No Logo"

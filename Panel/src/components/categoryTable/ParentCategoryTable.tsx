@@ -7,7 +7,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import TableFooter from "@mui/material/TableFooter";
 import TablePagination from "@mui/material/TablePagination";
-import CategoryTablePagination from "./CategoryTablePagination";
+import ParentCategoryTablePagination from "./ParentCategoryTablePagination";
 
 const rows = [
   { name: "Cupcake", calories: 305, fat: 3.7 },
@@ -25,7 +25,7 @@ const rows = [
   { name: "Oreo", calories: 437, fat: 18.0 },
 ];
 
-const CategoryTable = () => {
+const ParentCategoryTable = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -82,7 +82,7 @@ const CategoryTable = () => {
               page={page}
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
-              ActionsComponent={CategoryTablePagination}
+              ActionsComponent={ParentCategoryTablePagination}
             />
           </TableRow>
         </TableFooter>
@@ -91,4 +91,4 @@ const CategoryTable = () => {
   );
 };
 
-export default CategoryTable;
+export default ParentCategoryTable;

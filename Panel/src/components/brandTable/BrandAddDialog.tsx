@@ -47,10 +47,15 @@ const BrandAddDialog: React.FC<BrandDialogProps> = ({
       return;
     }
 
+    // Dosya uzantısı kontrolü
+    if (logo && !["image/jpeg", "image/png", "image/gif"].includes(logo.type)) {
+      toast.error("Yalnızca JPEG, PNG ve GIF dosyaları yüklenebilir.");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("name", brandName);
     formData.append("description", description);
-    formData.append("imageUrl", imageUrl);
     if (logo) {
       formData.append("logo", logo);
     }
