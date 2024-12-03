@@ -4,12 +4,12 @@ const Product = require("../models/product.js");
 const Brand = require("../models/brand.js");
 const Category = require("../models/category.js");
 
-router.post("/addProduct", async (req, res) => {
+router.post("/addProductToSubCategory", async (req, res) => {
   try {
     const {
       name,
       brand,
-      category,
+      subCategory,
       price,
       stock,
       description,
@@ -23,26 +23,36 @@ router.post("/addProduct", async (req, res) => {
       discountEndDate,
     } = req.body;
 
-    if (!name || !brand || !category || price == null || stock == null) {
+    if (!name || !brand || !subCategory || price == null || stock == null) {
       return res.status(400).json({ message: "Gerekli alanları doldurunuz." });
     }
 
-    // Brand ve Category ID'lerini isimden bululuyorm.
     const brandFind = await Brand.findOne({ name: brand });
     if (!brandFind)
       return res.status(404).json({ message: "Belirtilen marka bulunamadı." });
 
-    const categoryFind = await Category.findOne({ name: category });
-    if (!categoryFind)
-      return res
-        .status(404)
-        .json({ message: "Belirtilen kategori bulunamadı." });
+    const subCategoryFind = await Category.findOne({ name: subCategory });
+    if (!subCategoryFind)
+      return res.status(404).json({ message: "Alt kategori bulunamadı." });
 
-    // Yeni ürün oluşturuyorum.
+    const parentCategoryFind = await Category.findById(
+      subCategoryFind.parentCategory
+    );
+    if (!parentCategoryFind)
+      return res.status(404).json({ message: "Ana kategori bulunamadı." });
+
+    if (!subCategoryFind.products) {
+      subCategoryFind.products = [];
+    }
+
+    if (!parentCategoryFind.products) {
+      parentCategoryFind.products = [];
+    }
+
     const newProduct = new Product({
       name,
       brand: brandFind._id,
-      category: categoryFind._id,
+      category: subCategoryFind._id, // Alt kategori
       price,
       stock,
       description,
@@ -58,17 +68,17 @@ router.post("/addProduct", async (req, res) => {
 
     await newProduct.save();
 
-    // Brand ve Category belgelerinde ürün ID'sini ekliyorum.
-    brandFind.products.push(newProduct._id);
-    await brandFind.save();
+    subCategoryFind.products.push(newProduct._id);
+    await subCategoryFind.save();
 
-    categoryFind.products.push(newProduct._id);
-    await categoryFind.save();
+    parentCategoryFind.products.push(newProduct._id);
+    await parentCategoryFind.save();
 
     res
       .status(201)
       .json({ message: "Ürün başarıyla eklendi.", product: newProduct });
   } catch (error) {
+    console.error("Error details:", error);
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
   }
 });
@@ -119,7 +129,6 @@ router.delete("/deleteProduct/:id", async (req, res) => {
       return res.status(404).json({ message: "Ürün bulunamadı." });
     }
 
-    // ürünü brand ve categoridende kaldırıyorum.
     await Brand.updateOne(
       { _id: product.brand },
       { $pull: { products: product._id } }
@@ -129,7 +138,6 @@ router.delete("/deleteProduct/:id", async (req, res) => {
       { $pull: { products: product._id } }
     );
 
-    //ürün burada siliniyor
     await Product.findByIdAndDelete(req.params.id);
 
     res.status(200).json({ message: "Ürün başarıyla silindi." });
@@ -140,7 +148,7 @@ router.delete("/deleteProduct/:id", async (req, res) => {
 
 router.put("/updateProduct/:id", async (req, res) => {
   try {
-    console.log("Request Body:", req.body); // Request body kontrolü
+    console.log("Request Body:", req.body);
     const {
       name,
       price,
@@ -154,11 +162,10 @@ router.put("/updateProduct/:id", async (req, res) => {
       discount,
       discountStartDate,
       discountEndDate,
-      brand, // Brand ID
-      category, // Category ID
+      brand,
+      category,
     } = req.body;
 
-    // Güncellenen veriyi oluşturuyoruz
     const updatedProductData = {
       name,
       price,
@@ -172,13 +179,12 @@ router.put("/updateProduct/:id", async (req, res) => {
       discount,
       discountStartDate,
       discountEndDate,
-      brand, // Brand ID'sini ekliyoruz (artık ObjectId)
-      category, // Category ID'sini ekliyoruz (artık ObjectId)
+      brand,
+      category,
     };
 
-    console.log("Updated Product Data:", updatedProductData); // Güncellenen veri kontrolü
+    console.log("Updated Product Data:", updatedProductData);
 
-    // Ürünü güncelliyoruz
     const product = await Product.findByIdAndUpdate(
       req.params.id,
       updatedProductData,
@@ -191,7 +197,7 @@ router.put("/updateProduct/:id", async (req, res) => {
 
     res.status(200).json({ message: "Ürün başarıyla güncellendi.", product });
   } catch (error) {
-    console.error("Error updating product:", error); // Detaylı hata logu
+    console.error("Error updating product:", error);
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
   }
 });

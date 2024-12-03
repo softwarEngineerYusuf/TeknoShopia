@@ -5,6 +5,6 @@ const api = axios.create({
 });
 
 export const getAllCategories = async () => {
-  const response = await api.get("/category/getAllCategories");
+  const response = await api.get("/category/getAllSubCategories");
   return response.data;
 };

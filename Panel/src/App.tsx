@@ -9,6 +9,7 @@ import Product from "./pages/Product";
 import Menu from "./components/menu/Menu";
 import User from "./pages/User";
 import Brand from "./pages/Brand";
+import Category from "./pages/Category";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProductDetails from "./components/productTable/ProductDetails";
@@ -36,7 +37,8 @@ function App() {
                 <Route path="/user" element={<User />} />
                 <Route path="/products" element={<Product />} />
                 <Route path="/orders" element={<Order />} />
-                <Route path="/brands" element={<Brand />} />
+                <Route path="/brands" element={<Brand />} />4
+                <Route path="/categories" element={<Category />} />
                 <Route
                   path="/productDetails/:id"
                   element={<ProductDetails />}

@@ -31,7 +31,7 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
   const [brands, setBrands] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedBrand, setSelectedBrand] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [price, setPrice] = useState<number | "">("");
   const [stock, setStock] = useState<number | "">("");
@@ -81,7 +81,7 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
     const productData = {
       name,
       brand: selectedBrand,
-      category: selectedCategory,
+      subCategory: selectedSubCategory,
       price,
       stock,
       mainImage,
@@ -93,7 +93,7 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
         return acc;
       }, {} as Record<string, string>),
     };
-
+    console.log("productData", productData);
     try {
       await addProduct(productData);
 
@@ -112,7 +112,7 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
     setMainImage("");
     setDescription("");
     setSelectedBrand("");
-    setSelectedCategory("");
+    setSelectedSubCategory("");
     setAttributes([{ key: "", value: "" }]);
   };
 
@@ -175,8 +175,8 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
         <FormControl fullWidth margin="normal">
           <InputLabel>Category</InputLabel>
           <Select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            value={selectedSubCategory}
+            onChange={(e) => setSelectedSubCategory(e.target.value)}
           >
             {categories.map((category) => (
               <MenuItem key={category} value={category}>
@@ -229,7 +229,7 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
           onClick={handleSubmit}
           variant="contained"
           color="primary"
-          disabled={!name || !selectedBrand || !selectedCategory}
+          disabled={!name || !selectedBrand || !selectedSubCategory}
         >
           Add
         </Button>
