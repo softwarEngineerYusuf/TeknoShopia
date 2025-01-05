@@ -65,7 +65,6 @@ export default function ProductTable() {
       }));
 
       setProducts(formattedProducts);
-      console.log(" products", formattedProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
     }

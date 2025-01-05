@@ -63,7 +63,6 @@ export default function BrandTable() {
     try {
       const data = await getAllBrands();
       setBrands(data);
-      console.log(data);
     } catch (error) {
       setError("Markalar alınırken bir hata oluştu.");
       console.error(error);
@@ -71,7 +70,7 @@ export default function BrandTable() {
       setLoading(false);
     }
   };
-
+  y;
   const handleDeleteBrand = async () => {
     if (selectedBrandId) {
       try {

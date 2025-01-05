@@ -17,7 +17,7 @@ import { getAllBrands } from "../../allAPIs/BrandApi";
 import { getAllCategories } from "../../allAPIs/CategoryApi";
 import { getProductById, updateProduct } from "../../allAPIs/ProductApi";
 import { Brand } from "../../types/Brand";
-import { Category } from "../../types/Category";
+import { Category } from "../../types/ParentCategory";
 import { Product } from "../../types/Product";
 
 interface ProductUpdateDialogProps {

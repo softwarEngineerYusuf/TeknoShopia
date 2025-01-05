@@ -15,7 +15,7 @@ import "react-toastify/dist/ReactToastify.css";
 import ProductDetails from "./components/productTable/ProductDetails";
 import SubCategory from "./pages/SubCategory";
 function App() {
-  const [isMenuClosed, setIsMenuClosed] = useState<boolean>(false); //butona basıldığında menümüz daha küçük hale gelir.
+  const [isMenuClosed, setIsMenuClosed] = useState<boolean>(false); //menü küçültmek için.
   return (
     <>
       <Router>

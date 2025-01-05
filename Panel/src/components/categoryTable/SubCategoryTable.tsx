@@ -1,37 +1,46 @@
-import React, { useState } from "react";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import TableFooter from "@mui/material/TableFooter";
-import TablePagination from "@mui/material/TablePagination";
-import SubCategoryTablePagination from "./SubCategoryTablePagination";
-
-const rows = [
-  { name: "Cupcake", calories: 305, fat: 3.7 },
-  { name: "Donut", calories: 452, fat: 25.0 },
-  { name: "Eclair", calories: 262, fat: 16.0 },
-  { name: "Frozen yoghurt", calories: 159, fat: 6.0 },
-  { name: "Gingerbread", calories: 356, fat: 16.0 },
-  { name: "Honeycomb", calories: 408, fat: 3.2 },
-  { name: "Ice cream sandwich", calories: 237, fat: 9.0 },
-  { name: "Jelly Bean", calories: 375, fat: 0.0 },
-  { name: "KitKat", calories: 518, fat: 26.0 },
-  { name: "Lollipop", calories: 392, fat: 0.2 },
-  { name: "Marshmallow", calories: 318, fat: 0 },
-  { name: "Nougat", calories: 360, fat: 19.0 },
-  { name: "Oreo", calories: 437, fat: 18.0 },
-];
-
+import React, { useEffect, useState } from "react";
+import {
+  TableContainer,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  TableFooter,
+  TablePagination,
+  Paper,
+  TableHead, // Başlık için TableHead ekleyin
+} from "@mui/material";
+import { getAllSubCategories } from "../../allAPIs/CategoryApi"; // API fonksiyonunu içe aktar
+import { SubCategory } from "../../types/ParentCategory"; // Category tipini içe aktar
 const SubCategoryTable = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [subcategories, setSubCategories] = useState<SubCategory[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // API'den alt kategorileri çek
+  useEffect(() => {
+    const fetchSubCategories = async () => {
+      try {
+        const data = await getAllSubCategories(); // API'den verileri al
+
+        setSubCategories(data); // Kategorileri state'e kaydet
+      } catch (err) {
+        setError(err.message || "Alt kategoriler alınırken bir hata oluştu."); // Hata durumunda
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubCategories();
+  }, []);
+
+  // Boş satırları hesapla
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - subcategories.length) : 0;
 
+  // Sayfa değişikliği
   const handleChangePage = (
     event: React.MouseEvent<HTMLButtonElement> | null,
     newPage: number
@@ -39,6 +48,7 @@ const SubCategoryTable = () => {
     setPage(newPage);
   };
 
+  // Satır sayısı değişikliği
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -46,29 +56,40 @@ const SubCategoryTable = () => {
     setPage(0);
   };
 
+  if (loading) return <div>Yükleniyor...</div>;
+  if (error) return <div>{error}</div>;
+
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Alt Kategori Adı</TableCell>
+            <TableCell align="right">Ana Kategori Adı</TableCell>
+          </TableRow>
+        </TableHead>
         <TableBody>
           {(rowsPerPage > 0
-            ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            : rows
-          ).map((row) => (
-            <TableRow key={row.name}>
+            ? subcategories.slice(
+                page * rowsPerPage,
+                page * rowsPerPage + rowsPerPage
+              )
+            : subcategories
+          ).map((category) => (
+            <TableRow key={category._id}>
               <TableCell component="th" scope="row">
-                {row.name}
+                {category.name}
               </TableCell>
               <TableCell style={{ width: 160 }} align="right">
-                {row.calories}
-              </TableCell>
-              <TableCell style={{ width: 160 }} align="right">
-                {row.fat}
+                {category.parentCategory
+                  ? category.parentCategory.name
+                  : "Ana Kategori Yok"}
               </TableCell>
             </TableRow>
           ))}
           {emptyRows > 0 && (
             <TableRow style={{ height: 53 * emptyRows }}>
-              <TableCell colSpan={6} />
+              <TableCell colSpan={2} />
             </TableRow>
           )}
         </TableBody>
@@ -76,13 +97,12 @@ const SubCategoryTable = () => {
           <TableRow>
             <TablePagination
               rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
-              colSpan={3}
-              count={rows.length}
+              colSpan={2}
+              count={subcategories.length}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
-              ActionsComponent={SubCategoryTablePagination}
             />
           </TableRow>
         </TableFooter>

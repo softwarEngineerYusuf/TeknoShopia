@@ -1,5 +1,5 @@
 import { Brand } from "./Brand";
-import { Category } from "./Category";
+import { Category } from "./ParentCategory";
 
 export interface Product {
   _id: string;
