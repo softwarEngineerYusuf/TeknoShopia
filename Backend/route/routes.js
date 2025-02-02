@@ -12,6 +12,7 @@ const billingAddressRouter = require("./billingAddressRouter.js");
 const shippingAddressRouter = require("./shippingAddressRouter");
 const cartRouter = require("./cartRouter");
 const cartItemRouter = require("./cartItemRouter");
+const emailRoutes = require("./emailRouter");
 
 const base = "/api";
 
@@ -28,5 +29,6 @@ router.use(`${base}/billingAddress`, billingAddressRouter); //localhost:3000/api
 router.use(`${base}/shippingAddress`, shippingAddressRouter); //localhost:3000/api/shippingAddress
 router.use(`${base}/cart`, cartRouter); //localhost:3000/api/cart
 router.use(`${base}/cartItem`, cartItemRouter); //localhost:3000/api/cartItem
+router.use(`${base}/email`, emailRoutes);
 
 module.exports = router;
