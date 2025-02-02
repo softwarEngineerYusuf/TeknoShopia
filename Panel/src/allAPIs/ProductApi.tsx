@@ -42,7 +42,9 @@ export const deleteProduct = async (id: string) => {
     throw error;
   }
 };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const updateProduct = async (id: string, updatedData: any) => {
+  console.log("id:", id, "updatedData:", updatedData);
   try {
     const response = await api.put(`/product/updateProduct/${id}`, updatedData);
     return response.data;

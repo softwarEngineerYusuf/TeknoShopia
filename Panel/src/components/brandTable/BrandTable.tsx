@@ -70,7 +70,7 @@ export default function BrandTable() {
       setLoading(false);
     }
   };
-  y;
+
   const handleDeleteBrand = async () => {
     if (selectedBrandId) {
       try {

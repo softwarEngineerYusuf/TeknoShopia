@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { Add, Remove } from "@mui/icons-material";
 import { getAllBrands } from "../../allAPIs/BrandApi";
-import { getAllCategories } from "../../allAPIs/CategoryApi";
+import { getAllMainCategories } from "../../allAPIs/CategoryApi";
 import { getProductById, updateProduct } from "../../allAPIs/ProductApi";
 import { Brand } from "../../types/Brand";
 import { Category } from "../../types/ParentCategory";
@@ -49,13 +49,15 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
     };
 
     const fetchCategories = async () => {
-      const categoriesData = await getAllCategories();
-      setCategories(categoriesData);
+      const categoriesData = await getAllMainCategories();
+
+      setCategories(categoriesData.categories);
     };
 
     if (open && productId) {
       const fetchProduct = async () => {
         const productData = await getProductById(productId);
+        console.log("productData:", productData);
         setProduct(productData);
         setSelectedBrand(productData.brand._id);
         setSelectedCategory(productData.category._id);
@@ -108,7 +110,7 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
           return acc;
         }, {} as Record<string, string>),
       };
-
+      console.log(updatedProduct);
       try {
         await updateProduct(productId, updatedProduct);
         fetchProducts();
