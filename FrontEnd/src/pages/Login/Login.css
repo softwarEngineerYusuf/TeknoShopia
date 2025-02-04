@@ -1,15 +1,17 @@
+
 .LoginPageMain {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 90vh;
+    height: 100vh;
     border: 1px solid rgb(232, 219, 219);
     font-size: 17px;
+    background-color: #21005D;
 }
 
 .boxOfLogin {
-    padding: 100px 50px;
+    padding: 50px 50px;
     border-radius: 10px;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
     background-color: white;
@@ -19,6 +21,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .UnderLoginAndRegisterButtonLgn {
@@ -31,6 +35,18 @@
     padding: 6px 90px 6px 10px;
     margin-top: 14px;
 
+}
+
+.allInputsLgn{
+    display: grid;
+    justify-content: center;
+    align-items: center;
+}
+
+.emailInputLogin{
+    width: 100%;
+    margin-bottom: 12px;
+    margin-top: 20px;
 }
 
 .loginButtonLogin {
@@ -49,5 +65,20 @@
 .forgotPasswordLink{
     display: flex;
     justify-content: center;
-    margin-top: 3%;
+    margin-top: 12px;
+    margin-bottom: 8px;
 }
+
+.googleLoginButton button{
+    padding: 4px;
+}
+
+.googleLoginButton button:hover{
+    background-color: red;
+    color: white;
+}
+
+.googleLoginButton button:hover svg {
+    color: white !important;
+}
+

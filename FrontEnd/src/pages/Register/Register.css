@@ -3,13 +3,14 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 90vh;
+    height:100vh;
     font-size: 17px;
+    background-color: #21005D;
 }
 
 .boxOfRegister {
 
-    padding: 100px 50px;
+    padding: 70px 50px;
     border-radius: 10px;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
     background-color: white;
@@ -32,15 +33,19 @@
     margin-top: 14px;
 
 }
+.inputRgs{
+    padding: 6px 0px;
+    width: 100%;
+}
 
 .loginButtonRegister {
     display: flex;
     justify-content: center;
-    margin-top: 5%;
+    margin-top: 25px;
 }
 
 .loginButtonRegister button {
-    padding: 3px 110px;
+    padding: 5px 110px;
     background-color: #21005D;
     color: white;
     border-radius: 17px;
