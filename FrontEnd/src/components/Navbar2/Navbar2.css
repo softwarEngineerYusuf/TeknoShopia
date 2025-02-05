@@ -1,0 +1,20 @@
+.Navbar2All{
+
+}
+
+.Navbar2Links{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px 2px;
+    height: 30px;
+    margin-left: 40px;
+    margin-right: 40px;
+    margin-bottom: 2vh;
+}
+
+.Navbar2Links a{
+    text-decoration: none;
+    font-size: 17px;
+    font-family: "Georgia", Times, serif;
+}

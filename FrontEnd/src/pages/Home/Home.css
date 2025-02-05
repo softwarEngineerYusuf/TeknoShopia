@@ -6,8 +6,14 @@
     margin: 0 auto; /* Yatayda ortalama unutma!*/
 }
 
+.TopPicksOnHomePage{
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4vh;
+}
+
 .DiscountsTextOnHomePage {
-    margin-top: 5%;
+    margin-top: 3vh;
     font-size: xx-large;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif
 }
