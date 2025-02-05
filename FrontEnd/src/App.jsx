@@ -11,12 +11,14 @@ import Home from "./pages/Home/Home";
 import Navbar from "./components/Navbar/Navbar";
 import Basket from "./pages/Basket/Basket";
 import ProductDetail from "./pages/ProductDetail/ProductDetail";
+import Footer from "./components/Footer/Footer";
 
 function Layout() {
   return (
     <>
       <Navbar />
       <Outlet />
+      <Footer/>
     </>
   );
 }
