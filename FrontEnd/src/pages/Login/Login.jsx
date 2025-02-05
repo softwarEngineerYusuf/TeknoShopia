@@ -1,6 +1,6 @@
 import "../Login/Login.css";
 import { useNavigate } from "react-router-dom";
-import * as React from "react";
+import { useState } from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
@@ -13,11 +13,13 @@ import InputAdornment from "@mui/material/InputAdornment";
 import FormControl from "@mui/material/FormControl";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { loginApi } from "../../allAPIs/auth";
 
 function Login() {
   const navigate = useNavigate();
-
-  const [showPassword, setShowPassword] = React.useState(false);
+  const [email, setEmail] = useState("yusuf1@gmail.com");
+  const [password, setPassword] = useState("123456789");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -33,10 +35,23 @@ function Login() {
     window.open("http://localhost:5000/api/auth/google", "_self");
   };
 
-  const handleGoogleLogout = () => {
-    // Kullanıcıyı Google'dan çıkış yaptırmak için Google'ın logout URL'sini açıyoruz
-    window.open("https://accounts.google.com/Logout", "_self");
-    navigate("/");
+  // const handleGoogleLogout = () => {
+  //   // Kullanıcıyı Google'dan çıkış yaptırmak için Google'ın logout URL'sini açıyoruz
+  //   window.open("https://accounts.google.com/Logout", "_self");
+  //   navigate("/");
+  // };
+
+  const handleLogin = async () => {
+    try {
+      // Kullanıcıyı backend'den giriş yapmaya yardımcı oluyorum.
+      const data = await loginApi(email, password);
+
+      if (data && data.user) {
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("Giriş başarısız:", error.response?.data || error.message);
+    }
   };
 
   return (
@@ -74,6 +89,8 @@ function Login() {
                   id="outlined-basic"
                   label="E-Posta"
                   variant="outlined"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </Box>
             </div>
@@ -91,6 +108,8 @@ function Login() {
                   <OutlinedInput
                     id="outlined-adornment-password"
                     type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     endAdornment={
                       <InputAdornment position="end">
                         <IconButton
@@ -117,7 +136,9 @@ function Login() {
           <div>
             <div className="loginButtonLogin">
               <Stack spacing={2} direction="row">
-                <Button variant="contained">Login</Button>
+                <Button variant="contained" onClick={handleLogin}>
+                  Login
+                </Button>
               </Stack>
             </div>
             <div className="forgotPasswordLink">

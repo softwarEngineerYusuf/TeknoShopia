@@ -102,7 +102,7 @@ router.post("/register", registerValidation, validate, async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      cart: null, // Şimdilik boş bırakıyoruz, hemen aşağıda dolduracağız
+      cart: null, // Şimdilik boş bırakıyoruz, hemen aşağıda dolduracağız.
     });
     await newUser.save();
 
@@ -118,8 +118,25 @@ router.post("/register", registerValidation, validate, async (req, res) => {
     newUser.cart = newCart._id;
     await newUser.save();
 
+    // ✅ **JWT Token oluşturma**
+    const token = jwt.sign(
+      { userId: newUser._id, name: newUser.name, email: newUser.email },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRATION } // 1 gün geçerli olacak
+    );
+
+    // ✅ **Token'ı httpOnly ve secure cookie olarak set etme**
+    res.cookie("token", token, {
+      httpOnly: true, // JavaScript tarafından erişilemez.
+      secure: process.env.NODE_ENV === "production", // Sadece HTTPS üzerinde gönderilir.
+      maxAge: 24 * 60 * 60 * 1000, // 1 gün
+      sameSite: "lax", // CSRF saldırılarına karşı koruma sağlar.
+    });
+
+    // ✅ **Yanıt olarak kullanıcı bilgileri ve token'ı döndürme**
     res.status(201).json({
-      message: "Kullanıcı başarıyla oluşturuldu.",
+      message: "Kullanıcı başarıyla oluşturuldu ve giriş yapıldı.",
+      token, // Token'ı JSON içinde de gönderiyoruz.
       user: {
         id: newUser._id,
         name: newUser.name,
