@@ -14,9 +14,12 @@ import FormControl from "@mui/material/FormControl";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { loginApi } from "../../allAPIs/auth";
+import { useDispatch } from "react-redux";
+import { setUser } from "../../reduxToolkit/userSlice";
 
 function Login() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [email, setEmail] = useState("yusuf1@gmail.com");
   const [password, setPassword] = useState("123456789");
   const [showPassword, setShowPassword] = useState(false);
@@ -45,9 +48,10 @@ function Login() {
     try {
       // Kullanıcıyı backend'den giriş yapmaya yardımcı oluyorum.
       const data = await loginApi(email, password);
-
+      console.log("data", data);
       if (data && data.user) {
-        navigate("/");
+        dispatch(setUser(data.user));
+        navigate("/Home");
       }
     } catch (error) {
       console.error("Giriş başarısız:", error.response?.data || error.message);

@@ -8,9 +8,6 @@ const api = axios.create({
 export const loginApi = async (email, password) => {
   try {
     const response = await api.post("/auth/login", { email, password });
-
-    console.log("Giriş başarılı:", response.data);
-
     return response.data; // Kullanıcı verisini dön
   } catch (error) {
     console.error("Giriş başarısız:", error.response?.data || error.message);

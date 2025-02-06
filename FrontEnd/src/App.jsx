@@ -18,7 +18,7 @@ function Layout() {
     <>
       <Navbar />
       <Outlet />
-      <Footer/>
+      <Footer />
     </>
   );
 }
@@ -27,12 +27,12 @@ function App() {
     <Router>
       <Routes>
         <Route element={<Layout />}>
-        <Route path="/" element={<Home />} />
+          <Route path="/Home" element={<Home />} />
         </Route>
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/basket" element={<Basket />} />
-        <Route path="/productDetail" element={<ProductDetail/>} />
+        <Route path="/productDetail" element={<ProductDetail />} />
       </Routes>
     </Router>
   );
