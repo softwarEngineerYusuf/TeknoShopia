@@ -1,10 +1,11 @@
 .top-picks-and-button{
     display: flex;
     justify-content: space-between;
-    margin-top: 4vh;
+    margin-top: 2vh;
 }
 .TopPicksText{
     font-family: "Georgia", Times, serif;
+    font-size: 30px;
 }
 
 .buttonShowMore {
@@ -46,3 +47,28 @@
     opacity: 1;
     right: 0;
   }
+
+  .top-picks{
+    margin-bottom: 40px;
+  
+  }
+
+  .top-picks-card{
+    margin: 25px;
+  }
+
+  .add-basket-button{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0; 
+    margin: 0; 
+  }
+
+  .add-basket-button button{
+   width: 100%;
+   height: 100%; 
+   
+  }
+

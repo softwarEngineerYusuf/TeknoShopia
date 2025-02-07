@@ -9,6 +9,7 @@
 .TopPicksOnHomePage{
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-top: 4vh;
 }
 
