@@ -4,12 +4,12 @@ const Product = require("../models/product.js");
 const Brand = require("../models/brand.js");
 const Category = require("../models/category.js");
 
-router.post("/addProductToSubCategory", async (req, res) => {
+router.post("/addProduct", async (req, res) => {
   try {
     const {
       name,
       brand,
-      subCategory,
+      category, // Gönderilen kategori adı
       price,
       stock,
       description,
@@ -23,36 +23,43 @@ router.post("/addProductToSubCategory", async (req, res) => {
       discountEndDate,
     } = req.body;
 
-    if (!name || !brand || !subCategory || price == null || stock == null) {
+    if (!name || !brand || !category || price == null || stock == null) {
       return res.status(400).json({ message: "Gerekli alanları doldurunuz." });
     }
 
+    // Marka kontrolü
     const brandFind = await Brand.findOne({ name: brand });
     if (!brandFind)
       return res.status(404).json({ message: "Belirtilen marka bulunamadı." });
 
-    const subCategoryFind = await Category.findOne({ name: subCategory });
-    if (!subCategoryFind)
-      return res.status(404).json({ message: "Alt kategori bulunamadı." });
+    // Kategori kontrolü
+    const categoryFind = await Category.findOne({ name: category });
+    if (!categoryFind)
+      return res.status(404).json({ message: "Kategori bulunamadı." });
 
-    const parentCategoryFind = await Category.findById(
-      subCategoryFind.parentCategory
-    );
-    if (!parentCategoryFind)
-      return res.status(404).json({ message: "Ana kategori bulunamadı." });
+    // **Alt Kategori mi, Ana Kategori mi?**
+    const isSubCategory = categoryFind.parentCategory ? true : false;
+    const targetCategoryId = isSubCategory
+      ? categoryFind._id // Eğer parentCategory varsa alt kategoridir
+      : categoryFind._id; // Eğer yoksa ana kategoridir
 
-    if (!subCategoryFind.products) {
-      subCategoryFind.products = [];
+    // **Aynı isim ve aynı kategoriye sahip ürün var mı?**
+    const existingProduct = await Product.findOne({
+      name: name,
+      category: targetCategoryId,
+    });
+
+    if (existingProduct) {
+      return res.status(400).json({
+        message: "Bu kategori altında aynı isimde bir ürün zaten mevcut.",
+      });
     }
 
-    if (!parentCategoryFind.products) {
-      parentCategoryFind.products = [];
-    }
-
+    // **Yeni Ürün Kaydı**
     const newProduct = new Product({
       name,
       brand: brandFind._id,
-      category: subCategoryFind._id, // Alt kategori
+      category: targetCategoryId,
       price,
       stock,
       description,
@@ -68,15 +75,16 @@ router.post("/addProductToSubCategory", async (req, res) => {
 
     await newProduct.save();
 
-    subCategoryFind.products.push(newProduct._id);
-    await subCategoryFind.save();
+    // **Ürünü ilgili kategoriye ekleyelim**
+    categoryFind.products.push(newProduct._id);
+    await categoryFind.save();
 
-    parentCategoryFind.products.push(newProduct._id);
-    await parentCategoryFind.save();
-
-    res
-      .status(201)
-      .json({ message: "Ürün başarıyla eklendi.", product: newProduct });
+    res.status(201).json({
+      message: `Ürün başarıyla ${
+        isSubCategory ? "alt kategoriye" : "ana kategoriye"
+      } eklendi.`,
+      product: newProduct,
+    });
   } catch (error) {
     console.error("Error details:", error);
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
@@ -149,6 +157,7 @@ router.delete("/deleteProduct/:id", async (req, res) => {
 router.put("/updateProduct/:id", async (req, res) => {
   try {
     console.log("Request Body:", req.body);
+
     const {
       name,
       price,
@@ -166,6 +175,54 @@ router.put("/updateProduct/:id", async (req, res) => {
       category,
     } = req.body;
 
+    // Güncellenen ürünü bul
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: "Ürün bulunamadı." });
+    }
+
+    // Eğer marka adı değişiyorsa, yeni marka bilgisini bul
+    let brandFind = product.brand;
+    if (brand) {
+      const foundBrand = await Brand.findOne({ name: brand });
+      if (!foundBrand) {
+        return res
+          .status(404)
+          .json({ message: "Belirtilen marka bulunamadı." });
+      }
+      brandFind = foundBrand._id;
+    }
+
+    // Kategori bilgisi değişiyorsa, yeni kategoriyi bul
+    let categoryFind = product.category;
+    if (category) {
+      const foundCategory = await Category.findOne({ name: category });
+      if (!foundCategory) {
+        return res
+          .status(404)
+          .json({ message: "Belirtilen kategori bulunamadı." });
+      }
+      categoryFind = foundCategory._id;
+    }
+
+    // Eğer ürün adı ve kategorisi değişiyorsa, bu isimde aynı kategoriye sahip başka bir ürün olup olmadığını kontrol et
+    if (name && categoryFind.toString() !== product.category.toString()) {
+      const existingProduct = await Product.findOne({
+        name,
+        category: categoryFind,
+      });
+      if (
+        existingProduct &&
+        existingProduct._id.toString() !== product._id.toString()
+      ) {
+        return res.status(400).json({
+          message:
+            "Bu kategori altında aynı isimde başka bir ürün zaten mevcut.",
+        });
+      }
+    }
+
+    // Güncellenmiş ürün verileri
     const updatedProductData = {
       name,
       price,
@@ -179,26 +236,29 @@ router.put("/updateProduct/:id", async (req, res) => {
       discount,
       discountStartDate,
       discountEndDate,
-      brand,
-      category,
+      brand: brandFind,
+      category: categoryFind,
     };
 
     console.log("Updated Product Data:", updatedProductData);
 
-    const product = await Product.findByIdAndUpdate(
+    // Ürünü güncelle
+    const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       updatedProductData,
       { new: true, runValidators: true }
     );
 
-    if (!product) {
-      return res.status(404).json({ message: "Ürün bulunamadı." });
-    }
-
-    res.status(200).json({ message: "Ürün başarıyla güncellendi.", product });
+    res
+      .status(200)
+      .json({
+        message: "Ürün başarıyla güncellendi.",
+        product: updatedProduct,
+      });
   } catch (error) {
     console.error("Error updating product:", error);
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
   }
 });
+
 module.exports = router;

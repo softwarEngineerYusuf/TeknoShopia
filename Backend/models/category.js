@@ -10,6 +10,7 @@ const categorySchema = new Schema(
       default: null,
     },
     subCategories: [{ type: Schema.Types.ObjectId, ref: "Category" }],
+    products: [{ type: Schema.Types.ObjectId, ref: "Product" }], // Eksik olan alan
   },
   { timestamps: true }
 );

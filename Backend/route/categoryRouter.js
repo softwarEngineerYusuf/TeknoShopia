@@ -7,7 +7,11 @@ router.post("/addCategory", async (req, res) => {
   const { name, parentCategory } = req.body;
 
   try {
-    if (parentCategory === null) {
+    if (
+      parentCategory === null ||
+      parentCategory === undefined ||
+      parentCategory === ""
+    ) {
       const newCategory = new Category({ name });
       await newCategory.save();
       return res.status(201).json({
