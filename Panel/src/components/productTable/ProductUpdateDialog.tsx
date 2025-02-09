@@ -42,7 +42,9 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
   const [selectedBrand, setSelectedBrand] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [isCategoriesLoaded, setIsCategoriesLoaded] = useState(false);
-  const [additionalImages, setAdditionalImages] = useState<string[]>([]);
+  const [additionalImages, setAdditionalImages] = useState<
+    { imageUrl: string }[]
+  >([]);
   const [attributes, setAttributes] = useState<
     { key: string; value: string }[]
   >([]);
@@ -95,7 +97,11 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
         setAttributes(formattedAttributes);
 
         // Set existing additional images
-        setAdditionalImages(productData.additionalImages || []); // Add this line
+        setAdditionalImages(
+          productData.additionalImages?.map((image: string) => ({
+            imageUrl: image,
+          })) || []
+        );
       };
 
       fetchProduct();
@@ -121,7 +127,7 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
   };
 
   const handleAddAdditionalImage = () => {
-    setAdditionalImages([...additionalImages, ""]);
+    setAdditionalImages([...additionalImages, { imageUrl: "" }]);
   };
 
   const handleRemoveAdditionalImage = (index: number) => {
@@ -131,7 +137,7 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
 
   const handleAdditionalImageChange = (index: number, value: string) => {
     const updatedImages = [...additionalImages];
-    updatedImages[index] = value;
+    updatedImages[index].imageUrl = value;
     setAdditionalImages(updatedImages);
   };
 
@@ -151,7 +157,7 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
         }, {} as Record<string, string>),
         mainImage: product.mainImage, // Yeni eklenen alan
         description: product.description,
-        additionalImages, // Yeni eklenen alan
+        additionalImages: additionalImages.map((image) => image.imageUrl), // Yeni eklenen alan
       };
 
       try {
@@ -272,35 +278,93 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
         </FormControl>
 
         {/* Additional Images Inputs */}
-        <div>
-          <h4>Additional Images</h4>
+        <h4>Additional Images</h4>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "10px",
+          }}
+        >
           {additionalImages.map((image, index) => (
-            <div key={index} style={{ display: "flex", marginBottom: "10px" }}>
-              <TextField
-                label="Image URL"
-                value={image}
-                onChange={(e) =>
-                  handleAdditionalImageChange(index, e.target.value)
-                }
-                style={{ marginRight: "10px", flex: 1 }}
-              />
-              <IconButton
-                onClick={() => handleRemoveAdditionalImage(index)}
-                color="secondary"
-              >
-                <Remove />
-              </IconButton>
+            <div
+              key={index}
+              style={{
+                alignItems: "center",
+                position: "relative",
+                marginBottom: "10px",
+                width: "100%",
+              }}
+            >
+              {/* Resmi göster */}
+              {image.imageUrl ? (
+                <div
+                  style={{
+                    display: "flex",
+                    position: "relative",
+                    width: "100px",
+                    height: "100px",
+                  }}
+                >
+                  <img
+                    src={image.imageUrl}
+                    alt={`Additional Image ${index}`}
+                    style={{
+                      width: "100px",
+                      height: "100px",
+                      objectFit: "cover",
+                      marginBottom: "10px", // Resmin altına boşluk ekledik
+                    }}
+                  />
+                  {/* Resmin sağ üst köşesine remove butonu */}
+                  <IconButton
+                    onClick={() => handleRemoveAdditionalImage(index)}
+                    color="secondary"
+                    style={{
+                      position: "absolute",
+                      top: "5px",
+                      right: "5px",
+                    }}
+                  >
+                    <Remove />
+                  </IconButton>
+                </div>
+              ) : (
+                <div style={{ position: "relative" }}>
+                  <TextField
+                    label="Image URL"
+                    fullWidth
+                    value={image.imageUrl}
+                    onChange={(e) =>
+                      handleAdditionalImageChange(index, e.target.value)
+                    }
+                    style={{ width: "100%" }}
+                  />
+                  {/* Inputun sağ üst köşesine remove butonu */}
+                  <IconButton
+                    onClick={() => handleRemoveAdditionalImage(index)}
+                    color="secondary"
+                    style={{
+                      position: "absolute",
+                      top: "5px",
+                      right: "5px",
+                    }}
+                  >
+                    <Remove />
+                  </IconButton>
+                </div>
+              )}
             </div>
           ))}
-          <Button
-            onClick={handleAddAdditionalImage}
-            variant="outlined"
-            color="primary"
-            startIcon={<Add />}
-          >
-            Add Additional Image
-          </Button>
         </div>
+        <Button
+          onClick={handleAddAdditionalImage}
+          variant="outlined"
+          color="primary"
+          startIcon={<Add />}
+        >
+          Add Additional Image
+        </Button>
         <div>
           <h4>Attributes</h4>
           {attributes.map((attribute, index) => (
@@ -339,7 +403,6 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
           </Button>
         </div>
       </DialogContent>
-
       <DialogActions>
         <Button onClick={onClose} color="secondary">
           Cancel
