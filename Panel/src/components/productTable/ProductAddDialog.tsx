@@ -13,9 +13,13 @@ import {
   IconButton,
 } from "@mui/material";
 import { getAllBrands } from "../../allAPIs/BrandApi";
-import { getAllCategories } from "../../allAPIs/CategoryApi";
+import { getAllMainCategories } from "../../allAPIs/CategoryApi";
+import { getAllSubCategories } from "../../allAPIs/CategoryApi";
+
 import { addProduct } from "../../allAPIs/ProductApi";
 import { Add, Remove } from "@mui/icons-material";
+import { Category } from "../../types/ParentCategory";
+import { SubCategory } from "../../types/ParentCategory";
 
 interface ProductAddDialogProps {
   open: boolean;
@@ -29,9 +33,11 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
   fetchProducts,
 }) => {
   const [brands, setBrands] = useState<string[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
+
   const [selectedBrand, setSelectedBrand] = useState<string>("");
-  const [selectedSubCategory, setSelectedSubCategory] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [price, setPrice] = useState<number | "">("");
   const [stock, setStock] = useState<number | "">("");
@@ -40,7 +46,7 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
   const [attributes, setAttributes] = useState<
     { key: string; value: string }[]
   >([{ key: "", value: "" }]);
-
+  const [additionalImages, setAdditionalImages] = useState<string[]>([]);
   useEffect(() => {
     const fetchBrands = async () => {
       const brandsData = await getAllBrands();
@@ -48,13 +54,26 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
     };
 
     const fetchCategories = async () => {
-      const categoriesData = await getAllCategories();
-      setCategories(categoriesData.map((category: any) => category.name));
+      try {
+        const { categories } = await getAllMainCategories();
+        setCategories(categories);
+      } catch (error) {
+        console.error("Ana kategoriler alınırken hata oluştu:", error);
+      }
+    };
+    const fetchSubCategories = async () => {
+      try {
+        const subCategoriesData = await getAllSubCategories();
+        setSubCategories(subCategoriesData);
+      } catch (error) {
+        console.error("Alt kategoriler alınırken hata oluştu:", error);
+      }
     };
 
     if (open) {
       fetchBrands();
       fetchCategories();
+      fetchSubCategories();
     }
   }, [open]);
 
@@ -76,12 +95,26 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
     const updatedAttributes = attributes.filter((_, i) => i !== index);
     setAttributes(updatedAttributes);
   };
+  const handleAddAdditionalImage = () => {
+    setAdditionalImages([...additionalImages, ""]);
+  };
+
+  const handleRemoveAdditionalImage = (index: number) => {
+    const updatedImages = additionalImages.filter((_, i) => i !== index);
+    setAdditionalImages(updatedImages);
+  };
+
+  const handleAdditionalImageChange = (index: number, value: string) => {
+    const updatedImages = [...additionalImages];
+    updatedImages[index] = value;
+    setAdditionalImages(updatedImages);
+  };
 
   const handleSubmit = async () => {
     const productData = {
       name,
       brand: selectedBrand,
-      subCategory: selectedSubCategory,
+      category: selectedCategory,
       price,
       stock,
       mainImage,
@@ -92,6 +125,7 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
         }
         return acc;
       }, {} as Record<string, string>),
+      additionalImages, // Add the additional images to the product data
     };
     console.log("productData", productData);
     try {
@@ -112,8 +146,9 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
     setMainImage("");
     setDescription("");
     setSelectedBrand("");
-    setSelectedSubCategory("");
+    setSelectedCategory("");
     setAttributes([{ key: "", value: "" }]);
+    setAdditionalImages([]);
   };
 
   return (
@@ -175,16 +210,61 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
         <FormControl fullWidth margin="normal">
           <InputLabel>Category</InputLabel>
           <Select
-            value={selectedSubCategory}
-            onChange={(e) => setSelectedSubCategory(e.target.value)}
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
           >
+            <MenuItem disabled>
+              <em>Ana Kategoriler</em>
+            </MenuItem>
             {categories.map((category) => (
-              <MenuItem key={category} value={category}>
-                {category}
+              <MenuItem key={category.name} value={category.name}>
+                {category.name}
+              </MenuItem>
+            ))}
+
+            <MenuItem disabled>
+              <em>Alt Kategoriler</em>
+            </MenuItem>
+            {subCategories.map((subCategory) => (
+              <MenuItem key={subCategory._id} value={subCategory._id}>
+                {subCategory.name}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
+
+        {/* Additional Images Inputs */}
+        <div>
+          <h4>Additional Images</h4>
+          {additionalImages.map((image, index) => (
+            <div key={index} style={{ display: "flex", marginBottom: "10px" }}>
+              <TextField
+                label="Image URL"
+                value={image}
+                onChange={(e) =>
+                  handleAdditionalImageChange(index, e.target.value)
+                }
+                style={{ marginRight: "10px", flex: 1 }}
+              />
+              <IconButton
+                onClick={() => handleRemoveAdditionalImage(index)}
+                color="secondary"
+              >
+                <Remove />
+              </IconButton>
+            </div>
+          ))}
+          <Button
+            onClick={handleAddAdditionalImage}
+            variant="outlined"
+            color="primary"
+            startIcon={<Add />}
+          >
+            Add Additional Image
+          </Button>
+        </div>
+
+        {/* Attributes section */}
         <div>
           <h4>Attributes</h4>
           {attributes.map((attribute, index) => (
@@ -229,7 +309,7 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
           onClick={handleSubmit}
           variant="contained"
           color="primary"
-          disabled={!name || !selectedBrand || !selectedSubCategory}
+          disabled={!name || !selectedBrand || !selectedCategory}
         >
           Add
         </Button>

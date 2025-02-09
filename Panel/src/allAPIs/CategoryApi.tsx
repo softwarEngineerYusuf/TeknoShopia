@@ -24,10 +24,10 @@ export const getAllMainCategories = async (): Promise<{
 
 export const getAllSubCategories = async (): Promise<SubCategory[]> => {
   try {
-    const response = await api.get("/category/getAllSubCategories"); // API endpoint'i
+    const response = await api.get("/category/getAllSubCategories");
     return response.data; // Doğrudan dizi döndürüyor
   } catch (error) {
     console.error("Alt kategoriler alınırken hata oluştu:", error);
-    throw error; // Hata durumunda hatayı fırlat
+    throw error;
   }
 };

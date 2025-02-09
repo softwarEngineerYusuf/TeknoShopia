@@ -22,10 +22,7 @@ export const getProductById = async (id: string) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const addProduct = async (productData: any) => {
   try {
-    const response = await api.post(
-      "/product/addProductToSubCategory",
-      productData
-    );
+    const response = await api.post("/product/addProduct", productData);
     return response.data;
   } catch (error) {
     console.error("Error creating product:", error);

@@ -134,8 +134,9 @@ export default function ProductTable() {
           <TableHead>
             <TableRow>
               <TableCell>Image</TableCell>
-              <TableCell>Brand</TableCell>
               <TableCell>Name</TableCell>
+              <TableCell>Brand</TableCell>
+              <TableCell>Category</TableCell>
               <TableCell>Price</TableCell>
               <TableCell>Stock</TableCell>
               <TableCell>Discounted Price</TableCell>
@@ -162,8 +163,9 @@ export default function ProductTable() {
                     }}
                   />
                 </TableCell>
-                <TableCell>{product.brand}</TableCell>
                 <TableCell>{product.name}</TableCell>
+                <TableCell>{product.brand}</TableCell>
+                <TableCell>{product.category.name}</TableCell>
                 <TableCell>{`$${product.price.toFixed(2)}`}</TableCell>
                 <TableCell>{product.stock}</TableCell>
                 <TableCell>
