@@ -103,7 +103,10 @@ function Home() {
           <AdCarousel images={images} />
         </div>
 
-        <div className="TopPicksOnHomePage">
+        <div
+          className="TopPicksOnHomePage container"
+          style={{ border: "1px solid black" }}
+        >
           <TopPicks />
         </div>
 

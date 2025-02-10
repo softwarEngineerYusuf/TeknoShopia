@@ -1,270 +1,69 @@
-import React from "react";
-import "./TopPicks.css";
-import StarRateIcon from "@mui/icons-material/StarRate";
-import Stack from "@mui/material/Stack";
-import Button from "@mui/material/Button";
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import { Card, Button } from "antd";
+import { ShoppingCartOutlined, StarFilled } from "@ant-design/icons";
+import "./TopPicks.css"; // Stil dosyanı korudum.
 
-function TopPicks() {
+const { Meta } = Card;
+
+const TopPicks = () => {
   const imageURL =
     "https://assets.mmsrg.com/isr/166325/c1/-/ASSET_MMS_133460515?x=280&y=190&format=jpg&quality=80&sp=yes&strip=yes&trim&ex=280&ey=190&align=center&resizesource&unsharp=1.5x1+0.7+0.02&cox=0&coy=0&cdx=280&cdy=190";
 
   return (
-    <div>
-      
-      <div className="top-picks-and-button">
-        <div className="TopPicksText">
-          Top Picks
-        </div>
-        <div>
-          <button
-            className="buttonShowMore"
-            style={{ verticalAlign: "middle" }}
-          >
-            <span>Show More </span>
-          </button>
-        </div>
+    <div className="container mt-4">
+      <div className="top-picks-and-button d-flex justify-content-between align-items-center">
+        <h2 className="TopPicksText">Top Picks</h2>
+        <button className="buttonShowMore">
+          <span>Show More</span>
+        </button>
       </div>
 
-      <div className="card-group top-picks">
-        <div className="card top-picks-card" style={{height:'40vh'}}>
-          <img src={imageURL} className="card-img-top" alt="..." />
-          <div className="card-body">
-            <h5 className="card-title">PHILIPS Erkek Bakım Seti Gri Siyah</h5>
-            <p className="card-text" style={{ fontSize: "25px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div style={{ color: "yellow" }}>
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                </div>
-                <div style={{ display: "flex" }}>
-                  <p>599.00</p>
-                  <p>TL</p>
-                </div>
-              </div>
-            </p>
-          </div>
-          <div className="add-basket-button" style={{ display: "flex" }}>
-            <Stack direction="row" spacing={2} style={{ width: "100%" }}>
-              <Button variant="contained" color="success">
-                Add Basket 
-                <p style={{marginLeft:'8px'}}><ShoppingCartIcon/></p>
+      <div className="row mt-3">
+        {[...Array(4)].map((_, index) => (
+          <div key={index} className="col-lg-3 col-md-6 col-sm-12 mb-4">
+            <Card
+              hoverable
+              cover={<img alt="Product" src={imageURL} />}
+              className="h-100 d-flex flex-column p-3"
+              style={{ width: "100%", border: "3px solid #F0F0F0" }}
+            >
+              <Meta
+                title="PHILIPS Erkek Bakım Seti Gri Siyah"
+                description={
+                  <div>
+                    <div className="d-flex justify-content-between align-items-center mt-3">
+                      <div style={{ color: "#FADB14" }}>
+                        {[...Array(5)].map((_, i) => (
+                          <StarFilled key={i} />
+                        ))}
+                      </div>
+                      <div className="price d-flex align-items-center ">
+                        <span style={{ fontWeight: "bold", fontSize: "18px" }}>
+                          599.00 TL
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              />
+              <Button
+                type="primary"
+                icon={<ShoppingCartOutlined />}
+                className="mt-3"
+                block
+                style={{
+                  backgroundColor: "#52c41a",
+                  borderColor: "#52c41a",
+                  marginTop: "15px",
+                }}
+              >
+                Add to Basket
               </Button>
-            </Stack>
+            </Card>
           </div>
-        </div>
-        <div className="card top-picks-card" style={{height:'40vh'}}>
-          <img src={imageURL} className="card-img-top" alt="..." />
-          <div className="card-body">
-            <h5 className="card-title">PHILIPS Erkek Bakım Seti Gri Siyah</h5>
-            <p className="card-text" style={{ fontSize: "25px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div style={{ color: "yellow" }}>
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                </div>
-                <div style={{ display: "flex" }}>
-                  <p>599.00</p>
-                  <p>TL</p>
-                </div>
-              </div>
-            </p>
-          </div>
-          <div className="add-basket-button" style={{ display: "flex" }}>
-            <Stack direction="row" spacing={2} style={{ width: "100%" }}>
-              <Button variant="contained" color="success">
-                Add Basket 
-                <p style={{marginLeft:'8px'}}><ShoppingCartIcon/></p>
-              </Button>
-            </Stack>
-          </div>
-        </div>
-        <div className="card top-picks-card" style={{height:'40vh'}}>
-          <img src={imageURL} className="card-img-top" alt="..." />
-          <div className="card-body">
-            <h5 className="card-title">PHILIPS Erkek Bakım Seti Gri Siyah</h5>
-            <p className="card-text" style={{ fontSize: "25px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div style={{ color: "yellow" }}>
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                </div>
-                <div style={{ display: "flex" }}>
-                  <p>599.00</p>
-                  <p>TL</p>
-                </div>
-              </div>
-            </p>
-          </div>
-          <div className="add-basket-button" style={{ display: "flex" }}>
-            <Stack direction="row" spacing={2} style={{ width: "100%" }}>
-              <Button variant="contained" color="success">
-                Add Basket 
-                <p style={{marginLeft:'8px'}}><ShoppingCartIcon/></p>
-              </Button>
-            </Stack>
-          </div>
-        </div>
-        <div className="card top-picks-card" style={{height:'40vh'}}>
-          <img src={imageURL} className="card-img-top" alt="..." />
-          <div className="card-body">
-            <h5 className="card-title">PHILIPS Erkek Bakım Seti Gri Siyah</h5>
-            <p className="card-text" style={{ fontSize: "25px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div style={{ color: "yellow" }}>
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                </div>
-                <div style={{ display: "flex" }}>
-                  <p>599.00</p>
-                  <p>TL</p>
-                </div>
-              </div>
-            </p>
-          </div>
-          <div className="add-basket-button" style={{ display: "flex" }}>
-            <Stack direction="row" spacing={2} style={{ width: "100%" }}>
-              <Button variant="contained" color="success">
-                Add Basket 
-                <p style={{marginLeft:'8px'}}><ShoppingCartIcon/></p>
-              </Button>
-            </Stack>
-          </div>
-        </div>
-      </div>
-
-      <div className="card-group top-picks">
-      <div className="card top-picks-card" style={{height:'40vh'}}>
-          <img src={imageURL} className="card-img-top" alt="..." />
-          <div className="card-body">
-            <h5 className="card-title">PHILIPS Erkek Bakım Seti Gri Siyah</h5>
-            <p className="card-text" style={{ fontSize: "25px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div style={{ color: "yellow" }}>
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                </div>
-                <div style={{ display: "flex" }}>
-                  <p>599.00</p>
-                  <p>TL</p>
-                </div>
-              </div>
-            </p>
-          </div>
-          <div className="add-basket-button" style={{ display: "flex" }}>
-            <Stack direction="row" spacing={2} style={{ width: "100%" }}>
-              <Button variant="contained" color="success">
-                Add Basket 
-                <p style={{marginLeft:'8px'}}><ShoppingCartIcon/></p>
-              </Button>
-            </Stack>
-          </div>
-        </div>
-        <div className="card top-picks-card" style={{height:'40vh'}}>
-          <img src={imageURL} className="card-img-top" alt="..." />
-          <div className="card-body">
-            <h5 className="card-title">PHILIPS Erkek Bakım Seti Gri Siyah</h5>
-            <p className="card-text" style={{ fontSize: "25px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div style={{ color: "yellow" }}>
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                </div>
-                <div style={{ display: "flex" }}>
-                  <p>599.00</p>
-                  <p>TL</p>
-                </div>
-              </div>
-            </p>
-          </div>
-          <div className="add-basket-button" style={{ display: "flex" }}>
-            <Stack direction="row" spacing={2} style={{ width: "100%" }}>
-              <Button variant="contained" color="success">
-                Add Basket 
-                <p style={{marginLeft:'8px'}}><ShoppingCartIcon/></p>
-              </Button>
-            </Stack>
-          </div>
-        </div>
-        <div className="card top-picks-card" style={{height:'40vh'}}>
-          <img src={imageURL} className="card-img-top" alt="..." />
-          <div className="card-body">
-            <h5 className="card-title">PHILIPS Erkek Bakım Seti Gri Siyah</h5>
-            <p className="card-text" style={{ fontSize: "25px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div style={{ color: "yellow" }}>
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                </div>
-                <div style={{ display: "flex" }}>
-                  <p>599.00</p>
-                  <p>TL</p>
-                </div>
-              </div>
-            </p>
-          </div>
-          <div className="add-basket-button" style={{ display: "flex" }}>
-            <Stack direction="row" spacing={2} style={{ width: "100%" }}>
-              <Button variant="contained" color="success">
-                Add Basket 
-                <p style={{marginLeft:'8px'}}><ShoppingCartIcon/></p>
-              </Button>
-            </Stack>
-          </div>
-        </div>
-        <div className="card top-picks-card" style={{height:'40vh'}}>
-          <img src={imageURL} className="card-img-top" alt="..." />
-          <div className="card-body">
-            <h5 className="card-title">PHILIPS Erkek Bakım Seti Gri Siyah</h5>
-            <p className="card-text" style={{ fontSize: "25px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div style={{ color: "yellow" }}>
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                  <StarRateIcon />
-                </div>
-                <div style={{ display: "flex" }}>
-                  <p>599.00</p>
-                  <p>TL</p>
-                </div>
-              </div>
-            </p>
-          </div>
-          <div className="add-basket-button" style={{ display: "flex" }}>
-            <Stack direction="row" spacing={2} style={{ width: "100%" }}>
-              <Button variant="contained" color="success">
-                Add Basket 
-                <p style={{marginLeft:'8px'}}><ShoppingCartIcon/></p>
-              </Button>
-            </Stack>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );
-}
+};
 
 export default TopPicks;
