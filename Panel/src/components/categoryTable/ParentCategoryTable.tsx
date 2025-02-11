@@ -12,27 +12,36 @@ import {
 } from "@mui/material";
 import { getAllMainCategories } from "../../allAPIs/CategoryApi"; // API fonksiyonunu ve tipleri içe aktar
 import { Category } from "../../types/ParentCategory";
+import ParentCategoryAddDialog from "./ParentCategoryAddDialog";
 
 const ParentCategoryTable = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [openAddCategoryDialog, setOpenAddCategoryProductDialog] =
+    useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const handleOpenDialog = () => setOpenAddCategoryProductDialog(true);
+  const handleCloseDialog = () => setOpenAddCategoryProductDialog(false);
   // API'den kategorileri çek
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const data = await getAllMainCategories();
-        setCategories(data.categories);
-      } catch (err) {
-        setError(err.message || "Kategoriler alınırken bir hata oluştu.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  // API'den kategorileri çekme fonksiyonunu dışarı aldık
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllMainCategories();
+      setCategories(data.categories);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      setError(err.message || "Kategoriler alınırken bir hata oluştu.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // useEffect içinde çağır
+  useEffect(() => {
     fetchCategories();
   }, []);
 
@@ -60,53 +69,66 @@ const ParentCategoryTable = () => {
   if (error) return <div>{error}</div>;
 
   return (
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
-        <TableHead>
-          <TableRow>
-            <TableCell>Ana Kategoriler</TableCell>
-            <TableCell align="right">Alt Kategori Sayısı</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {(rowsPerPage > 0
-            ? categories.slice(
-                page * rowsPerPage,
-                page * rowsPerPage + rowsPerPage
-              )
-            : categories
-          ).map((category) => (
-            <TableRow key={category._id}>
-              <TableCell component="th" scope="row">
-                {category.name}
-              </TableCell>
-              <TableCell style={{ width: 160 }} align="right">
-                {category.subCategories ? category.subCategories.length : 0}{" "}
-                {/* SubCategories sayısı */}
-              </TableCell>
+    <>
+      <TableContainer component={Paper}>
+        <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
+          <TableHead>
+            <TableRow>
+              <TableCell>Ana Kategoriler</TableCell>
+              <TableCell align="right">Alt Kategori Sayısı</TableCell>
             </TableRow>
-          ))}
-          {emptyRows > 0 && (
-            <TableRow style={{ height: 53 * emptyRows }}>
-              <TableCell colSpan={2} />
+          </TableHead>
+          <TableBody>
+            {(rowsPerPage > 0
+              ? categories.slice(
+                  page * rowsPerPage,
+                  page * rowsPerPage + rowsPerPage
+                )
+              : categories
+            ).map((category) => (
+              <TableRow key={category._id}>
+                <TableCell component="th" scope="row">
+                  {category.name}
+                </TableCell>
+                <TableCell style={{ width: 160 }} align="right">
+                  {category.subCategories ? category.subCategories.length : 0}{" "}
+                  {/* SubCategories sayısı */}
+                </TableCell>
+              </TableRow>
+            ))}
+            {emptyRows > 0 && (
+              <TableRow style={{ height: 53 * emptyRows }}>
+                <TableCell colSpan={2} />
+              </TableRow>
+            )}
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                colSpan={2}
+                count={categories.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
             </TableRow>
-          )}
-        </TableBody>
-        <TableFooter>
-          <TableRow>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
-              colSpan={2}
-              count={categories.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-          </TableRow>
-        </TableFooter>
-      </Table>
-    </TableContainer>
+          </TableFooter>
+        </Table>
+      </TableContainer>
+      <button
+        onClick={handleOpenDialog}
+        className="px-4 py-2 mt-2 text-white bg-green-500 rounded hover:bg-green-600"
+      >
+        Add Main Category
+      </button>
+      <ParentCategoryAddDialog
+        open={openAddCategoryDialog}
+        onClose={handleCloseDialog}
+        fetchCategories={fetchCategories}
+      />
+    </>
   );
 };
 

@@ -20,6 +20,7 @@ import { addProduct } from "../../allAPIs/ProductApi";
 import { Add, Remove } from "@mui/icons-material";
 import { Category } from "../../types/ParentCategory";
 import { SubCategory } from "../../types/ParentCategory";
+import { Brand } from "../../types/Brand";
 
 interface ProductAddDialogProps {
   open: boolean;
@@ -50,7 +51,8 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
   useEffect(() => {
     const fetchBrands = async () => {
       const brandsData = await getAllBrands();
-      setBrands(brandsData.map((brand: any) => brand.name));
+
+      setBrands(brandsData.map((brand: Brand) => brand.name));
     };
 
     const fetchCategories = async () => {

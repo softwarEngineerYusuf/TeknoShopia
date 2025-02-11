@@ -6,6 +6,20 @@ const api = axios.create({
   baseURL: "http://localhost:5000/api",
 });
 
+export const addCategory = async (name: string, parentCategory?: string) => {
+  try {
+    const response = await api.post("/category/addCategory", {
+      name,
+      parentCategory: parentCategory || null,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Kategori eklenirken hata oluştu:", error);
+    throw error;
+  }
+};
+
 export const getAllCategories = async () => {
   const response = await api.get("/category/getAllSubCategories");
   return response.data;
