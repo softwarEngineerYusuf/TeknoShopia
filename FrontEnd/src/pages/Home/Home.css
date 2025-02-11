@@ -41,6 +41,10 @@
   margin: 0;
 }
 
+.GridCardsOnHomePage{
+  margin-top: 5%;
+}
+
 /* Ekran boyutuna göre kart genişliğini ayarlama */
 @media (max-width: 768px) {
   /*(tablet) */
