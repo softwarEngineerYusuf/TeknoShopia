@@ -1,8 +1,8 @@
 /* footer.css */
 .footer {
     background-color: #f8f9fa;
-    padding: 20px;
     border-top: 1px solid #ddd;
+    width: 100%;
   }
   
   .footer-navbar {

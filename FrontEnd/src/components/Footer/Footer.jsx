@@ -1,19 +1,16 @@
-// footer.jsx
-
 import "./footer.css";
 import { YouTube, Instagram, LinkedIn, Twitter } from "@mui/icons-material";
 
 const Footer = () => {
   return (
     <footer className="footer">
-      <div className="footer-navbar">
+      <div className="footer-navbar justify-content-between p-5 mt-5">
         <nav>
           <ul>
             <li>
-              <a href="#">Mağazalar</a>
+              <a className="fs-5" href="#">Mağazalar</a>
             </li>
             <li>
-              Sosyal Medya
               <div className="social-icons">
                 <a href="#">
                   <YouTube className="icon" />
@@ -29,7 +26,7 @@ const Footer = () => {
                 </a>
               </div>
             </li>
-            <li>Müşteri Hattı: 0850 666 19 07</li>
+            <li className="fs-5" >Müşteri Hattı: 0850 666 19 07</li>
           </ul>
         </nav>
       </div>
