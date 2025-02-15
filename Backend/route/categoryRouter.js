@@ -134,6 +134,36 @@ router.get("/getSubCategoryById/:id", async (req, res) => {
   }
 });
 
+router.delete("/deleteMainCategory/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const mainCategory = await Category.findById(id);
+
+    if (!mainCategory || mainCategory.parentCategory !== null) {
+      return res.status(404).json({
+        message: "Ana kategori bulunamadı veya geçersiz kategori ID'si",
+      });
+    }
+
+    // Find and delete all subcategories
+    const subCategories = await Category.find({ parentCategory: id });
+    for (const subCategory of subCategories) {
+      await Category.findByIdAndDelete(subCategory._id);
+    }
+
+    // Delete the main category
+    await Category.findByIdAndDelete(id);
+
+    return res
+      .status(200)
+      .json({ message: "Ana kategori ve alt kategoriler başarıyla silindi" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Sunucu hatası" });
+  }
+});
+
 // router.get("/getCategoryByName/:name", async (req, res) => {
 //   try {
 //     const formattedName =

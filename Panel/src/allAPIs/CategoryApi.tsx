@@ -45,3 +45,13 @@ export const getAllSubCategories = async (): Promise<SubCategory[]> => {
     throw error;
   }
 };
+
+export const deleteMainCategory = async (id: string) => {
+  try {
+    const response = await api.delete(`/category/deleteMainCategory/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Ana kategori silinirken hata oluştu:", error);
+    throw error;
+  }
+};

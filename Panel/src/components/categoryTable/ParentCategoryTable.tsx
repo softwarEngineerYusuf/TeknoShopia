@@ -10,9 +10,16 @@ import {
   Paper,
   TableHead,
 } from "@mui/material";
-import { getAllMainCategories } from "../../allAPIs/CategoryApi"; // API fonksiyonunu ve tipleri içe aktar
+import DeleteIcon from "@mui/icons-material/Delete";
+import {
+  deleteMainCategory,
+  getAllMainCategories,
+} from "../../allAPIs/CategoryApi"; // API fonksiyonunu ve tipleri içe aktar
 import { Category } from "../../types/ParentCategory";
 import ParentCategoryAddDialog from "./ParentCategoryAddDialog";
+import ParentCategoryDeleteDialog from "./ParentCategoryDeleteDialog";
+import EditIcon from "@mui/icons-material/Edit";
+import { toast } from "react-toastify";
 
 const ParentCategoryTable = () => {
   const [page, setPage] = useState(0);
@@ -20,6 +27,13 @@ const ParentCategoryTable = () => {
   const [openAddCategoryDialog, setOpenAddCategoryProductDialog] =
     useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    null
+  );
+  const [selectedPCategoryName, setSelectedPCategoryName] =
+    useState<string>("");
+
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,6 +78,30 @@ const ParentCategoryTable = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+  };
+  const openDeleteDialog = (id: string, name: string) => {
+    setSelectedCategoryId(id);
+    setSelectedPCategoryName(name);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteCategory = async () => {
+    if (selectedCategoryId) {
+      try {
+        await deleteMainCategory(selectedCategoryId);
+        setCategories(
+          categories.filter((category) => category._id !== selectedCategoryId)
+        );
+        setDeleteDialogOpen(false);
+        toast.success("Category deleted successfully!");
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        toast.error("Error deleting product.");
+      }
+    }
+  };
 
   if (loading) return <div>Yükleniyor...</div>;
   if (error) return <div>{error}</div>;
@@ -75,7 +113,8 @@ const ParentCategoryTable = () => {
           <TableHead>
             <TableRow>
               <TableCell>Ana Kategoriler</TableCell>
-              <TableCell align="right">Alt Kategori Sayısı</TableCell>
+              <TableCell align="center">Alt Kategori Sayısı</TableCell>
+              <TableCell align="center">Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -90,9 +129,27 @@ const ParentCategoryTable = () => {
                 <TableCell component="th" scope="row">
                   {category.name}
                 </TableCell>
-                <TableCell style={{ width: 160 }} align="right">
+                <TableCell style={{ width: 160 }} align="center">
                   {category.subCategories ? category.subCategories.length : 0}{" "}
                   {/* SubCategories sayısı */}
+                </TableCell>
+                <TableCell align="center">
+                  <div className="flex space-x-2 justify-center">
+                    <button
+                      // onClick={() => handleOpenUpdateDialog(product._id)}
+                      className="px-3 py-1 text-white bg-blue-500 rounded hover:bg-blue-600"
+                    >
+                      <EditIcon />
+                    </button>
+                    <button
+                      onClick={() =>
+                        openDeleteDialog(category._id, category.name)
+                      }
+                      className="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600"
+                    >
+                      <DeleteIcon />
+                    </button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -127,6 +184,12 @@ const ParentCategoryTable = () => {
         open={openAddCategoryDialog}
         onClose={handleCloseDialog}
         fetchCategories={fetchCategories}
+      />
+      <ParentCategoryDeleteDialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        onDelete={handleDeleteCategory}
+        parentCategoryName={selectedPCategoryName}
       />
     </>
   );
