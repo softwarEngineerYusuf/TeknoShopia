@@ -136,30 +136,34 @@ router.get("/getSubCategoryById/:id", async (req, res) => {
 
 router.delete("/deleteMainCategory/:id", async (req, res) => {
   const { id } = req.params;
+  console.log("Silinecek ID:", id);
 
   try {
-    const mainCategory = await Category.findById(id);
+    const category = await Category.findById(id);
+    console.log("Bulunan Kategori:", category);
 
-    if (!mainCategory || mainCategory.parentCategory !== null) {
+    if (!category) {
       return res.status(404).json({
-        message: "Ana kategori bulunamadı veya geçersiz kategori ID'si",
+        message: "Kategori bulunamadı veya geçersiz kategori ID'si",
       });
     }
 
-    // Find and delete all subcategories
-    const subCategories = await Category.find({ parentCategory: id });
-    for (const subCategory of subCategories) {
-      await Category.findByIdAndDelete(subCategory._id);
+    // Eğer bu kategori bir alt kategoriye sahipse, önce tüm alt kategorileri sil
+    if (category.parentCategory === null) {
+      // Ana kategori, alt kategorileri sil
+      await Category.deleteMany({ parentCategory: id });
+      console.log(`Alt kategoriler silindi: ${id}`);
     }
 
-    // Delete the main category
+    // Kategoriyi sil
     await Category.findByIdAndDelete(id);
+    console.log(`Kategori silindi: ${id}`);
 
-    return res
-      .status(200)
-      .json({ message: "Ana kategori ve alt kategoriler başarıyla silindi" });
+    return res.status(200).json({
+      message: "Kategori ve bağlı alt kategoriler başarıyla silindi",
+    });
   } catch (err) {
-    console.error(err);
+    console.error("Silme sırasında hata:", err);
     return res.status(500).json({ message: "Sunucu hatası" });
   }
 });
