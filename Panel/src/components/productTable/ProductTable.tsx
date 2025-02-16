@@ -163,14 +163,14 @@ export default function ProductTable() {
                     }}
                   />
                 </TableCell>
-                <TableCell>{product.name}</TableCell>
-                <TableCell>{product.brand}</TableCell>
-                <TableCell>{product.category.name}</TableCell>
-                <TableCell>{`$${product.price.toFixed(2)}`}</TableCell>
-                <TableCell>{product.stock}</TableCell>
+                <TableCell>{product?.name}</TableCell>
+                <TableCell>{product?.brand}</TableCell>
+                <TableCell>{product?.category?.name}</TableCell>
+                <TableCell>{`$${product?.price.toFixed(2)}`}</TableCell>
+                <TableCell>{product?.stock}</TableCell>
                 <TableCell>
                   {product.discount
-                    ? `$${product.discount.toFixed(2)}`
+                    ? `$${product?.discount.toFixed(2)}`
                     : "No Discount"}
                 </TableCell>
                 <TableCell align="right">

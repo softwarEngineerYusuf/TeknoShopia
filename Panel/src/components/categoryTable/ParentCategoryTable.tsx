@@ -10,17 +10,17 @@ import {
   Paper,
   TableHead,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
+
 import {
   deleteMainCategory,
   getAllMainCategories,
-} from "../../allAPIs/CategoryApi"; // API fonksiyonunu ve tipleri içe aktar
+} from "../../allAPIs/CategoryApi";
 import { Category } from "../../types/ParentCategory";
 import ParentCategoryAddDialog from "./ParentCategoryAddDialog";
 import ParentCategoryDeleteDialog from "./ParentCategoryDeleteDialog";
 import EditIcon from "@mui/icons-material/Edit";
 import { toast } from "react-toastify";
-
+import DeleteIcon from "@mui/icons-material/Delete";
 const ParentCategoryTable = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
