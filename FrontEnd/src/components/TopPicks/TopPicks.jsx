@@ -19,7 +19,7 @@ const TopPicks = () => {
 
       <div className="row mt-3">
         {[...Array(4)].map((_, index) => (
-          <div key={index} className="col-lg-3 col-md-6 col-sm-12 mb-4">
+          <div key={index} className="col-6 col-sm-6 col-md-6 col-lg-3 mb-4">
             <Card
               hoverable
               cover={<img alt="Product" src={imageURL} />}
@@ -36,7 +36,7 @@ const TopPicks = () => {
                           <StarFilled key={i} />
                         ))}
                       </div>
-                      <div className="price d-flex align-items-center ">
+                      <div className="price d-flex align-items-center">
                         <span style={{ fontWeight: "bold", fontSize: "18px" }}>
                           599.00 TL
                         </span>
