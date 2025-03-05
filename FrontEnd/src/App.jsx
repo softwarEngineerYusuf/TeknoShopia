@@ -35,6 +35,7 @@ function App() {
         <Route path="/basket" element={<Basket />} />
         <Route path="/productDetail" element={<ProductDetail />} />
         <Route path="/compare" element={<Compare />} />
+
       </Routes>
     </Router>
   );

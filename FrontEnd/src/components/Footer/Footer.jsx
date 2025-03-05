@@ -30,6 +30,7 @@ const Footer = () => {
           </ul>
         </nav>
       </div>
+      
       <div className="footer-content">
         <div className="footer-section">
           <h3>TeknoShopia</h3>

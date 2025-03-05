@@ -1,8 +1,15 @@
 /* Ana Konteyner */
+.product-detail-main-container{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-right: 15%;
+  margin-left: 15%;
+}
+
 .product-detail-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
     font-family: Arial, sans-serif;
   }
   
@@ -89,3 +96,49 @@
     border-color: #ddd;
   }
   
+.underProductDetail{
+display: flex;
+align-items: center;
+justify-content: center;
+flex-direction: column;
+margin-top: 2vh;
+}
+
+.product-detail-rating{
+  display: flex;
+  margin-top: 1vh;
+width: 100%;
+justify-content:space-evenly;
+}
+.product-detail-price{
+  display: flex;
+  margin-top: 1vh;
+  font-size:x-large;
+  font-weight: bold;
+}
+
+.product-detail-addToCart-button{
+  display: flex;
+  margin-top: 1vh;
+  justify-content: center;
+}
+
+.product-detail-addToCart-button button{
+  padding: 5px 30px;
+  border-radius: 30px;
+}
+
+.product-detail-info {
+  padding: 5vh 12vh;
+  width: 100%;
+}
+
+.product-detail-info table tbody tr td {
+  background-color: #f0f0f0; 
+}
+
+@media (max-width: 768px) {
+  .product-detail-main-container {
+    flex-direction: column;
+  }
+}

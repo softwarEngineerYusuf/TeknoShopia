@@ -6,10 +6,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0px 2px;
+    padding: 0% 1%;
     height: 30px;
-    margin-left: 40px;
-    margin-right: 40px;
+    margin-left: 5%;
+    margin-right: 5%;
     margin-bottom: 2vh;
 }
 
