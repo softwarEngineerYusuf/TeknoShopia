@@ -3,6 +3,11 @@
   justify-content: space-between;
   margin-top: 2vh;
 }
+.container {
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+}
+
 .TopPicksText {
   font-family: "Georgia", Times, serif;
   font-size: 30px;

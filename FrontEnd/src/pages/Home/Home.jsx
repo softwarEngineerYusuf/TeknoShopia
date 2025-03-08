@@ -28,12 +28,12 @@ function Home() {
           <AdCarousel images={images} />
         </div>
 
-        <div className="TopPicksOnHomePage container">
+        <div className="container TopPicksOnHomePage ">
           <TopPicks />
         </div>
 
         {/* Discounts Slider */}
-        <div className="DiscountsTextOnHomePage container">
+        <div className="container DiscountsTextOnHomePage ">
           <p>Discounts</p>
         </div>
         <DiscountsCarousel />
