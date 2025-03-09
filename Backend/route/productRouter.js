@@ -249,14 +249,24 @@ router.put("/updateProduct/:id", async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    res
-      .status(200)
-      .json({
-        message: "Ürün başarıyla güncellendi.",
-        product: updatedProduct,
-      });
+    res.status(200).json({
+      message: "Ürün başarıyla güncellendi.",
+      product: updatedProduct,
+    });
   } catch (error) {
     console.error("Error updating product:", error);
+    res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
+  }
+});
+
+router.get("/getDiscountedProducts", async (req, res) => {
+  try {
+    const discountedProducts = await Product.find({ discount: { $gt: 0 } })
+      .populate("brand")
+      .populate("category");
+
+    res.status(200).json(discountedProducts);
+  } catch (error) {
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
   }
 });

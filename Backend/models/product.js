@@ -29,7 +29,7 @@ const productSchema = new Schema(
     discountEndDate: { type: Date },
     attributes: { type: Map, of: String },
   },
-  { timestamps: true }
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } } // 🔥 Virtual'leri JSON çıktısına ekler
 );
 
 productSchema.virtual("discountedPrice").get(function () {

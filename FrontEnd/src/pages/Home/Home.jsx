@@ -28,7 +28,7 @@ function Home() {
           <AdCarousel images={images} />
         </div>
 
-        <div className="container TopPicksOnHomePage ">
+        <div className=" TopPicksOnHomePage ">
           <TopPicks />
         </div>
 
