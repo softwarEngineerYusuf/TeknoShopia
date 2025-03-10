@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import StarIcon from "@mui/icons-material/Star";
+import "./DiscountsCorousel.css"; // Add a new CSS file for styling
 
 function DiscountsCarousel() {
   const cardsData = [
@@ -117,26 +119,19 @@ function DiscountsCarousel() {
                     key={card.id}
                     className="col-12 col-sm-6 col-md-6 col-lg-3"
                   >
-                    <div className="card" style={{ width: "100%" }}>
+                    <div className="card-discount-corousel container">
                       <img
                         src={card.imgSrc}
-                        className="card-img-top"
                         alt={card.title}
+                        className="card-image-discount-corousel"
                       />
-                      <div className="card-body">
-                        <p className="card-text">{card.title}</p>
-                        <div className="pricesOnDiscountsList">
-                          <div className="canceledPriceOnDiscound">
-                            <p style={{ textDecoration: "line-through" }}>
-                              {card.price}
-                            </p>
-                          </div>
-                          <div className="lastPriceOnDiscound">
-                            <p style={{ color: "red", fontWeight: "bold" }}>
-                              {card.discountedPrice}
-                            </p>
-                          </div>
+                      <div className="card-details-discount-corousel">
+                        <p className="product-name-discount-corousel">{card.title}</p>
+                        <div className="d-flex justify-content-between" style={{ padding: "0rem 1rem" }}>
+                          <StarIcon />
+                          <p className="product-price-discount-corousel">{card.discountedPrice}</p>
                         </div>
+                        <button className="buy-button-discount-corousel">Satın Al</button>
                       </div>
                     </div>
                   </div>

@@ -1,16 +1,17 @@
-.top-picks-and-button {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 2vh;
-}
+
 .container {
   max-width: 1200px !important;
   margin: 0 auto !important;
 }
 
-.TopPicksText {
-  font-family: "Georgia", Times, serif;
-  font-size: 30px;
+.top-picks-title{
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.top-picks-and-button{
+  margin-top: 2rem;
+  margin-bottom: 1rem;
 }
 
 .buttonShowMore {
@@ -21,11 +22,10 @@
   border: 1px solid rgba(0, 0, 0, 0.24);
   text-align: center;
   font-size: 20px;
-  padding: 6px 6px;
-  width: 200px;
+  padding: 4px;
+  width: 140px;
   transition: all 0.5s;
   cursor: pointer;
-  margin: 0px 0px 10px 0px;
 }
 
 .buttonShowMore span {
@@ -51,4 +51,63 @@
 .buttonShowMore:hover span:after {
   opacity: 1;
   right: 0;
+}
+
+.card-top-picks {
+  width: 250px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+
+.card-image-top-picks {
+  width: 100%;
+  height: auto;
+}
+
+.card-details-top-picks {
+  padding: 10px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.product-name-top-picks {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.product-price-top-picks {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.buy-button-top-picks {
+  background-color:black;
+  color: white;
+  border: none;
+  padding: 8px;
+  width: 100%;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius:18px;
+  transition: background-color 0.3s;
+  opacity: 0; /* Başlangıçta gizle */
+  visibility: hidden; 
+  transition: background-color 0.3s, opacity 0.5s ease;
+  
+}
+
+.buy-button-top-picks:hover {
+  background-color: black;
+ 
+}
+
+.card-top-picks:hover .buy-button-top-picks {
+  opacity: 1; /* Hover durumunda butonu görünür yap */
+  visibility: visible; /* Hover durumunda butonu görünür yap */
 }
