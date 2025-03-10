@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const { v4: uuidv4 } = require("uuid");
 
 const productSchema = new Schema(
   {
@@ -8,6 +9,7 @@ const productSchema = new Schema(
     category: { type: Schema.Types.ObjectId, ref: "Category", required: true },
     price: { type: Number, required: true },
     stock: { type: Number, required: true },
+    color: { type: String, required: true }, // Renk bilgisi eklendi
     description: { type: String },
     mainImage: { type: String },
     additionalImages: [String],
@@ -28,8 +30,9 @@ const productSchema = new Schema(
     discountStartDate: { type: Date },
     discountEndDate: { type: Date },
     attributes: { type: Map, of: String },
+    groupId: { type: String, required: true }, // Aynı ürün grubunu takip eden ID
   },
-  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } } // 🔥 Virtual'leri JSON çıktısına ekler
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
 productSchema.virtual("discountedPrice").get(function () {
