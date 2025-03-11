@@ -15,36 +15,6 @@
   height: auto;
 }
 
-/* Arama bar'ı stil */
-.navbar-search {
-  position: relative;
-  width: 350px; /* Arama bar'ı uzunluğu */
-  height: 40px; /* Arama bar'ı yüksekliği */
-}
-
-.search-input {
-  width: 100%;
-  height: 100%;
-  padding: 0 20px 0 10px;
-  border: 1px solid #ccc;
-  border-radius: 20px; /* Oval köşeler */
-  font-size: 16px;
-  color: black; /* Yazı rengi siyah */
-  outline: none;
-}
-
-.search-input:focus {
-  border-color: #003da6; /* Focus durumunda renk değişikliği */
-}
-
-.search-icon {
-  position: absolute;
-  top: 50%;
-  right: 10px; /* Sağ tarafta 10px mesafe */
-  transform: translateY(-50%); /* Dikeyde ortalamak için */
-  font-size: 18px;
-  color: #888;
-}
 
 .navbar-buttons {
   display: flex;

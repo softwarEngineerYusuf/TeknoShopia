@@ -1,0 +1,32 @@
+
+.brands-title {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.brands-logos {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.brand-logo {
+  margin: 0 10px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.brand-logo img {
+  max-width: 100px;
+  height: auto;
+}
+
+.brand-logo:hover {
+  transform: scale(1.1);
+}

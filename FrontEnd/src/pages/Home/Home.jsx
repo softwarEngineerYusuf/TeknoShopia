@@ -6,6 +6,7 @@ import DiscountsCarousel from "../../components/DiscountsCorousel/DiscountsCorou
 import Navbar2 from "../../components/Navbar2/Navbar2.jsx";
 import TopPicks from "../../components/TopPicks/TopPicks.jsx";
 import GridCards from "../../components/GridCards/GridCards.jsx";
+import Brands from "../../components/Brands/Brands.jsx";
 
 function Home() {
   const images = [
@@ -40,6 +41,9 @@ function Home() {
       </div>
       <div className="GridCardsOnHomePage">
         <GridCards />
+      </div>
+      <div className="BrandsOnHomePage">
+        <Brands/>
       </div>
     </div>
   );

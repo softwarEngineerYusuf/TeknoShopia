@@ -42,7 +42,11 @@
 }
 
 .GridCardsOnHomePage{
-  margin-top: 5%;
+  margin-top: 4rem;
+}
+
+.BrandsOnHomePage{
+  margin-bottom: 2rem;
 }
 
 /* Ekran boyutuna göre kart genişliğini ayarlama */
