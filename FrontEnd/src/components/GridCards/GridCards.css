@@ -1,0 +1,29 @@
+.grid-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 1000px;
+    margin: auto;
+  }
+  
+  .top-row {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .top-row img {
+    width: 32%;
+    border-radius: 8px;
+  }
+  
+  .bottom-row {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .bottom-row img {
+    width: 48%; 
+    border-radius: 8px;
+  }
+  
+  

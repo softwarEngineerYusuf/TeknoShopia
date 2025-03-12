@@ -21,7 +21,7 @@ const TopPicks = () => {
             <StarIcon />
             <p className="product-price-top-picks">₺1,299.00</p>
           </div>
-          <button className="buy-button-top-picks">Satın Al</button>
+          <button className="buy-button-top-picks">İncele</button>
         </div>
       </div>
     </div>

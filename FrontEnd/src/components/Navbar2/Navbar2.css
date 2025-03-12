@@ -1,20 +1,59 @@
-.Navbar2All{
-
+.Navbar2All {
+  background-color: #f8f9fa;
+  padding: 10px 0;
 }
 
-.Navbar2Links{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0% 1%;
-    height: 30px;
-    margin-left: 5%;
-    margin-right: 5%;
-    margin-bottom: 2vh;
+.Navbar2Links {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 4%;
+  height: 40px;
+  position: relative;
 }
 
-.Navbar2Links a{
-    text-decoration: none;
-    font-size: 17px;
-    font-family: "Georgia", Times, serif;
+.category {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.Navbar2Links a {
+  text-decoration: none;
+  font-size: 17px;
+  font-family: "Georgia", Times, serif;
+  color: black;
+  padding: 5px 10px;
+  transition: 0.3s;
+}
+
+.Navbar2Links a.active, .Navbar2Links a:hover {
+  text-decoration: underline;
+}
+
+.subcategories {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0;
+  z-index: 10;
+}
+
+.subcategories a {
+  padding: 5px 10px;
+  color: black;
+  text-decoration: none;
+  display: block;
+  transition: 0.3s;
+}
+
+.subcategories a:hover {
+  background-color: #f1f1f1;
 }
