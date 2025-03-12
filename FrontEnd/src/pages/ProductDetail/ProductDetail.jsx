@@ -26,6 +26,8 @@ function ProductDetail() {
     <div className="product-detail-main-container">
       <div className="product-detail-container">
         {/* Büyük Görsel ve Kaydırma Butonları */}
+        
+        <div className="product-detail-image-container">
         <div className="product-main-image-container">
           <button
             onClick={handlePrevImage}
@@ -61,15 +63,13 @@ function ProductDetail() {
           ))}
         </div>
 
+        </div>
+
         <div className="underProductDetail">
-          <h1 style={{ fontSize: "22px" }}>MSI hg3hj-a</h1>
+          <h1 style={{ fontSize: "22px" }}>MSI hg3hj-a 16GB ram - i7 12000H - RTX 3090</h1>
           <div className="product-detail-rating">
             <div className="product-detail-rating-stars">
-              <StarIcon style={{ color: "yellow" }} />
-              <StarIcon style={{ color: "yellow" }} />
-              <StarIcon style={{ color: "yellow" }} />
-              <StarIcon style={{ color: "yellow" }} />
-              <StarIcon style={{ color: "yellow" }} />
+              <StarIcon/>
             </div>
             <a style={{textDecoration:'underline',color:'darkblue'}} href="">Comments </a>
           </div>
@@ -93,52 +93,6 @@ function ProductDetail() {
         </div>
       </div>
 
-      <div className="product-detail-info">
-        <table className="table table-bordered">
-          <tbody>
-            <tr>
-              <td>özellik</td>
-              <td>Değer</td>
-            </tr>
-            <tr>
-              <td>özellik</td>
-              <td>Değer</td>
-            </tr>
-            <tr>
-              <td>özellik</td>
-              <td>Değer</td>
-            </tr>
-            <tr>
-              <td>özellik</td>
-              <td>Değer</td>
-            </tr>
-            <tr>
-              <td>özellik</td>
-              <td>Değer</td>
-            </tr>
-            <tr>
-              <td>özellik</td>
-              <td>Değer</td>
-            </tr>
-            <tr>
-              <td>özellik</td>
-              <td>Değer</td>
-            </tr>
-            <tr>
-              <td>özellik</td>
-              <td>Değer</td>
-            </tr>
-            <tr>
-              <td>özellik</td>
-              <td>Değer</td>
-            </tr>
-            <tr>
-              <td>özellik</td>
-              <td>Değer</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 }

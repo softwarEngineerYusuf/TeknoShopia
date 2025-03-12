@@ -1,16 +1,21 @@
 /* Ana Konteyner */
 .product-detail-main-container{
+  border: 1px solid green;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  margin-right: 15%;
-  margin-left: 15%;
 }
 
 .product-detail-container {
+  border: 1px solid red;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: space-between;
     font-family: Arial, sans-serif;
+  }
+
+  .product-detail-image-container{
+    border: 1px solid blue;
   }
   
   /* Büyük Görsel ve Kaydırma */
@@ -20,7 +25,7 @@
     justify-content: center;
     position: relative;
     width: 420px;
-    margin: 20px 0;
+    margin: 2rem 0;
   }
   
   .product-main-image {
@@ -97,6 +102,7 @@
   }
   
 .underProductDetail{
+  border: 1px solid black;
 display: flex;
 align-items: center;
 justify-content: center;
@@ -104,12 +110,6 @@ flex-direction: column;
 margin-top: 2vh;
 }
 
-.product-detail-rating{
-  display: flex;
-  margin-top: 1vh;
-width: 100%;
-justify-content:space-evenly;
-}
 .product-detail-price{
   display: flex;
   margin-top: 1vh;
@@ -126,15 +126,6 @@ justify-content:space-evenly;
 .product-detail-addToCart-button button{
   padding: 5px 30px;
   border-radius: 30px;
-}
-
-.product-detail-info {
-  padding: 5vh 12vh;
-  width: 100%;
-}
-
-.product-detail-info table tbody tr td {
-  background-color: #f0f0f0; 
 }
 
 @media (max-width: 768px) {
