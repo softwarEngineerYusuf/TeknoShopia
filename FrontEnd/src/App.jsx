@@ -13,6 +13,7 @@ import Basket from "./pages/Basket/Basket";
 import ProductDetail from "./pages/ProductDetail/ProductDetail";
 import Footer from "./components/Footer/Footer";
 import Compare from "./pages/Compare/Compare";
+import Category from "./pages/Category/Category";
 
 function Layout() {
   return (
@@ -35,6 +36,7 @@ function App() {
         <Route path="/basket" element={<Basket />} />
         <Route path="/productDetail" element={<ProductDetail />} />
         <Route path="/compare" element={<Compare />} />
+        <Route path="/category" element={<Category/>} />
 
       </Routes>
     </Router>

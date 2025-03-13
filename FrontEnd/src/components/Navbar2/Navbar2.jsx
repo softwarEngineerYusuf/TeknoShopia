@@ -29,7 +29,7 @@ function Navbar2() {
             onMouseEnter={() => setActiveCategory(category.name)}
             onMouseLeave={() => setActiveCategory(null)}
           >
-            <a href="#" className={activeCategory === category.name ? "active" : ""}>
+            <a href="/category" className={activeCategory === category.name ? "active" : ""}>
               {category.name}
             </a>
             {activeCategory === category.name && (

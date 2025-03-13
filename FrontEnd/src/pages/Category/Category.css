@@ -1,0 +1,11 @@
+.subContainer{
+    display: flex;
+}
+
+.categoryFilter{
+width: 25%;
+}
+
+.categoryProducts{
+width: 75%;
+}
