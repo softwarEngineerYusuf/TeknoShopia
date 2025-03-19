@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import "./ProductDetail.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import StarIcon from "@mui/icons-material/Star";
-import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
+import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
+import CompareSection from "../../components/CompareSection/CompareSection.jsx";
 
 function ProductDetail() {
   const images = [
@@ -12,87 +13,82 @@ function ProductDetail() {
     "https://cdn.vatanbilgisayar.com/Upload/PRODUCT/msi/thumb/145795-7_large.jpg",
   ];
 
-  const [currentImage, setCurrentImage] = useState(0); // Şu anda büyük ekranda gösterilen görsel
+  const product = {
+    name: "MSI hg3hj-a 16GB ram - i7 12000H - RTX 3090",
+    price: "19999 TL",
+    image: images[0],
+  };
+
+  const [currentImage, setCurrentImage] = useState(0);
+  const [compareList, setCompareList] = useState([]);
+  const [showCompare, setShowCompare] = useState(false);
 
   const handleNextImage = () => {
-    setCurrentImage((prev) => (prev + 1) % images.length); // Son görselden sonra ilk görsele geçiş
+    setCurrentImage((prev) => (prev + 1) % images.length);
   };
 
   const handlePrevImage = () => {
-    setCurrentImage((prev) => (prev - 1 + images.length) % images.length); // İlk görselden önce son görsele geçiş
+    setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const handleCompare = () => {
+    if (!compareList.find((item) => item.name === product.name)) {
+      setCompareList([product, ...compareList]);
+    }
+    setShowCompare(true);
   };
 
   return (
     <div className="product-detail-main-container">
       <div className="product-detail-container">
-        {/* Büyük Görsel ve Kaydırma Butonları */}
-        
+        {/* Ürün Resimleri */}
         <div className="product-detail-image-container">
-        <div className="product-main-image-container">
-          <button
-            onClick={handlePrevImage}
-            className="product-main-slider-button"
-          >
-            {"<"}
-          </button>
-          <img
-            src={images[currentImage]}
-            alt="Product"
-            className="product-main-image"
-          />
-          <button
-            onClick={handleNextImage}
-            className="product-main-slider-button"
-          >
-            {">"}
-          </button>
+          <div className="product-main-image-container">
+            <button onClick={handlePrevImage} className="product-main-slider-button">{"<"}</button>
+            <img src={images[currentImage]} alt="Product" className="product-main-image" />
+            <button onClick={handleNextImage} className="product-main-slider-button">{">"}</button>
+          </div>
+          <div className="product-preview-slider">
+            {images.map((img, index) => (
+              <img
+                key={index}
+                src={img}
+                alt="Thumbnail"
+                className={`product-thumbnail ${currentImage === index ? "product-thumbnail-active" : ""}`}
+                onClick={() => setCurrentImage(index)}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* Küçük Önizleme Görselleri */}
-        <div className="product-preview-slider">
-          {images.map((img, index) => (
-            <img
-              key={index}
-              src={img}
-              alt="Thumbnail"
-              className={`product-thumbnail ${
-                currentImage === index ? "product-thumbnail-active" : ""
-              }`}
-              onClick={() => setCurrentImage(index)} // Tıklanan küçük görsel büyük resim olur
-            />
-          ))}
-        </div>
-
-        </div>
-
+        {/* Ürün Bilgileri */}
         <div className="underProductDetail">
-          <h1 style={{ fontSize: "22px" }}>MSI hg3hj-a 16GB ram - i7 12000H - RTX 3090</h1>
+          <h1 style={{ fontSize: "22px" }}>{product.name}</h1>
           <div className="product-detail-rating">
             <div className="product-detail-rating-stars">
-              <StarIcon/>
+              <StarIcon />
             </div>
-            <a style={{textDecoration:'underline',color:'darkblue'}} href="">Comments </a>
+            <a style={{ textDecoration: "underline", color: "darkblue" }} href="">Comments</a>
           </div>
           <div className="product-detail-price">
-            <h1>19999</h1> <h1>TL</h1>
+            <h1>{product.price}</h1>
           </div>
           <div className="product-detail-compare">
-          <a style={{textDecoration:'underline',color:'darkblue'}} href="">Compare  <CompareArrowsIcon style={{}} /></a>
+            <a style={{ textDecoration: "underline", color: "darkblue" }} href="">Compare <CompareArrowsIcon /></a>
           </div>
           <div>
             <div className="product-detail-addToCart-button">
-            <button
-              type="button"
-              style={{ backgroundColor: "green" }}
-              class="btn btn-primary"
-            >
-              + Add to card
-            </button>
+              <button type="button" style={{ backgroundColor: "green" }} className="btn btn-primary">+ Add to cart</button>
+            </div>
+            <div className="product-detail-addToCart-button">
+              <button type="button" style={{ backgroundColor: "green" }} onClick={handleCompare}>Karşılaştır</button>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Karşılaştırma Bölümü - Yatay Scroll */}
+      {showCompare && <CompareSection compareList={compareList} />}
     </div>
   );
 }

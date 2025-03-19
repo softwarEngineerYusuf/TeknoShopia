@@ -1,0 +1,33 @@
+.compare-section {
+    position: fixed;   
+    bottom: 0;         
+    left: 0;           
+    width: 100%;       
+    background: #f9f9f9;
+    border-top: 2px solid #ddd;
+    padding: 10px;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;     /* İçeriklerin üstünde olmasını sağlar */
+  }
+  
+  .compare-items {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;  /* Yatay kaydırmayı etkinleştir */
+    white-space: nowrap;
+    padding: 10px;
+  }
+  
+  .compare-item {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    min-width: 200px; /* Ürün kutularının minimum genişliği */
+    background: white;
+  }
+  
+  .compare-item img {
+    width: 100px;
+    height: auto;
+  }
+  

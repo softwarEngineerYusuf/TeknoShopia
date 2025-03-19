@@ -9,14 +9,14 @@ function Navbar2() {
     { name: "TV", subcategories: ["Samsung", "Philips", "Vestel", "LG", "Grundig", "Toshiba", "Sunny", "Beko"] },
     { name: "Telephone", subcategories: ["Apple", "Samsung", "Huawei", "Xiaomi", "Oppo", "General Mobile"] },
     { name: "Computer", subcategories: ["Apple",  "Samsung", "Monster", "Huawei", "Lenovo", "Asus","Casper"] },
-    { name: "Smart Watch", subcategories: ["Apple", "Samsung", "Huawei"] },
+    { name: "Smart Watch", subcategories: ["Apple", "Samsung", "Huawei", "Xiaomi"] },
     { name: "Camera", subcategories: ["Canon", "Nikon", "Sony", "Everest", "Insta360"] },
     { name: "Speaker", subcategories: ["JBL", "Marshall", "Logitech","Apple", "Anker"] },
     { name: "Printer", subcategories: ["Asus", "Canon", "Epson", "HP"] },
     { name: "Game Console", subcategories: ["Sony", "Microsoft", "Nintendo", "Razer"] },
-    { name: "Game Chair", subcategories: ["Cougar", "Power Boost", "Rampage", "Razer"] },
+    { name: "Vacuum Cleaner", subcategories: ["Dyson", "Bosch", "Roborock", "Philips", "Xiaomi", "Fakir", "Shark"] },
     { name: "Earphones", subcategories: ["Apple", "Samsung", "Steelseries", "Logitech", "Oppo", "Marshall"] },
-    { name: "Bluetooth Headset", subcategories: ["JBL", "Beats", "Apple", "Huawei"] },
+    { name: "Coffee Machine", subcategories: ["Philips", "Arzum", "Nespresso", "Siemens", "Grundig", "Fakir"] },
   ];
 
   return (
