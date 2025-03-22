@@ -1,32 +1,77 @@
-
-.brands-title {
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 1rem;
+.brand-carousel-container {
+  width: 100%;
+  padding: 2rem 0;
+  background-color: #f8f9fa;
+  overflow: hidden;
 }
 
-.brands-logos {
+.brand-carousel-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  color: #333;
+}
+
+.brand-carousel-track {
   display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
+  width: calc(200px * 16); /* Double the items to create infinite loop effect */
+  animation: scroll 30s linear infinite;
+}
+
+.brand-carousel-item {
+  width: 150px;
+  height: 150px;
+  margin: 0 25px;
+  flex-shrink: 0;
 }
 
 .brand-logo {
-  margin: 0 10px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: contain;
+  padding: 20px;
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
-  cursor: pointer;
-}
-
-.brand-logo img {
-  max-width: 100px;
-  height: auto;
 }
 
 .brand-logo:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-200px * 8)); /* Hız*/
+  }
+}
+
+/* markaya geldiğimizde duruyor istersek kaldırırız */
+.brand-carousel-track:hover {
+  animation-play-state: paused;
+}
+
+@media (max-width: 768px) {
+  .brand-carousel-item {
+    width: 100px;
+    height: 100px;
+    margin: 0 15px;
+  }
+
+  .brand-carousel-track {
+    width: calc(150px * 16);
+  }
+  
+  @keyframes scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(calc(-150px * 8));
+    }
+  }
 }

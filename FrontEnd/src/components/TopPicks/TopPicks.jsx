@@ -1,15 +1,38 @@
+import React, { useState } from 'react';
 import StarIcon from "@mui/icons-material/Star";
 import "./TopPicks.css"; // Stil dosyanı korudum.
 import "bootstrap/dist/css/bootstrap.min.css";
+import { HeartOutlined, HeartFilled } from '@ant-design/icons';
 
 const TopPicks = () => {
+  const [favorites, setFavorites] = useState(Array(12).fill(false));
+
+  const toggleFavorite = (index) => {
+    setFavorites((prevFavorites) => {
+      const newFavorites = [...prevFavorites];
+      newFavorites[index] = !newFavorites[index];
+      return newFavorites;
+    });
+  };
+
   const imageURL =
     "https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/129743-1_large.jpg";
 
   const cards = Array.from({ length: 12 }, (_, index) => (
-   
-   <div key={index} className="col-md-3 mb-4">
+    <div key={index} className="col-md-3 mb-4">
       <div className="card-top-picks container">
+        {/* Favori butonu */}
+        <button 
+          className="favorite-button"
+          onClick={() => toggleFavorite(index)}
+        >
+          {favorites[index] ? (
+            <HeartFilled style={{ fontSize: '24px', color: 'red' }} />
+          ) : (
+            <HeartOutlined style={{ fontSize: '24px' }} />
+          )}
+        </button>
+        
         <img
           src={imageURL}
           alt="Product"

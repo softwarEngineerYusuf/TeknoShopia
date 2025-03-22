@@ -1,94 +1,129 @@
-import React, { useState } from "react";
-import "./ProductDetail.css";
-import "bootstrap/dist/css/bootstrap.min.css";
-import StarIcon from "@mui/icons-material/Star";
-import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
-import CompareSection from "../../components/CompareSection/CompareSection.jsx";
+import { useState } from 'react';
+import { Card, Row, Col, Button, Rate, Table, Image, Typography } from 'antd';
+import { LeftOutlined, RightOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import './ProductDetail.css';
+
+const { Title, Text } = Typography;
 
 function ProductDetail() {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
   const images = [
-    "https://cdn.vatanbilgisayar.com/Upload/PRODUCT/msi/thumb/145795-5_large.jpg",
-    "https://cdn.vatanbilgisayar.com/Upload/PRODUCT/msi/thumb/145795-2_large.jpg",
-    "https://cdn.vatanbilgisayar.com/Upload/PRODUCT/msi/thumb/145795-6_large.jpg",
-    "https://cdn.vatanbilgisayar.com/Upload/PRODUCT/msi/thumb/145795-7_large.jpg",
+    'https://cdn.vatanbilgisayar.com/Upload/PRODUCT/philips/thumb/145094-1-3_large.jpg',
+    'https://cdn.vatanbilgisayar.com/Upload/PRODUCT/philips/thumb/145094-3-3_large.jpg',
+    'https://cdn.vatanbilgisayar.com/Upload/PRODUCT/philips/thumb/145094-1-3_large.jpg'
   ];
 
-  const product = {
-    name: "MSI hg3hj-a 16GB ram - i7 12000H - RTX 3090",
-    price: "19999 TL",
-    image: images[0],
-  };
+  const specifications = [
+    { key: 'Ekran Boyutu', value: '50 inch' },
+    { key: 'Çözünürlük (Piksel)', value: '3840 x 2160' },
+    { key: 'Çözünürlük', value: '4K Ultra HD' },
+    { key: 'Ekran Boyu (cm)', value: '139 cm' },
+    { key: 'Yenileme Hızı', value: '60 Hz' }
+  ];
 
-  const [currentImage, setCurrentImage] = useState(0);
-  const [compareList, setCompareList] = useState([]);
-  const [showCompare, setShowCompare] = useState(false);
-
-  const handleNextImage = () => {
-    setCurrentImage((prev) => (prev + 1) % images.length);
-  };
-
-  const handlePrevImage = () => {
-    setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
-  };
-
-  const handleCompare = () => {
-    if (!compareList.find((item) => item.name === product.name)) {
-      setCompareList([product, ...compareList]);
+  const columns = [
+    {
+      title: 'Özellik',
+      dataIndex: 'key',
+      key: 'key',
+    },
+    {
+      title: 'Değer',
+      dataIndex: 'value',
+      key: 'value',
     }
-    setShowCompare(true);
+  ];
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
   return (
-    <div className="product-detail-main-container">
-      <div className="product-detail-container">
-        {/* Ürün Resimleri */}
-        <div className="product-detail-image-container">
-          <div className="product-main-image-container">
-            <button onClick={handlePrevImage} className="product-main-slider-button">{"<"}</button>
-            <img src={images[currentImage]} alt="Product" className="product-main-image" />
-            <button onClick={handleNextImage} className="product-main-slider-button">{">"}</button>
-          </div>
-          <div className="product-preview-slider">
+    <div className="container">
+      <Row gutter={[24, 24]}>
+        <Col xs={24} md={12}>
+        <div style={{ position: 'relative', width: '90%', margin: '0 auto' }}>
+  <Button 
+    icon={<LeftOutlined />} 
+    style={{ 
+      position: 'absolute',
+      left: 10,
+      top: '50%',
+      transform: 'translateY(-50%)',
+      zIndex: 1,
+      backgroundColor: 'rgba(255,255,255,0.8)'
+    }}
+    onClick={prevImage}
+  />
+  <Image
+    src={images[currentImageIndex]}
+    alt="LG TV"
+    style={{ width: '100%', position: 'relative' }}
+  />
+  <Button 
+    icon={<RightOutlined />} 
+    style={{ 
+      position: 'absolute',
+      right: 10,
+      top: '50%',
+      transform: 'translateY(-50%)',
+      zIndex: 1,
+      backgroundColor: 'rgba(255,255,255,0.8)'
+    }}
+    onClick={nextImage}
+  />
+</div>
+          <Row gutter={[8, 8]} style={{ marginTop: 16, width: '80%', margin: '0 auto' }}> 
             {images.map((img, index) => (
-              <img
-                key={index}
-                src={img}
-                alt="Thumbnail"
-                className={`product-thumbnail ${currentImage === index ? "product-thumbnail-active" : ""}`}
-                onClick={() => setCurrentImage(index)}
-              />
+              <Col span={8} key={index}>
+                <Image
+                  src={img}
+                  alt={`Thumbnail ${index + 1}`}
+                  style={{ width: '100%', cursor: 'pointer' }}
+                  onClick={() => setCurrentImageIndex(index)}
+                />
+              </Col>
             ))}
-          </div>
-        </div>
+          </Row>
+        </Col>
+        
+        <Col xs={24} md={12}>
+          <Card>
+            <Title level={2}>LG 50UQ75 50inc</Title>
+            <Rate disabled defaultValue={4} />
+            <Text> (Yorumlar)</Text>
+            
+            <div style={{ margin: '24px 0' }}>
+              <Title level={3}>19.999TL</Title>
+              <Text type="secondary">Karşılaştır</Text>
+            </div>
 
-        {/* Ürün Bilgileri */}
-        <div className="underProductDetail">
-          <h1 style={{ fontSize: "22px" }}>{product.name}</h1>
-          <div className="product-detail-rating">
-            <div className="product-detail-rating-stars">
-              <StarIcon />
-            </div>
-            <a style={{ textDecoration: "underline", color: "darkblue" }} href="">Comments</a>
-          </div>
-          <div className="product-detail-price">
-            <h1>{product.price}</h1>
-          </div>
-          <div className="product-detail-compare">
-            <a style={{ textDecoration: "underline", color: "darkblue" }} href="">Compare <CompareArrowsIcon /></a>
-          </div>
-          <div>
-            <div className="product-detail-addToCart-button">
-              <button type="button" style={{ backgroundColor: "green" }} className="btn btn-primary">+ Add to cart</button>
-            </div>
-            <div className="product-detail-addToCart-button">
-              <button type="button" style={{ backgroundColor: "green" }} onClick={handleCompare}>Karşılaştır</button>
-            </div>
-          </div>
-        </div>
-      </div>
+            <Button 
+              type="primary" 
+              icon={<ShoppingCartOutlined />} 
+              size="large"
+              style={{ backgroundColor: '#32174D', width: '100%' }}
+            >
+              Sepete Ekle
+            </Button>
 
-      {/* Karşılaştırma Bölümü - Yatay Scroll */}
-      {showCompare && <CompareSection compareList={compareList} />}
+            <div style={{ marginTop: 24 }}>
+              <Title level={4}>Teknik Özellikler</Title>
+              <Table 
+                dataSource={specifications} 
+                columns={columns} 
+                pagination={false}
+                size="small"
+              />
+            </div>
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 }
