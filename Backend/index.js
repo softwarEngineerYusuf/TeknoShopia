@@ -3,8 +3,8 @@ const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const dbConnect = require("./dbConnect/db.js");
 const routes = require("./route/routes.js");
-const session = require("express-session"); // Eklediğimiz paket
-const passport = require("passport"); // Eklediğimiz paket
+const session = require("express-session");
+const passport = require("passport");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
@@ -12,34 +12,31 @@ dotenv.config();
 
 const app = express();
 
+// CORS'u tamamen açık hale getir
 app.use(
   cors({
-    origin: function (origin, callback) {
-      const allowedOrigins = ["http://localhost:5173"];
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
+    origin: (origin, callback) => {
+      callback(null, origin || "*"); // Tüm kaynaklara izin ver
     },
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
+    credentials: true, // Çerezleri destekle
   })
 );
-app.use(bodyParser.json());
 
+app.use(bodyParser.json());
 app.use(cookieParser());
+
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "your_session_secret", // Session secret
+    secret: process.env.SESSION_SECRET || "your_session_secret",
     resave: false,
     saveUninitialized: true,
   })
 );
 
-app.use(passport.initialize()); // Passport'u başlat
-app.use(passport.session()); // Oturum yönetimi için passport'u kullan
+app.use(passport.initialize());
+app.use(passport.session());
 app.use("/", routes);
 
 app.listen(process.env.PORT || 5000, () => {
