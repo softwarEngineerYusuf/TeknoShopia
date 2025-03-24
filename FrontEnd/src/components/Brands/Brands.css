@@ -1,6 +1,7 @@
 .brand-carousel-container {
   width: 100%;
-  padding: 2rem 0;
+  margin-top: 3rem;
+  padding-bottom: 3rem;
   background-color: #f8f9fa;
   overflow: hidden;
 }

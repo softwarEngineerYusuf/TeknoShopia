@@ -5,17 +5,25 @@
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
+  position: relative; /* Add position relative for favorite button */
 }
 
 .card-image-discount-corousel {
   width: 100%;
   height: auto;
+  min-height: 300px;
 }
 
 .card-details-discount-corousel {
   padding: 10px;
   text-align: center;
   margin-top: 10px;
+}
+
+.rating-discount-corousel{
+  display: flex;
+  justify-content: center;
+  font-size: large;
 }
 
 .product-name-discount-corousel {
@@ -25,7 +33,7 @@
 }
 
 .product-price-discount-corousel {
-  font-size: 14px;
+  font-size: 18px;
   color: #333;
   margin-bottom: 20px;
 }
@@ -52,4 +60,26 @@
 .card-discount-corousel:hover .buy-button-discount-corousel {
   opacity: 1; /* Hover durumunda butonu görünür yap */
   visibility: visible; /* Hover durumunda butonu görünür yap */
+}
+
+.favorite-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.favorite-button:hover {
+  transform: scale(1.1);
+  background: #ffe5e5;
 }

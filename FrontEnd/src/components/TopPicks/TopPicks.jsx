@@ -41,7 +41,10 @@ const TopPicks = () => {
         <div className="card-details-top-picks">
           <p className="product-name-top-picks">iPhone 13 128 Gb Siyah</p>
           <div className="d-flex justify-content-between" style={{ padding: "0rem 1rem" }}>
-            <StarIcon />
+          <div className="rating-discount-corousel">
+                            <StarIcon /> 
+                          <p>4.8</p>
+                          </div>
             <p className="product-price-top-picks">₺1,299.00</p>
           </div>
           <button className="buy-button-top-picks">İncele</button>

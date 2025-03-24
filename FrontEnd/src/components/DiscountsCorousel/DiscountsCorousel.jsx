@@ -2,16 +2,19 @@ import { useState, useEffect } from "react";
 import { getDiscountedProducts } from "../../allAPIs/product"; // API fonksiyonunu ekledik
 import "bootstrap/dist/css/bootstrap.min.css";
 import StarIcon from "@mui/icons-material/Star";
+import { HeartOutlined, HeartFilled } from "@ant-design/icons"; // Import heart icons
 import "./DiscountsCorousel.css";
 
 function DiscountsCarousel() {
   const [products, setProducts] = useState([]);
   const [itemsPerSlide, setItemsPerSlide] = useState(4);
+  const [favorites, setFavorites] = useState([]);
 
   useEffect(() => {
     const fetchDiscountedProducts = async () => {
       const data = await getDiscountedProducts();
       setProducts(data);
+      setFavorites(Array(data.length).fill(false)); // Initialize favorites state
     };
 
     fetchDiscountedProducts();
@@ -40,6 +43,14 @@ function DiscountsCarousel() {
     }, []);
   };
 
+  const toggleFavorite = (index) => {
+    setFavorites((prevFavorites) => {
+      const newFavorites = [...prevFavorites];
+      newFavorites[index] = !newFavorites[index];
+      return newFavorites;
+    });
+  };
+
   const groupedCards = chunkArray(products, itemsPerSlide);
 
   return (
@@ -56,12 +67,24 @@ function DiscountsCarousel() {
           >
             <div className="container">
               <div className="row">
-                {group.map((product) => (
+                {group.map((product, productIndex) => (
                   <div
                     key={product._id}
                     className="col-12 col-sm-6 col-md-6 col-lg-3"
                   >
                     <div className="card-discount-corousel container">
+                      <button
+                        className="favorite-button"
+                        onClick={() => toggleFavorite(productIndex)}
+                      >
+                        {favorites[productIndex] ? (
+                          <HeartFilled
+                            style={{ fontSize: "24px", color: "red" }}
+                          />
+                        ) : (
+                          <HeartOutlined style={{ fontSize: "24px" }} />
+                        )}
+                      </button>
                       <img
                         src={product.mainImage}
                         alt={product.title}
@@ -75,10 +98,18 @@ function DiscountsCarousel() {
                           className="d-flex justify-content-between"
                           style={{ padding: "0rem 1rem" }}
                         >
-                          <StarIcon />
-                          <p className="product-price-discount-corousel">
-                            {product.discountedPrice}₺
-                          </p>
+                          <div className="rating-discount-corousel">
+                            <StarIcon />
+                            <p>4.8</p>
+                          </div>
+                          <div>
+                            <p style={{ color: "red" }}>
+                              <del>1800₺</del>
+                            </p>
+                            <p className="product-price-discount-corousel">
+                              {product.discountedPrice}₺
+                            </p>
+                          </div>
                         </div>
                         <button className="buy-button-discount-corousel">
                           Satın Al
