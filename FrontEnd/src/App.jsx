@@ -30,11 +30,12 @@ function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/Home" element={<Home />} />
+          <Route path="/productDetail" element={<ProductDetail />} />
         </Route>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/basket" element={<Basket />} />
-        <Route path="/productDetail" element={<ProductDetail />} />
+        
         <Route path="/compare" element={<Compare />} />
         <Route path="/category" element={<Category/>} />
 
