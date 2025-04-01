@@ -1,5 +1,5 @@
 import { FaShoppingCart, FaUser, FaSearch } from "react-icons/fa";
-import { Link } from "react-router-dom"; // Link'i içe aktar
+import { Link } from "react-router-dom"; 
 import { useNavigate } from "react-router-dom";
 import "../Navbar/Navbar.css";
 import logo from "../../assets/TeknoShopiaLogo.png";
@@ -8,6 +8,9 @@ import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import { useDispatch } from "react-redux";
 import { clearUser } from "../../reduxToolkit/userSlice";
 import { persistor } from "../../reduxToolkit/store";
+import { HeartFilled } from "@ant-design/icons";
+import ViewListIcon from '@mui/icons-material/ViewList';
+
 function Navbar() {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user.user);
@@ -74,16 +77,27 @@ function Navbar() {
         ) : (
           <Link to="/" className="navbar-button">
             <div className="login-container d-flex align-items-center">
-              <FaUser className="icon" />
+              <FaUser className="iconNav" />
               <span>Login</span>
             </div>
           </Link>
         )}
 
         <Link to="/basket" className="navbar-button">
-          <FaShoppingCart className="icon" /> {/* Sepetim ikonu */}
+          <FaShoppingCart className="iconNav" /> 
           Basket
         </Link>
+
+        <Link to="/favorites" className="navbar-button">
+           <HeartFilled className="iconNav"  />
+          Favorites
+        </Link>
+
+        <Link to="/myorders" className="navbar-button">
+           <ViewListIcon className="iconNav"  />
+          My Orders
+        </Link>
+
       </div>
     </nav>
   );

@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import StarIcon from "@mui/icons-material/Star";
-import "./TopPicks.css"; // Stil dosyanı korudum.
+import "./TopPicks.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { HeartOutlined, HeartFilled } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom"; 
+import { Link } from "react-router-dom"; 
 
 const TopPicks = () => {
   const [favorites, setFavorites] = useState(Array(12).fill(false));
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate(); 
 
   const toggleFavorite = (index) => {
     setFavorites((prevFavorites) => {
@@ -58,16 +59,20 @@ const TopPicks = () => {
     <div className="container">
       <div className="top-picks-and-button d-flex justify-content-between align-items-center">
         <h2 className="top-picks-title">Top Picks</h2>
-        <button
+        <Link to="/TopPicksShow" >
+<button
           className="buttonShowMore"
-          onClick={() => navigate("/TopPicksShow")} // Navigate to /top-picks
+          onClick={() => navigate("/TopPicksShow")} 
         >
           <span>Show More</span>
         </button>
+        </Link>
       </div>
       <div className="row">{cards}</div>
     </div>
   );
 };
+
+
 
 export default TopPicks;

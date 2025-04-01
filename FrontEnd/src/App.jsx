@@ -15,6 +15,8 @@ import Footer from "./components/Footer/Footer";
 import Compare from "./pages/Compare/Compare";
 import Category from "./pages/Category/Category";
 import TopPicksShow from "./components/TopPicksShowMore/TopPicksShowMore";
+import Favorites from "./components/Favorites/Favorites";
+import MyOrders from "./components/MyOrders/MyOrders";
 
 function Layout() {
   return (
@@ -33,6 +35,8 @@ function App() {
           <Route path="/Home" element={<Home />} />
           <Route path="/productDetail" element={<ProductDetail />} />
           <Route path="/TopPicksShow" element={<TopPicksShow/>} />
+         <Route path="/favorites" element={<Favorites/>} />
+        <Route path="/myorders" element={<MyOrders/>} />
         </Route>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -40,7 +44,6 @@ function App() {
         <Route path="/compare" element={<Compare />} />
         <Route path="/category" element={<Category/>} />
         
-
       </Routes>
     </Router>
   );
