@@ -24,6 +24,26 @@ function ProductDetail() {
     { key: "Çözünürlük", value: "4K Ultra HD" },
     { key: "Ekran Boyu (cm)", value: "139 cm" },
     { key: "Yenileme Hızı", value: "60 Hz" },
+    { key: "Ekran Boyutu", value: "50 inch" },
+    { key: "Çözünürlük (Piksel)", value: "3840 x 2160" },
+    { key: "Çözünürlük", value: "4K Ultra HD" },
+    { key: "Ekran Boyu (cm)", value: "139 cm" },
+    { key: "Yenileme Hızı", value: "60 Hz" },
+    { key: "Ekran Boyutu", value: "50 inch" },
+    { key: "Çözünürlük (Piksel)", value: "3840 x 2160" },
+    { key: "Çözünürlük", value: "4K Ultra HD" },
+    { key: "Ekran Boyu (cm)", value: "139 cm" },
+    { key: "Yenileme Hızı", value: "60 Hz" },
+    { key: "Ekran Boyutu", value: "50 inch" },
+    { key: "Çözünürlük (Piksel)", value: "3840 x 2160" },
+    { key: "Çözünürlük", value: "4K Ultra HD" },
+    { key: "Ekran Boyu (cm)", value: "139 cm" },
+    { key: "Yenileme Hızı", value: "60 Hz" },
+    { key: "Ekran Boyutu", value: "50 inch" },
+    { key: "Çözünürlük (Piksel)", value: "3840 x 2160" },
+    { key: "Çözünürlük", value: "4K Ultra HD" },
+    { key: "Ekran Boyu (cm)", value: "139 cm" },
+    { key: "Yenileme Hızı", value: "60 Hz" }
   ];
 
   const columns = [
