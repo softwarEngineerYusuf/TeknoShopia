@@ -103,20 +103,14 @@
   cursor: pointer;
   border-radius:18px;
   transition: background-color 0.3s;
-  opacity: 0; /* Başlangıçta gizle */
-  visibility: hidden; 
   transition: background-color 0.3s, opacity 0.5s ease;
   
 }
 
 .buy-button-top-picks:hover {
-  background-color: black;
- 
-}
-
-.card-top-picks:hover .buy-button-top-picks {
-  opacity: 1; /* Hover durumunda butonu görünür yap */
-  visibility: visible; /* Hover durumunda butonu görünür yap */
+  background-color: #333; /* Daha koyu renk */
+  opacity: 0.9; /* opaklık */
+  transform: scale(1.05); /* büyüme efekti */
 }
 
 .favorite-button {

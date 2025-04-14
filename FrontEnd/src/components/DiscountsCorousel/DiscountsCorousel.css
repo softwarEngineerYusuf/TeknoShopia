@@ -48,13 +48,13 @@
   cursor: pointer;
   border-radius: 18px;
   transition: background-color 0.3s;
-  opacity: 0; /* Başlangıçta gizle */
-  visibility: hidden; 
   transition: background-color 0.3s, opacity 0.5s ease;
 }
 
 .buy-button-discount-corousel:hover {
-  background-color: black;
+  background-color: #333; /* Daha koyu bir renk */
+  opacity: 0.9; /* Hafif bir opaklık */
+  transform: scale(1.05); /* Hafif büyüme efekti */
 }
 
 .card-discount-corousel:hover .buy-button-discount-corousel {

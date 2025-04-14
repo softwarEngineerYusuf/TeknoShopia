@@ -45,6 +45,12 @@
     margin-bottom: 20px;
 }
 
+.rating-category-cards{
+    display: flex;
+  justify-content: center;
+  font-size: large;
+}
+
 .buy-button-category-cards {
     background-color: black;
     color: white;
@@ -55,14 +61,13 @@
     cursor: pointer;
     border-radius: 18px;
     transition: background-color 0.3s;
-    opacity: 0; /* Başlangıçta gizle */
-    visibility: hidden;
     transition: background-color 0.3s, opacity 0.5s ease;
 }
-
 .buy-button-category-cards:hover {
-    background-color: black;
-}
+    background-color: #333; /* Daha koyu bir renk */
+    opacity: 0.9; /* Hafif bir opaklık */
+    transform: scale(1.05); /* Hafif büyüme efekti */
+  }
 
 .category-cards:hover .buy-button-category-cards {
     opacity: 1; /* Hover durumunda butonu görünür yap */

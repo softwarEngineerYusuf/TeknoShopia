@@ -1,121 +1,122 @@
 /* Modern Favorites Page Styles */
 .favorites-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px 20px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  }
-  
-  .favorites-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 40px;
-  }
-  
-  .favorites-title {
-    font-size: 32px;
-    font-weight: 600;
-    color: #1a1a1a;
-  }
-  
-  .favorites-count {
-    font-size: 16px;
-    color: #666;
-  }
-  
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, sans-serif;
+}
+
+.favorites-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.favorites-title {
+  font-size: 32px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.favorites-count {
+  font-size: 16px;
+  color: #666;
+}
+
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 30px;
+}
+
+.favorite-item {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.favorite-item:hover {
+  transform: translateY(-4px);
+}
+
+.favorite-image {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  border-radius: 12px 12px 0 0;
+}
+
+.favorite-content {
+  padding: 20px;
+}
+
+.favorite-name {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+  color: #1a1a1a;
+}
+
+.favorite-price {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2d2d2d;
+  margin: 0 0 16px 0;
+}
+
+.favorite-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.add-to-cart {
+  background: #1a1a1a;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.add-to-cart:hover {
+  background: #333;
+}
+
+.remove-favorite {
+  background: none;
+  border: none;
+  color: #ff4444;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 10px;
+}
+
+.remove-favorite:hover {
+  text-decoration: underline;
+}
+
+.empty-favorites {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+@media (max-width: 768px) {
   .favorites-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
   }
-  
-  .favorite-item {
-    position: relative;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease;
+
+  .favorites-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
-  
-  .favorite-item:hover {
-    transform: translateY(-4px);
-  }
-  
-  .favorite-image {
-    width: 100%;
-    height: 280px;
-    object-fit: cover;
-    border-radius: 12px 12px 0 0;
-  }
-  
-  .favorite-content {
-    padding: 20px;
-  }
-  
-  .favorite-name {
-    font-size: 18px;
-    font-weight: 500;
-    margin: 0 0 8px 0;
-    color: #1a1a1a;
-  }
-  
-  .favorite-price {
-    font-size: 20px;
-    font-weight: 600;
-    color: #2d2d2d;
-    margin: 0 0 16px 0;
-  }
-  
-  .favorite-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .add-to-cart {
-    background: #1a1a1a;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background 0.2s ease;
-  }
-  
-  .add-to-cart:hover {
-    background: #333;
-  }
-  
-  .remove-favorite {
-    background: none;
-    border: none;
-    color: #ff4444;
-    cursor: pointer;
-    font-size: 14px;
-    padding: 10px;
-  }
-  
-  .remove-favorite:hover {
-    text-decoration: underline;
-  }
-  
-  .empty-favorites {
-    text-align: center;
-    padding: 60px 20px;
-    color: #666;
-  }
-  
-  @media (max-width: 768px) {
-    .favorites-grid {
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 20px;
-    }
-    
-    .favorites-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 10px;
-    }
-  }
+}

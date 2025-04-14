@@ -72,8 +72,14 @@ function CategoryCards() {
         <div className="card-details-category-cards">
           <p className="product-name-category-cards">{product.name}</p>
           <div className="d-flex justify-content-between" style={{ padding: "0rem 1rem" }}>
-            <StarIcon />
+            <div className="rating-category-cards">
+              <StarIcon />
+            <p>4.8</p>
+            </div>
+            <div>
+               <p style={{color:'red',textDecoration:'line-through'}}>₺1999.00</p> {/* yalnızca indirim olan ürünlerde görünecek */}
             <p className="product-price-category-cards">₺{product.price.toFixed(2)}</p>
+            </div>
           </div>
           <button className="buy-button-category-cards">İncele</button>
         </div>

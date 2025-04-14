@@ -6,6 +6,8 @@ const mockOrders = [
     id: 1,
     date: '2024-03-15',
     orderNumber: 'ORD-2024-001',
+    orderImage: 'https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/129743-1_large.jpg',
+    orderImage2: 'https://cdn.vatanbilgisayar.com/Upload/PRODUCT/asus/thumb/150368-1_large.jpg',
     status: 'Teslim Edildi',
     total: 1299.99,
     items: [
@@ -27,6 +29,7 @@ const mockOrders = [
     id: 2,
     date: '2024-03-10',
     orderNumber: 'ORD-2024-002',
+    orderImge: 'https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/129743-1_large.jpg',
     status: 'Kargoda',
     total: 799.50,
     items: [
@@ -42,6 +45,7 @@ const mockOrders = [
     id: 3,
     date: '2024-03-05',
     orderNumber: 'ORD-2024-003',
+    orderImge: 'https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/129743-1_large.jpg',
     status: 'İşleme Alındı',
     total: 2499.99,
     items: [
@@ -61,6 +65,10 @@ function OrderCard({ order }) {
   return (
     <div className="order-card">
       <div className="order-header" onClick={() => setIsExpanded(!isExpanded)}>
+        <div className='order-image'>
+          <img src={order.orderImage} alt="Order" />
+          <img src={order.orderImage2} alt="Order" />
+        </div>
         <div className="order-main-info">
           <span className="order-number">{order.orderNumber}</span>
           <span className="order-date">{order.date}</span>

@@ -52,6 +52,12 @@
   .order-header:hover {
     background-color: #f8f9fa;
   }
+
+  .order-image{
+   height: 6rem;
+   width: 6rem;
+   display: flex;
+  }
   
   .order-main-info {
     display: flex;
