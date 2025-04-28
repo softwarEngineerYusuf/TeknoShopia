@@ -1,12 +1,12 @@
-.subContainer{
+.subContainerTopPicksMore{
     display: flex;
 }
 
-.categoryFilter{
+.categoryFilterTopPicksMore{
 width: 25%;
 }
 
-.categoryProducts{
+.categoryProductsTopPicksMore{
 width: 75%;
 }
 

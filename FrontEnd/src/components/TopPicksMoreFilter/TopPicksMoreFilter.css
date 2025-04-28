@@ -1,0 +1,36 @@
+.top-picks-more-filter {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+    width: 100%;
+    max-width: 250px;
+    margin: 2rem;
+    border: 1px solid #ddd;
+  }
+  
+  .top-picks-more-filter h4 {
+    margin-bottom: 0.6rem;
+  }
+  
+  .top-picks-more-filter .ant-checkbox-group {
+    width: 100%;
+  }
+  
+  .top-picks-more-filter .ant-checkbox-group > div {
+    margin-bottom: 8px;
+  }
+  
+  @media (max-width: 768px) {
+    .top-picks-more-filter {
+      width: 100%;
+      margin: 1rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .top-picks-more-filter {
+      margin: 0.5rem;
+    }
+  }
+  
