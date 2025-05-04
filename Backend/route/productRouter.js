@@ -316,4 +316,86 @@ router.get("/getDiscountedProducts", async (req, res) => {
   }
 });
 
+router.get("/getProductsByCategory/:categoryId", async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+
+    // Kategori var mı kontrol et
+    const category = await Category.findById(categoryId);
+    if (!category) {
+      return res.status(404).json({ message: "Kategori bulunamadı." });
+    }
+
+    // Kategoriye ait ürünleri getir (populate ile marka ve kategori bilgilerini de al)
+    const products = await Product.find({ category: categoryId })
+      .populate("brand", "name") // Sadece marka adını getir
+      .populate("category", "name") // Sadece kategori adını getir
+      .populate("reviews"); // İsteğe bağlı: yorumları da getir
+
+    res.status(200).json({
+      message: `${category.name} kategorisindeki ürünler başarıyla getirildi.`,
+      category: category.name,
+      count: products.length,
+      products: products,
+    });
+  } catch (error) {
+    console.error("Error details:", error);
+    res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
+  }
+});
+
+router.get("/getProductsByBrand/:brandId", async (req, res) => {
+  try {
+    const { brandId } = req.params;
+    const minPrice = parseFloat(req.query.minPrice);
+    const maxPrice = parseFloat(req.query.maxPrice);
+
+    // Marka kontrolü
+    const brand = await Brand.findById(brandId);
+    if (!brand) {
+      return res.status(404).json({
+        success: false,
+        message: "Marka bulunamadı.",
+      });
+    }
+
+    // Filtre oluştur
+    const filter = { brand: brandId };
+
+    // Fiyat aralığı varsa filtreye ekle
+    if (!isNaN(minPrice) || !isNaN(maxPrice)) {
+      filter.discountedPrice = {};
+      if (!isNaN(minPrice)) filter.discountedPrice.$gte = minPrice;
+      if (!isNaN(maxPrice)) filter.discountedPrice.$lte = maxPrice;
+    }
+
+    const products = await Product.find(filter)
+      .populate("brand", "name logo")
+      .populate("category", "name");
+
+    res.status(200).json({
+      success: true,
+      brand: brand.name,
+      count: products.length,
+      products: products.map((product) => ({
+        id: product._id,
+        name: product.name,
+        price: product.price,
+        discountedPrice: product.discountedPrice,
+        color: product.color,
+        mainImage: product.mainImage,
+        brand: product.brand,
+        category: product.category,
+      })),
+    });
+  } catch (error) {
+    console.error("Hata:", error);
+    res.status(500).json({
+      success: false,
+      message: "Sunucu hatası",
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;
