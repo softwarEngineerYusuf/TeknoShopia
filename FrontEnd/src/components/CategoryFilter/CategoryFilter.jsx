@@ -1,26 +1,49 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import "./CategoryFilter.css";
-import { Checkbox, InputNumber, Radio } from "antd";
+import { Checkbox, InputNumber, Radio, Button, Spin } from "antd";
+import { getAllBrands } from "../../allAPIs/brand";
 
-const BrandFilter = ({ brands, selectedBrands, onChange }) => {
-  return (
-    <div className="brand-filter">
-      <Checkbox.Group value={selectedBrands} onChange={onChange}>
-        {brands.map((brand) => (
-          <div key={brand} style={{ marginBottom: "8px" }}>
-            <Checkbox value={brand}>{brand}</Checkbox>
-          </div>
-        ))}
-      </Checkbox.Group>
-    </div>
-  );
-};
+// eslint-disable-next-line react/prop-types
+const BrandFilter = ({ brands, selectedBrands, onChange }) => (
+  <div className="brand-filter">
+    <Checkbox.Group value={selectedBrands} onChange={onChange}>
+      {brands.map((brand) => (
+        <div key={brand._id} style={{ marginBottom: "8px" }}>
+          <Checkbox value={brand._id}>
+            {brand.logo?.url ? (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <img
+                  src={brand.logo.url}
+                  alt={brand.name}
+                  style={{
+                    width: "20px",
+                    height: "20px",
+                    objectFit: "contain",
+                  }}
+                />
+                {brand.name}
+              </div>
+            ) : (
+              brand.name
+            )}
+          </Checkbox>
+        </div>
+      ))}
+    </Checkbox.Group>
+  </div>
+);
 
+// eslint-disable-next-line react/prop-types
 const PriceFilter = ({ priceRange, setPriceRange }) => {
-  const handleRangeChange = (selectedRange) => {
-    // Seçilen aralığı min ve max olarak ayarlama
-    setPriceRange(selectedRange);
-  };
+  const priceRanges = [
+    [0, 10000],
+    [10000, 20000],
+    [20000, 30000],
+    [30000, 40000],
+    [40000, 150000],
+  ];
 
   return (
     <div className="price-filter">
@@ -51,17 +74,13 @@ const PriceFilter = ({ priceRange, setPriceRange }) => {
 
       <Radio.Group
         value={priceRange}
-        onChange={(e) => handleRangeChange(e.target.value)}
+        onChange={(e) => setPriceRange(e.target.value)}
       >
-        {[
-          [0, 10000],
-          [10000, 20000],
-          [20000, 30000],
-          [30000, 40000],
-          [40000],
-        ].map((range) => (
+        {priceRanges.map((range) => (
           <div key={range.join("-")} style={{ marginBottom: "8px" }}>
-            <Radio value={range}>{`${range[0]} - ${range[1]}`}</Radio>
+            <Radio value={range}>
+              {range[1] ? `${range[0]} - ${range[1]}` : `${range[0]}+`}
+            </Radio>
           </div>
         ))}
       </Radio.Group>
@@ -69,28 +88,43 @@ const PriceFilter = ({ priceRange, setPriceRange }) => {
   );
 };
 
-function CategoryFilter() {
-  const [brands] = useState([
-    "Apple",
-    "Samsung",
-    "Xiaomi",
-    "Huawei",
-    "Oppo",
-    "Vivo",
-    "Xiaomi",
-    "Xiaomi",
-    "Xiaomi",
-    "Xiaomi",
-    "Xiaomi",
-    "Xiaomi",
-    "Xiaomi",
-    "Xiaomi",
-    "Xiaomi",
-    "Xiaomi",
-    "Xiaomi",
-  ]);
+// eslint-disable-next-line react/prop-types
+function CategoryFilter({ onFilterChange }) {
+  const [brands, setBrands] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedBrands, setSelectedBrands] = useState([]);
-  const [priceRange, setPriceRange] = useState([0, 100000]);
+  const [priceRange, setPriceRange] = useState([0, 150000]);
+
+  useEffect(() => {
+    const fetchBrands = async () => {
+      const brandsData = await getAllBrands();
+      setBrands(brandsData);
+      setLoading(false);
+    };
+
+    fetchBrands();
+  }, []);
+
+  const handleFilter = () => {
+    onFilterChange({
+      brands: selectedBrands,
+      minPrice: priceRange[0],
+      maxPrice: priceRange[1],
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="category-filter">
+        <div
+          className="filter-container"
+          style={{ display: "flex", justifyContent: "center", padding: "20px" }}
+        >
+          <Spin />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="category-filter">
@@ -101,10 +135,21 @@ function CategoryFilter() {
           selectedBrands={selectedBrands}
           onChange={setSelectedBrands}
         />
+
         <PriceFilter priceRange={priceRange} setPriceRange={setPriceRange} />
-        <button type="button" style={{borderRadius:'20px', backgroundColor:'#003da6'}} className="btn btn-primary container">
+
+        <Button
+          type="primary"
+          style={{
+            borderRadius: "20px",
+            backgroundColor: "#003da6",
+            width: "100%",
+            marginTop: "16px",
+          }}
+          onClick={handleFilter}
+        >
           Filter
-        </button>
+        </Button>
       </div>
     </div>
   );

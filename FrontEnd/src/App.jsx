@@ -34,18 +34,15 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/Home" element={<Home />} />
           <Route path="/productDetail" element={<ProductDetail />} />
-         <Route path="/favorites" element={<Favorites/>} />
-        <Route path="/myorders" element={<MyOrders/>} />
-        <Route path="/TopPicksMore" element={<TopPicksMore/>} />
+          <Route path="/favorites" element={<Favorites />} />
+          <Route path="/myorders" element={<MyOrders />} />
+          <Route path="/TopPicksMore" element={<TopPicksMore />} />
+          <Route path="/category/:id" element={<Category />} />
         </Route>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/basket" element={<Basket />} />
         <Route path="/compare" element={<Compare />} />
-        <Route path="/category" element={<Category/>} />
-       
-
-        
       </Routes>
     </Router>
   );
