@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./CategoryCards.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import StarIcon from "@mui/icons-material/Star";
 import SortIcon from "@mui/icons-material/Sort";
 import { Dropdown, Menu, Space } from "antd";
-import { getProductsByCategory } from "../../allAPIs/product";
+import {
+  getProductsByCategory,
+  getProductsByBrand,
+} from "../../allAPIs/product";
 
 // eslint-disable-next-line react/prop-types
-function CategoryCards({ categoryId }) {
+function CategoryCards({ categoryId, filters }) {
   const [currentSort, setCurrentSort] = useState("price-asc");
   const [products, setProducts] = useState([]);
   const [categoryName, setCategoryName] = useState("");
@@ -16,10 +19,38 @@ function CategoryCards({ categoryId }) {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await getProductsByCategory(categoryId);
-        setProducts(response.products);
-        setCategoryName(response.category);
-        console.log("Ürünler:", response.products);
+        setLoading(true);
+
+        // Filtre varsa filtreli ürünleri getir
+        // eslint-disable-next-line react/prop-types
+        if (
+          // eslint-disable-next-line react/prop-types
+          filters.brands.length > 0 ||
+          // eslint-disable-next-line react/prop-types
+          filters.minPrice > 0 ||
+          // eslint-disable-next-line react/prop-types
+          filters.maxPrice < 150000
+        ) {
+          const response = await getProductsByBrand(
+            // eslint-disable-next-line react/prop-types
+            filters.brands,
+            // eslint-disable-next-line react/prop-types
+            filters.minPrice,
+            // eslint-disable-next-line react/prop-types
+            filters.maxPrice
+          );
+          // Filtrelenmiş ürünlerin aynı zamanda bu kategoriye ait olmasını sağla
+          const filteredProducts = response.products.filter(
+            (product) => product.category._id === categoryId
+          );
+          setProducts(filteredProducts);
+          setCategoryName(filteredProducts[0]?.category?.name || "");
+        } else {
+          // Filtre yoksa normal kategori ürünlerini getir
+          const response = await getProductsByCategory(categoryId);
+          setProducts(response.products);
+          setCategoryName(response.category);
+        }
       } catch (error) {
         console.error("Ürünler yüklenirken hata:", error);
         setProducts([]);
@@ -29,7 +60,7 @@ function CategoryCards({ categoryId }) {
     };
 
     fetchProducts();
-  }, [categoryId]);
+  }, [categoryId, filters]);
 
   const handleSortChange = (sortType) => {
     setCurrentSort(sortType);

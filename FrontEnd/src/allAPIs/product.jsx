@@ -29,27 +29,37 @@ export const getProductsByCategory = async (categoryId) => {
   }
 };
 
-export const getProductsByBrand = async (brandId, priceRange = null) => {
+export const getProductsByBrand = async (
+  brandIds = [],
+  minPrice = 0,
+  maxPrice = 150000
+) => {
   try {
-    // Fiyat aralığı varsa query parametrelerini hazırla
     const params = {};
-    if (priceRange?.min !== undefined) params.minPrice = priceRange.min;
-    if (priceRange?.max !== undefined) params.maxPrice = priceRange.max;
 
-    const response = await axios.get(
-      `${API_URL}/getProductsByBrand/${brandId}`,
-      {
-        params,
-      }
-    );
+    if (brandIds.length > 0) {
+      params.brandIds = brandIds.join(",");
+    }
 
+    if (minPrice > 0) {
+      params.minPrice = minPrice;
+    }
+
+    if (maxPrice < 150000) {
+      params.maxPrice = maxPrice;
+    }
+
+    const response = await axios.get(`${API_URL}/getProductsByBrand`, {
+      params,
+    });
     return response.data;
   } catch (error) {
-    console.error("Marka ürünleri çekilirken hata:", error);
+    console.error("Markaya göre ürünler çekilirken hata oluştu:", error);
     return {
       success: false,
-      products: [],
+      message: "Markaya göre ürünler getirilirken hata oluştu",
       count: 0,
+      products: [],
     };
   }
 };

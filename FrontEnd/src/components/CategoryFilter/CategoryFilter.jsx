@@ -106,11 +106,19 @@ function CategoryFilter({ onFilterChange }) {
   }, []);
 
   const handleFilter = () => {
-    onFilterChange({
+    const newFilters = {
       brands: selectedBrands,
       minPrice: priceRange[0],
       maxPrice: priceRange[1],
+    };
+
+    console.log("Filtreleme Bilgileri:", {
+      brandIds: selectedBrands,
+      minPrice: priceRange[0],
+      maxPrice: priceRange[1],
     });
+
+    onFilterChange(newFilters);
   };
 
   if (loading) {

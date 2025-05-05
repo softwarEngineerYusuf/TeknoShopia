@@ -6,13 +6,19 @@ import { useParams } from "react-router-dom";
 
 function Category() {
   const { id } = useParams();
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState({
+    brands: [],
+    minPrice: 0,
+    maxPrice: 150000,
+  });
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
-    // Burada filtre değişikliklerini işleyebilirsiniz
-    // Örneğin, filtreleme yapılmış ürünleri yeniden çekebilirsiniz
-    console.log("Yeni filtreler:", newFilters);
+    console.log("Uygulanan Filtreler:", {
+      brandIds: newFilters.brands,
+      minPrice: newFilters.minPrice,
+      maxPrice: newFilters.maxPrice,
+    });
   };
 
   return (
