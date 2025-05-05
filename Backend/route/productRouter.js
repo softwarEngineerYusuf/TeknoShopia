@@ -4,7 +4,7 @@ const Product = require("../models/product.js");
 const Brand = require("../models/brand.js");
 const Category = require("../models/category.js");
 const { v4: uuidv4 } = require("uuid");
-
+const mongoose = require("mongoose");
 router.post("/addProduct", async (req, res) => {
   try {
     const {
@@ -344,48 +344,115 @@ router.get("/getProductsByCategory/:categoryId", async (req, res) => {
   }
 });
 
-router.get("/getProductsByBrand/:brandId", async (req, res) => {
+router.get("/getProductsByBrand", async (req, res) => {
   try {
-    const { brandId } = req.params;
+    const brandIds = req.query.brandIds ? req.query.brandIds.split(",") : [];
     const minPrice = parseFloat(req.query.minPrice);
     const maxPrice = parseFloat(req.query.maxPrice);
 
     // Marka kontrolü
-    const brand = await Brand.findById(brandId);
-    if (!brand) {
-      return res.status(404).json({
-        success: false,
-        message: "Marka bulunamadı.",
+    if (brandIds.length > 0) {
+      const brands = await Brand.find({ _id: { $in: brandIds } });
+      if (brands.length !== brandIds.length) {
+        const missingBrands = brandIds.filter(
+          (id) => !brands.some((brand) => brand._id.equals(id))
+        );
+        return res.status(404).json({
+          success: false,
+          message: "Bazı markalar bulunamadı.",
+          missingBrands: missingBrands,
+        });
+      }
+    }
+
+    // Aggregation pipeline oluştur
+    const pipeline = [];
+
+    // Marka filtreleme - DÜZELTME: new kullanarak ObjectId oluşturma
+    if (brandIds.length > 0) {
+      pipeline.push({
+        $match: {
+          brand: {
+            $in: brandIds.map((id) => new mongoose.Types.ObjectId(id)), // new eklenerek düzeltildi
+          },
+        },
       });
     }
 
-    // Filtre oluştur
-    const filter = { brand: brandId };
+    // İndirimli fiyat hesaplama
+    pipeline.push({
+      $addFields: {
+        calculatedDiscountPrice: {
+          $cond: {
+            if: { $gt: ["$discount", 0] },
+            then: {
+              $subtract: [
+                "$price",
+                { $multiply: ["$price", { $divide: ["$discount", 100] }] },
+              ],
+            },
+            else: "$price",
+          },
+        },
+      },
+    });
 
-    // Fiyat aralığı varsa filtreye ekle
+    // Fiyat aralığı filtreleme
     if (!isNaN(minPrice) || !isNaN(maxPrice)) {
-      filter.discountedPrice = {};
-      if (!isNaN(minPrice)) filter.discountedPrice.$gte = minPrice;
-      if (!isNaN(maxPrice)) filter.discountedPrice.$lte = maxPrice;
+      const priceMatch = {};
+      if (!isNaN(minPrice)) priceMatch.$gte = minPrice;
+      if (!isNaN(maxPrice)) priceMatch.$lte = maxPrice;
+
+      pipeline.push({
+        $match: {
+          calculatedDiscountPrice: priceMatch,
+        },
+      });
     }
 
-    const products = await Product.find(filter)
-      .populate("brand", "name logo")
-      .populate("category", "name");
+    // Marka ve kategori bilgilerini birleştirme
+    pipeline.push(
+      {
+        $lookup: {
+          from: "brands",
+          localField: "brand",
+          foreignField: "_id",
+          as: "brand",
+        },
+      },
+      { $unwind: "$brand" },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "category",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      { $unwind: "$category" }
+    );
+
+    const products = await Product.aggregate(pipeline);
 
     res.status(200).json({
       success: true,
-      brand: brand.name,
       count: products.length,
       products: products.map((product) => ({
         id: product._id,
         name: product.name,
         price: product.price,
-        discountedPrice: product.discountedPrice,
+        discountedPrice: product.calculatedDiscountPrice,
         color: product.color,
         mainImage: product.mainImage,
-        brand: product.brand,
-        category: product.category,
+        brand: {
+          _id: product.brand._id,
+          name: product.brand.name,
+          logo: product.brand.logo,
+        },
+        category: {
+          _id: product.category._id,
+          name: product.category.name,
+        },
       })),
     });
   } catch (error) {
