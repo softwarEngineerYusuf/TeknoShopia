@@ -19,7 +19,7 @@ const base = "/api";
 router.use(`${base}/auth`, authRouter); //localhost:3000/api/auth
 router.use(`${base}/user`, userRouter); //localhost:3000/api/user
 router.use(`${base}/category`, categoryRouter); //localhost:3000/api/category
-router.use(`${base}/brand`, brandRouter); //localhost:3000/api/category
+router.use(`${base}/brand`, brandRouter); //localhost:3000/api/brand
 router.use(`${base}/address`, addressRouter); //localhost:3000/api/address
 router.use(`${base}/product`, productRouter); //localhost:3000/api/product
 router.use(`${base}/review`, reviewRouter); //localhost:3000/api/review
