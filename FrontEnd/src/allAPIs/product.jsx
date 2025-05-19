@@ -63,3 +63,16 @@ export const getProductsByBrand = async (
     };
   }
 };
+
+export const getTopPicksProducts = async (selectedBrands = []) => {
+  try {
+    const query = selectedBrands.length
+      ? `?brands=${selectedBrands.join(",")}`
+      : "";
+    const response = await axios.get(`${API_URL}/topPicks${query}`);
+    return response.data;
+  } catch (error) {
+    console.error("Top Picks ürünleri çekerken hata oluştu:", error);
+    return [];
+  }
+};

@@ -1,21 +1,26 @@
-import React from 'react'
-import "./TopPicksMore.css"
-import TopPicksMoreFilter from '../../components/TopPicksMoreFilter/TopPicksMoreFilter'
-import TopPicksMoreCards from '../../components/TopPicksMoreCards/TopPicksMoreCards'
+import { useState } from "react";
+import TopPicksMoreFilter from "../../components/TopPicksMoreFilter/TopPicksMoreFilter";
+import TopPicksMoreCards from "../../components/TopPicksMoreCards/TopPicksMoreCards";
+import "./TopPicksMore.css";
 
 function TopPicksMore() {
+  const [selectedBrands, setSelectedBrands] = useState([]);
+
   return (
     <div className="container">
-       <div className="subContainerTopPicksMore">
+      <div className="subContainerTopPicksMore">
         <div className="categoryFilterTopPicksMore">
-          <TopPicksMoreFilter/>
+          <TopPicksMoreFilter
+            selectedBrands={selectedBrands}
+            setSelectedBrands={setSelectedBrands}
+          />
         </div>
         <div className="categoryProductsTopPicksMore">
-          <TopPicksMoreCards/>
-          </div>
-      </div> 
+          <TopPicksMoreCards selectedBrands={selectedBrands} />
+        </div>
+      </div>
     </div>
-  )
+  );
 }
 
-export default TopPicksMore
+export default TopPicksMore;
