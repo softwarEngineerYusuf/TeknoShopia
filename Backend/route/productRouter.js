@@ -21,6 +21,7 @@ router.post("/addProduct", async (req, res) => {
       additionalImageFiles,
       attributes,
       discount,
+      topPick = 0,
       discountStartDate,
       discountEndDate,
       groupId, // Kullanıcıdan groupId gelirse
@@ -76,6 +77,7 @@ router.post("/addProduct", async (req, res) => {
       additionalImageFiles,
       attributes,
       discount,
+      topPick,
       discountStartDate,
       discountEndDate,
       groupId: newGroupId, // Ürünün grup kimliği
@@ -214,6 +216,7 @@ router.put("/updateProduct/:id", async (req, res) => {
       additionalImageFiles,
       attributes,
       discount,
+      topPick,
       discountStartDate,
       discountEndDate,
       brand,
@@ -278,6 +281,7 @@ router.put("/updateProduct/:id", async (req, res) => {
       imageFiles,
       additionalImageFiles,
       attributes,
+      topPick,
       discount,
       discountStartDate,
       discountEndDate,
@@ -465,4 +469,33 @@ router.get("/getProductsByBrand", async (req, res) => {
   }
 });
 
+router.get("/topPicks", async (req, res) => {
+  try {
+    const { brands } = req.query; // örn: "Xiaomi,Samsung"
+
+    // Eğer gönderilmemişse tümü
+    if (!brands) {
+      const topProducts = await Product.find({ topPick: 1 });
+      return res.status(200).json(topProducts);
+    }
+
+    const brandNames = brands.split(",");
+
+    // Brand koleksiyonundan bu isimlerin _id'lerini bul
+    const brandDocs = await Brand.find({ name: { $in: brandNames } }, "_id");
+    const brandIds = brandDocs.map((b) => b._id);
+
+    // Product'ları brand id'lerine göre filtrele
+    const topProducts = await Product.find({
+      topPick: 1,
+      brand: { $in: brandIds },
+    });
+
+    res.status(200).json(topProducts);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Top picks alınamadı", error: error.message });
+  }
+});
 module.exports = router;

@@ -31,6 +31,7 @@ const productSchema = new Schema(
     discountEndDate: { type: Date },
     attributes: { type: Map, of: String },
     groupId: { type: String, required: true }, // Aynı ürün grubunu takip eden ID
+    topPick: { type: Number, default: 0 },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
