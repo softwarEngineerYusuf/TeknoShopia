@@ -16,18 +16,35 @@ const app = express();
 const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-        callback(null, true); // Origin'e izin ver
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, origin); // İzin verilen origin'i doğrudan dön
       } else {
-        callback(new Error("Not allowed by CORS"));
+        callback(new Error("CORS hatası: Bu origin'e izin verilmiyor."));
       }
     },
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
   })
 );
+
+// 🟢 OPTIONS isteği için destek
+app.options("*", cors());
+
+// Manuel CORS header'ları (Bu kısmı ekliyoruz)
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization"
+    );
+  }
+  next();
+});
 
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -40,7 +57,7 @@ app.use(
   })
 );
 app.use((req, res, next) => {
-  console.log("Request Origin:", req.headers.origin);
+  // console.log("Request Origin:", req.headers.origin);
   next();
 });
 app.use(passport.initialize());
