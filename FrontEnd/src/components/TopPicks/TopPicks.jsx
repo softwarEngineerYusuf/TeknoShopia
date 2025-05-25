@@ -5,11 +5,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { getTopPicksProducts } from "../../allAPIs/product"; // yolunu projenize göre ayarlayın
-
+import { useGoToProductDetail } from "../GoToProductDetailFunction/GoToProductDetail";
 const TopPicks = () => {
   const [products, setProducts] = useState([]);
   const [favorites, setFavorites] = useState([]);
-
+  const goToProductDetail = useGoToProductDetail();
   useEffect(() => {
     const fetchTopPicks = async () => {
       const data = await getTopPicksProducts();
@@ -72,7 +72,12 @@ const TopPicks = () => {
                     ₺{product.price?.toLocaleString("tr-TR") || "0"}
                   </p>
                 </div>
-                <button className="buy-button-top-picks">İncele</button>
+                <button
+                  className="buy-button-top-picks"
+                  onClick={() => goToProductDetail(product._id)}
+                >
+                  İncele
+                </button>
               </div>
             </div>
           </div>

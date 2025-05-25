@@ -76,3 +76,13 @@ export const getTopPicksProducts = async (selectedBrands = []) => {
     return [];
   }
 };
+
+export const getProductById = async (productId) => {
+  try {
+    const response = await axios.get(`${API_URL}/getProductById/${productId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Ürün detayları alınırken hata oluştu:", error);
+    return null;
+  }
+};

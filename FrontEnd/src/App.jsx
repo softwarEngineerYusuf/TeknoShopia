@@ -1,10 +1,5 @@
 import "./App.css";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Outlet,
-} from "react-router-dom";
+import { Route, Routes, Outlet } from "react-router-dom";
 import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import Home from "./pages/Home/Home";
@@ -29,22 +24,20 @@ function Layout() {
 }
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/Home" element={<Home />} />
-          <Route path="/productDetail" element={<ProductDetail />} />
-          <Route path="/favorites" element={<Favorites />} />
-          <Route path="/myorders" element={<MyOrders />} />
-          <Route path="/TopPicksMore" element={<TopPicksMore />} />
-          <Route path="/category/:id" element={<Category />} />
-        </Route>
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/basket" element={<Basket />} />
-        <Route path="/compare" element={<Compare />} />
-      </Routes>
-    </Router>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/productDetail/:id" element={<ProductDetail />} />
+        <Route path="/favorites" element={<Favorites />} />
+        <Route path="/myorders" element={<MyOrders />} />
+        <Route path="/TopPicksMore" element={<TopPicksMore />} />
+        <Route path="/category/:id" element={<Category />} />
+      </Route>
+      <Route path="/Login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/basket" element={<Basket />} />
+      <Route path="/compare" element={<Compare />} />
+    </Routes>
   );
 }
 

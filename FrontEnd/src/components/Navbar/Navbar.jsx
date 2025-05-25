@@ -1,27 +1,23 @@
 import { FaShoppingCart, FaUser, FaSearch } from "react-icons/fa";
-import { Link } from "react-router-dom"; 
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import "../Navbar/Navbar.css";
 import logo from "../../assets/TeknoShopiaLogo.png";
-import { useSelector } from "react-redux";
+import { useState } from "react";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
-import { useDispatch } from "react-redux";
-import { clearUser } from "../../reduxToolkit/userSlice";
-import { persistor } from "../../reduxToolkit/store";
 import { HeartFilled } from "@ant-design/icons";
-import ViewListIcon from '@mui/icons-material/ViewList';
+import ViewListIcon from "@mui/icons-material/ViewList";
 
 function Navbar() {
   const navigate = useNavigate();
-  const user = useSelector((state) => state.user.user);
+  const [user, setUser] = useState("");
 
   const ClearUser = () => {
     console.log("silinmeye basıldı");
-    dispatch(clearUser());
-    persistor.purge();
+
     navigate("/");
   };
-  const dispatch = useDispatch();
+
   return (
     <nav className="navbar">
       <div className="navbar-logo">
@@ -75,7 +71,7 @@ function Navbar() {
             {user.name}
           </Link>
         ) : (
-          <Link to="/" className="navbar-button">
+          <Link to="/Login" className="navbar-button">
             <div className="login-container d-flex align-items-center">
               <FaUser className="iconNav" />
               <span>Login</span>
@@ -84,20 +80,19 @@ function Navbar() {
         )}
 
         <Link to="/basket" className="navbar-button">
-          <FaShoppingCart className="iconNav" /> 
+          <FaShoppingCart className="iconNav" />
           Basket
         </Link>
 
         <Link to="/favorites" className="navbar-button">
-           <HeartFilled className="iconNav"  />
+          <HeartFilled className="iconNav" />
           Favorites
         </Link>
 
         <Link to="/myorders" className="navbar-button">
-           <ViewListIcon className="iconNav"  />
+          <ViewListIcon className="iconNav" />
           My Orders
         </Link>
-
       </div>
     </nav>
   );

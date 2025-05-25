@@ -14,12 +14,12 @@ import FormControl from "@mui/material/FormControl";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { loginApi } from "../../allAPIs/auth";
-import { useDispatch } from "react-redux";
-import { setUser } from "../../reduxToolkit/userSlice";
+// import { useDispatch } from "react-redux";
+// import { setUser } from "../../reduxToolkit/userSlice";
 
 function Login() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const [email, setEmail] = useState("yusuf1@gmail.com");
   const [password, setPassword] = useState("123456789");
   const [showPassword, setShowPassword] = useState(false);
@@ -50,7 +50,7 @@ function Login() {
       const data = await loginApi(email, password);
       console.log("data", data);
       if (data && data.user) {
-        dispatch(setUser(data.user));
+        // dispatch(setUser(data.user));
         navigate("/Home");
       }
     } catch (error) {

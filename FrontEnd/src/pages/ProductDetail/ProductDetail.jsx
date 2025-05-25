@@ -1,50 +1,67 @@
-import { useState } from "react";
-import { Card, Row, Col, Button, Rate, Table, Image, Typography } from "antd";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import {
+  Card,
+  Row,
+  Col,
+  Button,
+  Rate,
+  Table,
+  Image,
+  Typography,
+  Spin,
+} from "antd";
 import {
   LeftOutlined,
   RightOutlined,
   ShoppingCartOutlined,
 } from "@ant-design/icons";
 import "./ProductDetail.css";
+import { getProductById } from "../../allAPIs/product";
 
 const { Title, Text } = Typography;
 
 function ProductDetail() {
+  const { id } = useParams(); // URL'den ID'yi al
+
+  const [product, setProduct] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  const images = [
-    "https://cdn.vatanbilgisayar.com/Upload/PRODUCT/philips/thumb/145094-1-3_large.jpg",
-    "https://cdn.vatanbilgisayar.com/Upload/PRODUCT/philips/thumb/145094-3-3_large.jpg",
-    "https://cdn.vatanbilgisayar.com/Upload/PRODUCT/philips/thumb/145094-1-3_large.jpg",
-  ];
+  useEffect(() => {
+    const fetchProduct = async () => {
+      const data = await getProductById(id);
+      setProduct(data);
+      setLoading(false);
+    };
+    fetchProduct();
+    console.log("Product data:", id);
+  }, [id]);
 
-  const specifications = [
-    { key: "Ekran Boyutu", value: "50 inch" },
-    { key: "Çözünürlük (Piksel)", value: "3840 x 2160" },
-    { key: "Çözünürlük", value: "4K Ultra HD" },
-    { key: "Ekran Boyu (cm)", value: "139 cm" },
-    { key: "Yenileme Hızı", value: "60 Hz" },
-    { key: "Ekran Boyutu", value: "50 inch" },
-    { key: "Çözünürlük (Piksel)", value: "3840 x 2160" },
-    { key: "Çözünürlük", value: "4K Ultra HD" },
-    { key: "Ekran Boyu (cm)", value: "139 cm" },
-    { key: "Yenileme Hızı", value: "60 Hz" },
-    { key: "Ekran Boyutu", value: "50 inch" },
-    { key: "Çözünürlük (Piksel)", value: "3840 x 2160" },
-    { key: "Çözünürlük", value: "4K Ultra HD" },
-    { key: "Ekran Boyu (cm)", value: "139 cm" },
-    { key: "Yenileme Hızı", value: "60 Hz" },
-    { key: "Ekran Boyutu", value: "50 inch" },
-    { key: "Çözünürlük (Piksel)", value: "3840 x 2160" },
-    { key: "Çözünürlük", value: "4K Ultra HD" },
-    { key: "Ekran Boyu (cm)", value: "139 cm" },
-    { key: "Yenileme Hızı", value: "60 Hz" },
-    { key: "Ekran Boyutu", value: "50 inch" },
-    { key: "Çözünürlük (Piksel)", value: "3840 x 2160" },
-    { key: "Çözünürlük", value: "4K Ultra HD" },
-    { key: "Ekran Boyu (cm)", value: "139 cm" },
-    { key: "Yenileme Hızı", value: "60 Hz" }
-  ];
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  if (loading) {
+    return <Spin tip="Yükleniyor..." fullscreen />;
+  }
+
+  if (!product) {
+    return <p>Ürün bulunamadı.</p>;
+  }
+
+  const images = [product.mainImage, ...product.additionalImages];
+
+  const specifications = Object.entries(product.attributes || {}).map(
+    ([key, value]) => ({
+      key,
+      value,
+    })
+  );
 
   const columns = [
     {
@@ -58,14 +75,6 @@ function ProductDetail() {
       key: "value",
     },
   ];
-
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % images.length);
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
 
   return (
     <div className="container">
@@ -86,8 +95,8 @@ function ProductDetail() {
             />
             <Image
               src={images[currentImageIndex]}
-              alt="LG TV"
-              style={{ width: "100%", position: "relative" }}
+              alt={product.name}
+              style={{ width: "100%" }}
             />
             <Button
               icon={<RightOutlined />}
@@ -102,6 +111,7 @@ function ProductDetail() {
               onClick={nextImage}
             />
           </div>
+
           <Row
             gutter={[8, 8]}
             style={{ marginTop: 16, width: "80%", margin: "0 auto" }}
@@ -121,16 +131,24 @@ function ProductDetail() {
 
         <Col xs={24} md={12}>
           <Card>
-            <Title level={2}>LG 50UQ75 50inc</Title>
+            <Title level={2}>{product.name}</Title>
             <Rate disabled defaultValue={4} />
             <Text> (Yorumlar)</Text>
 
             <div style={{ margin: "24px 0" }}>
-              <p style={{ color: "red" }}>
-                <del>1800₺</del>
-              </p>
-              <Title level={3}>19.999TL</Title>
-              <Text type="secondary">Karşılaştır</Text>
+              {product.discount > 0 && (
+                <p style={{ color: "red" }}>
+                  <del>{product.price}₺</del>
+                </p>
+              )}
+              <Title level={3}>
+                {product.discountedPrice
+                  ? `${Math.round(product.discountedPrice)} TL`
+                  : `${product.price} TL`}
+              </Title>
+              <Text type="secondary">Marka: {product.brand?.name}</Text>
+              <br />
+              <Text type="secondary">Kategori: {product.category?.name}</Text>
             </div>
 
             <Button
