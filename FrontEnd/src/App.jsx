@@ -12,6 +12,7 @@ import Category from "./pages/Category/Category";
 import Favorites from "./components/Favorites/Favorites";
 import MyOrders from "./components/MyOrders/MyOrders";
 import TopPicksMore from "./pages/TopPicksMore/TopPicksMore";
+import Payment from "./pages/Payment/Payment";
 
 function Layout() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/myorders" element={<MyOrders />} />
         <Route path="/TopPicksMore" element={<TopPicksMore />} />
         <Route path="/category/:id" element={<Category />} />
+        <Route path="/payment" element={<Payment />} />
       </Route>
       <Route path="/Login" element={<Login />} />
       <Route path="/register" element={<Register />} />
