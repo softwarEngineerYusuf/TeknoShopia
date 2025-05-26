@@ -13,16 +13,16 @@ import InputAdornment from "@mui/material/InputAdornment";
 import FormControl from "@mui/material/FormControl";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { loginApi } from "../../allAPIs/auth";
-// import { useDispatch } from "react-redux";
-// import { setUser } from "../../reduxToolkit/userSlice";
+import { useAuth } from "../../context/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
-  // const dispatch = useDispatch();
+  const { login } = useAuth();
+
   const [email, setEmail] = useState("yusuf1@gmail.com");
   const [password, setPassword] = useState("123456789");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -38,23 +38,13 @@ function Login() {
     window.open("http://localhost:5000/api/auth/google", "_self");
   };
 
-  // const handleGoogleLogout = () => {
-  //   // Kullanıcıyı Google'dan çıkış yaptırmak için Google'ın logout URL'sini açıyoruz
-  //   window.open("https://accounts.google.com/Logout", "_self");
-  //   navigate("/");
-  // };
-
   const handleLogin = async () => {
     try {
-      // Kullanıcıyı backend'den giriş yapmaya yardımcı oluyorum.
-      const data = await loginApi(email, password);
-      console.log("data", data);
-      if (data && data.user) {
-        // dispatch(setUser(data.user));
-        navigate("/Home");
-      }
+      await login(email, password);
+      navigate("/");
     } catch (error) {
-      console.error("Giriş başarısız:", error.response?.data || error.message);
+      setError("E-posta adresi veya şifre yanlış.");
+      console.error("Giriş başarısız:", error);
     }
   };
 
@@ -81,6 +71,9 @@ function Login() {
               <button onClick={() => navigate("/register")}>Register</button>
             </div>
           </div>
+          {error && (
+            <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>
+          )}
           <div className="allInputsLgn">
             <div className="emailInputLogin">
               <Box

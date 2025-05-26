@@ -3,20 +3,23 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import "../Navbar/Navbar.css";
 import logo from "../../assets/TeknoShopiaLogo.png";
-import { useState } from "react";
+import { useEffect } from "react";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import { HeartFilled } from "@ant-design/icons";
 import ViewListIcon from "@mui/icons-material/ViewList";
-
+import { useAuth } from "../../context/AuthContext";
 function Navbar() {
   const navigate = useNavigate();
-  const [user, setUser] = useState("");
+  const { user, logout } = useAuth();
 
   const ClearUser = () => {
     console.log("silinmeye basıldı");
 
     navigate("/");
   };
+  useEffect(() => {
+    console.log("User bilgisi:", user);
+  }, [user]);
 
   return (
     <nav className="navbar">

@@ -13,7 +13,7 @@ import Favorites from "./components/Favorites/Favorites";
 import MyOrders from "./components/MyOrders/MyOrders";
 import TopPicksMore from "./pages/TopPicksMore/TopPicksMore";
 import Payment from "./pages/Payment/Payment";
-
+import { AuthProvider } from "./context/AuthContext";
 function Layout() {
   return (
     <>
@@ -25,21 +25,23 @@ function Layout() {
 }
 function App() {
   return (
-    <Routes>
-      <Route element={<Layout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/productDetail/:id" element={<ProductDetail />} />
-        <Route path="/favorites" element={<Favorites />} />
-        <Route path="/myorders" element={<MyOrders />} />
-        <Route path="/TopPicksMore" element={<TopPicksMore />} />
-        <Route path="/category/:id" element={<Category />} />
-        <Route path="/payment" element={<Payment />} />
-      </Route>
-      <Route path="/Login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/basket" element={<Basket />} />
-      <Route path="/compare" element={<Compare />} />
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/productDetail/:id" element={<ProductDetail />} />
+          <Route path="/favorites" element={<Favorites />} />
+          <Route path="/myorders" element={<MyOrders />} />
+          <Route path="/TopPicksMore" element={<TopPicksMore />} />
+          <Route path="/category/:id" element={<Category />} />
+          <Route path="/payment" element={<Payment />} />
+        </Route>
+        <Route path="/Login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/basket" element={<Basket />} />
+        <Route path="/compare" element={<Compare />} />
+      </Routes>
+    </AuthProvider>
   );
 }
 
