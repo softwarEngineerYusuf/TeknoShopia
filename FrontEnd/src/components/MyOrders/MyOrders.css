@@ -132,18 +132,16 @@
   
   .order-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 0.75rem;
-    background-color: white;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 8px 0;
   }
   
   .item-info {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 8px;
     flex: 1;
   }
   
@@ -162,11 +160,27 @@
   .item-quantity {
     color: #6c757d;
     margin: 0 1rem;
+    min-width: 70px;
+    text-align: right;
+  }
+
+  .review-star-button {
+    background-color: #ffc107;
+    border: 1px solid #ffc107;  
+    cursor: pointer;
+    color:white; 
+    font-size: 1rem;
+    border-radius: 20px;
+    padding: 0.3rem 1rem; 
+    margin: 0 16px;
+    flex-shrink: 0;
+    display: block;
+    /* Gerekirse genişlik ayarı ekleyin */
   }
   
   .item-price {
     font-weight: 500;
     color: #1a1a1a;
-    min-width: 100px;
+    min-width: 70px;
     text-align: right;
   }

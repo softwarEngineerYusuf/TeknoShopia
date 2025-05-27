@@ -1,5 +1,13 @@
 import React from 'react';
 import './MyOrders.css';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Rating from '@mui/material/Rating';
+import StarIcon from '@mui/icons-material/Star';
 
 const mockOrders = [
   {
@@ -59,15 +67,83 @@ const mockOrders = [
   }
 ];
 
+function ReviewModal({ open, onClose, onSubmit }) {
+  const [rating, setRating] = React.useState(0);
+  const [comment, setComment] = React.useState('');
+
+  React.useEffect(() => {
+    if (open) {
+      setRating(0);
+      setComment('');
+    }
+  }, [open]);
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+      <DialogTitle>Evaluate the product</DialogTitle>
+      <DialogContent>
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '12px 0' }}>
+          <Rating
+            name="product-rating"
+            value={rating}
+            onChange={(_, newValue) => setRating(newValue)}
+            size="large"
+            icon={<StarIcon style={{ fontSize: 44, color: '#FFD700' }} />}         // Sarı yıldız
+            emptyIcon={<StarIcon style={{ fontSize: 44, color: '#FFD700', opacity: 0.3 }} />}
+          />
+        </div>
+        <TextField
+          label="Comment.."
+          multiline
+          minRows={3}
+          fullWidth
+          value={comment}
+          onChange={e => setComment(e.target.value)}
+          variant="outlined"
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} color="secondary" style={{ backgroundColor: 'red', color: 'white' }} variant="contained">
+          Cancel
+        </Button>
+        <Button
+          onClick={() => {
+            onSubmit({ rating, comment });
+            onClose();
+          }}
+          color="primary"
+          variant="contained"
+          disabled={rating === 0}
+         style={{ backgroundColor: 'green', color: 'white' }}>
+          Send
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 function OrderCard({ order }) {
   const [isExpanded, setIsExpanded] = React.useState(false);
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [selectedItem, setSelectedItem] = React.useState(null);
+
+  const handleReviewClick = (item) => {
+    setSelectedItem(item);
+    setModalOpen(true);
+  };
+
+  const handleReviewSubmit = ({ rating, comment }) => {
+    // Burada API'ye gönderme işlemi yapılabilir
+    // console.log('Yıldız:', rating, 'Yorum:', comment, 'Ürün:', selectedItem);
+    alert(`Yıldız: ${rating}\nYorum: ${comment}\nÜrün: ${selectedItem?.name}`);
+  };
 
   return (
     <div className="order-card">
       <div className="order-header" onClick={() => setIsExpanded(!isExpanded)}>
         <div className='order-image'>
           <img src={order.orderImage} alt="Order" />
-          <img src={order.orderImage2} alt="Order" />
+          {order.orderImage2 && <img src={order.orderImage2} alt="Order" />}
         </div>
         <div className="order-main-info">
           <span className="order-number">{order.orderNumber}</span>
@@ -91,6 +167,15 @@ function OrderCard({ order }) {
                   <img src={item.image} alt={item.name} className="item-image" />
                   <span className="item-name">{item.name}</span>
                 </div>
+                <button
+                  className='review-star-button'
+                  onClick={e => {
+                    e.stopPropagation();
+                    handleReviewClick(item);
+                  }}
+                >
+                  Review & Star
+                </button>
                 <span className="item-quantity">x{item.quantity}</span>
                 <span className="item-price">{item.price.toFixed(2)} ₺</span>
               </div>
@@ -98,6 +183,11 @@ function OrderCard({ order }) {
           </div>
         </div>
       )}
+      <ReviewModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSubmit={handleReviewSubmit}
+      />
     </div>
   );
 }

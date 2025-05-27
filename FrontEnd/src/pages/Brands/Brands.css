@@ -1,0 +1,103 @@
+.container {
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+}
+
+.brands-cards-title {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.brands-cards-and-sort {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.brands-cards {
+    width: 100%;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.card-image-brands-cards {
+    width: 100%;
+    height: auto;
+}
+
+.card-details-brands-cards {
+    padding: 10px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.product-name-brands-cards {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.product-price-brands-cards {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.rating-brands-cards{
+    display: flex;
+  justify-content: center;
+  font-size: large;
+}
+
+.buy-button-brands-cards {
+    background-color: black;
+    color: white;
+    border: none;
+    padding: 8px;
+    width: 100%;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 18px;
+    transition: background-color 0.3s;
+    transition: background-color 0.3s, opacity 0.5s ease;
+}
+.buy-button-category-cards:hover {
+    background-color: #333; /* Daha koyu bir renk */
+    opacity: 0.9; /* Hafif bir opaklık */
+    transform: scale(1.05); /* Hafif büyüme efekti */
+  }
+
+.category-cards:hover .buy-button-category-cards {
+    opacity: 1; /* Hover durumunda butonu görünür yap */
+    visibility: visible; /* Hover durumunda butonu görünür yap */
+}
+
+.favorite-btn-brands:hover svg {
+  color: #c0392b;
+  transform: scale(1.1);
+  transition: all 0.2s;
+}
+
+/* Responsive styles */
+@media (max-width: 1200px) {
+    .col-md-3 {
+        flex: 0 0 33.3333%;
+        max-width: 33.3333%;
+    }
+}
+
+@media (max-width: 768px) {
+    .col-md-3 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 576px) {
+    .col-md-3 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}

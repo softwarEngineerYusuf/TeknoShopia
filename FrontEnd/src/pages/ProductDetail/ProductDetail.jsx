@@ -15,6 +15,7 @@ import {
   LeftOutlined,
   RightOutlined,
   ShoppingCartOutlined,
+   SwapOutlined,
 } from "@ant-design/icons";
 import "./ProductDetail.css";
 import { getProductById } from "../../allAPIs/product";
@@ -151,14 +152,26 @@ function ProductDetail() {
               <Text type="secondary">Kategori: {product.category?.name}</Text>
             </div>
 
-            <Button
-              type="primary"
-              icon={<ShoppingCartOutlined />}
-              size="large"
-              style={{ backgroundColor: "#32174D", width: "100%" }}
-            >
-              Sepete Ekle
-            </Button>
+            <div className="product-buttons" style={{ display: "flex", gap: 4 }}>
+              <Button
+                type="primary"
+                 icon={<SwapOutlined />}
+                size="large"
+                style={{ backgroundColor: "green", width: "30%" }}
+                 className="compare-btn-product-detail"
+              >
+                Compare
+              </Button>
+
+              <Button
+                type="primary"
+                icon={<ShoppingCartOutlined />}
+                size="large"
+                style={{ backgroundColor: "#32174D", width: "70%" }}
+              >
+                Sepete Ekle
+              </Button>
+            </div>
 
             <div style={{ marginTop: 24 }}>
               <Title level={4}>Teknik Özellikler</Title>

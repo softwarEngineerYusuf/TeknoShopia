@@ -14,6 +14,7 @@ import MyOrders from "./components/MyOrders/MyOrders";
 import TopPicksMore from "./pages/TopPicksMore/TopPicksMore";
 import Payment from "./pages/Payment/Payment";
 import { AuthProvider } from "./context/AuthContext";
+import Brands from "./pages/Brands/Brands";
 function Layout() {
   return (
     <>
@@ -35,11 +36,13 @@ function App() {
           <Route path="/TopPicksMore" element={<TopPicksMore />} />
           <Route path="/category/:id" element={<Category />} />
           <Route path="/payment" element={<Payment />} />
+           <Route path="/brands" element={<Brands />} />
         </Route>
         <Route path="/Login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/basket" element={<Basket />} />
         <Route path="/compare" element={<Compare />} />
+       
       </Routes>
     </AuthProvider>
   );

@@ -1,6 +1,9 @@
 import React from 'react';
 import './Brands.css';
+import { useNavigate } from 'react-router-dom';
+
 const Brands = () => {
+  const navigate = useNavigate(); 
   const brands = [
     { id: 1, name: 'TCL', logoUrl: 'https://cdn.vatanbilgisayar.com/Upload/GENERAL/ter-ed-marka/tcl-logo.png' },
     { id: 2, name: 'Samsung', logoUrl: 'https://cdn.vatanbilgisayar.com/Upload/GENERAL/ter-ed-marka/samsung.png' },
@@ -27,11 +30,9 @@ const Brands = () => {
               className="brand-logo"
               title={brand.name}
               style={{cursor:'pointer'}}
-              onClick={() => alert(`You clicked on ${brand.name}`)} // markayla alakalı sayfa yönlendirmesi yapacaz
-              
+              onClick={() => navigate('/brands')} // Yönlendirme burada
             />
             <h1 style={{display:'flex',alignItems:'center',justifyContent:'center',marginTop:'0.5rem'}}>{brand.name}</h1>
-
           </div>
         ))}
       </div>
