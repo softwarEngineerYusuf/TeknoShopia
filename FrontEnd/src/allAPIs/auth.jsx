@@ -14,3 +14,18 @@ export const loginApi = async (email, password) => {
     throw error;
   }
 };
+
+export const registerApi = async (name, email, password, confirmPassword) => {
+  try {
+    const response = await api.post("/auth/register", {
+      name,
+      email,
+      password,
+      confirmPassword,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Kayıt başarısız:", error.response?.data || error.message);
+    throw error;
+  }
+};

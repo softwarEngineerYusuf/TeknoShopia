@@ -5,7 +5,6 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
-// import GoogleIcon from "@mui/icons-material/Google";
 import IconButton from "@mui/material/IconButton";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InputLabel from "@mui/material/InputLabel";
@@ -13,20 +12,65 @@ import InputAdornment from "@mui/material/InputAdornment";
 import FormControl from "@mui/material/FormControl";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { useAuth } from "../../context/AuthContext"; // AuthContext import edildi
+import { Typography } from "@mui/material";
 
 function Register() {
   const navigate = useNavigate();
+  const { register } = useAuth();
+
+  const [formData, setFormData] = React.useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [error, setError] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
 
   const [showPassword, setShowPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const handleClickShowConfirmPassword = () =>
+    setShowConfirmPassword((show) => !show);
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
 
-  const handleMouseUpPassword = (event) => {
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    setError("");
+    setLoading(true);
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Şifreler eşleşmiyor.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      await register(
+        formData.name,
+        formData.email,
+        formData.password,
+        formData.confirmPassword
+      );
+      navigate("/"); // Başarılı kayıt sonrası anasayfaya yönlendir
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Kayıt sırasında bir hata oluştu."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,65 +91,60 @@ function Register() {
             </div>
             <div
               className="UnderLoginAndRegisterButtonRgs"
-              style={{ backgroundColor: "##2C2C2C" }}
+              style={{ backgroundColor: "##2C2C2C" }} // Çift # var, #2C2C2C olmalı
             >
               <button>Register</button>
             </div>
           </div>
-          <div className="allInputsRgs">
-            <div className="inputRgs">
-              <Box
-                component="form"
-                sx={{ "& > :not(style)": { width: "100%" } }}
-                noValidate
-                autoComplete="off"
-              >
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            sx={{ "& > :not(style)": { width: "100%" } }}
+            noValidate
+            autoComplete="off"
+          >
+            <div className="allInputsRgs">
+              <div className="inputRgs">
                 <TextField
-                  id="outlined-basic"
+                  id="fullName"
+                  name="name"
                   label="FullName"
                   variant="outlined"
+                  value={formData.name}
+                  onChange={handleChange}
+                  fullWidth
+                  required
                 />
-              </Box>
-            </div>
-            <div className="inputRgs">
-              <Box
-                component="form"
-                sx={{ "& > :not(style)": { width: "100%" } }}
-                noValidate
-                autoComplete="off"
-              >
+              </div>
+              <div className="inputRgs">
                 <TextField
-                  id="outlined-basic"
+                  id="email"
+                  name="email"
                   label="E-Posta"
                   variant="outlined"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  fullWidth
+                  required
                 />
-              </Box>
-            </div>
-            <div className="inputRgs">
-              <Box
-                component="form"
-                sx={{ "& .MuiTextField-root": { width: "100%" } }}
-                noValidate
-                autoComplete="off"
-              >
+              </div>
+              <div className="inputRgs">
                 <FormControl sx={{ width: "100%" }} variant="outlined">
-                  <InputLabel htmlFor="outlined-adornment-password">
-                    Password
-                  </InputLabel>
+                  <InputLabel htmlFor="password">Password</InputLabel>
                   <OutlinedInput
-                    id="outlined-adornment-password"
+                    id="password"
+                    name="password"
                     type={showPassword ? "text" : "password"}
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
                     endAdornment={
                       <InputAdornment position="end">
                         <IconButton
-                          aria-label={
-                            showPassword
-                              ? "hide the password"
-                              : "display the password"
-                          }
+                          aria-label="toggle password visibility"
                           onClick={handleClickShowPassword}
                           onMouseDown={handleMouseDownPassword}
-                          onMouseUp={handleMouseUpPassword}
                           edge="end"
                         >
                           {showPassword ? <VisibilityOff /> : <Visibility />}
@@ -115,54 +154,67 @@ function Register() {
                     label="Password"
                   />
                 </FormControl>
-              </Box>
-            </div>
-            <div className="inputRgs">
-              <Box
-                component="form"
-                sx={{ "& .MuiTextField-root": { width: "100%" } }}
-                noValidate
-                autoComplete="off"
-              >
+              </div>
+              <div className="inputRgs">
                 <FormControl sx={{ width: "100%" }} variant="outlined">
-                  <InputLabel htmlFor="outlined-adornment-password">
+                  <InputLabel htmlFor="confirmPassword">
                     Confirm Password
                   </InputLabel>
                   <OutlinedInput
-                    id="outlined-adornment-password"
-                    type={showPassword ? "text" : "password"}
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    required
                     endAdornment={
                       <InputAdornment position="end">
                         <IconButton
-                          aria-label={
-                            showPassword
-                              ? "hide the password"
-                              : "display the password"
-                          }
-                          onClick={handleClickShowPassword}
+                          aria-label="toggle confirm password visibility"
+                          onClick={handleClickShowConfirmPassword}
                           onMouseDown={handleMouseDownPassword}
-                          onMouseUp={handleMouseUpPassword}
                           edge="end"
                         >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                          {showConfirmPassword ? (
+                            <VisibilityOff />
+                          ) : (
+                            <Visibility />
+                          )}
                         </IconButton>
                       </InputAdornment>
                     }
-                    label="Password"
+                    label="Confirm Password"
                   />
                 </FormControl>
-              </Box>
+              </div>
+              {error && (
+                <Typography
+                  color="error"
+                  variant="body2"
+                  sx={{ mt: 1, textAlign: "center" }}
+                >
+                  {error}
+                </Typography>
+              )}
+              <div className="checkboxRgs" style={{ maxWidth: "350px" }}>
+                <input className="inputsOfLoginRgs" type="checkbox" /> I approve
+                of Teknoshopia sending commercial electronic messages via
+                e-mail.
+              </div>
             </div>
-            <div className="checkboxRgs" style={{ maxWidth: "350px" }}>
-              <input className="inputsOfLoginRgs" type="checkbox" /> I approve
-              of Teknoshopia sending commercial electronic messages via e-mail.{" "}
+            <div className="loginButtonRegister">
+              <Stack spacing={2} direction="row">
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={loading}
+                  fullWidth
+                >
+                  {loading ? "Kaydediliyor..." : "Register"}
+                </Button>
+              </Stack>
             </div>
-          </div>
-          <div className="loginButtonRegister">
-            <Stack spacing={2} direction="row">
-              <Button variant="contained">Register</Button>
-            </Stack>
-          </div>
+          </Box>
         </div>
       </div>
     </>
