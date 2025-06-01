@@ -1,33 +1,84 @@
 .compare-section {
-    position: fixed;   
-    bottom: 0;         
-    left: 0;           
-    width: 100%;       
-    background: #f9f9f9;
-    border-top: 2px solid #ddd;
-    padding: 10px;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-    z-index: 1000;     /* İçeriklerin üstünde olmasını sağlar */
-  }
-  
-  .compare-items {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;  /* Yatay kaydırmayı etkinleştir */
-    white-space: nowrap;
-    padding: 10px;
-  }
-  
-  .compare-item {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: center;
-    min-width: 200px; /* Ürün kutularının minimum genişliği */
-    background: white;
-  }
-  
-  .compare-item img {
-    width: 100px;
-    height: auto;
-  }
-  
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #f9f9f9;
+  border-top: 2px solid #ddd;
+  padding: 10px 20px;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.compare-items-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.compare-items {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 10px 0;
+  padding-left: 40px;    /* sola boşluk ekler, sağa kaydırır */
+  justify-content: flex-start;
+}
+
+.compare-item {
+  position: relative;
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+  min-width: 200px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+}
+
+.compare-item img {
+  width: 100px;
+  height: auto;
+  margin-bottom: 8px;
+}
+
+/* Çarpı butonu */
+.remove-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.remove-btn:hover {
+  color: red;
+}
+
+.compare-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  margin-top: 140px;     /* dikey konum */
+  margin-left: 3px;   /* yatay konum */
+}
+
+.action-btn {
+  padding: 10px 25px;
+  background-color: #32174D;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.action-btn:hover {
+  background-color: #32174D;
+}

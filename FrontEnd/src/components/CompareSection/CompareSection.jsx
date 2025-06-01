@@ -5,14 +5,11 @@ function CompareSection({ compareList }) {
   return (
     <div className="compare-section">
       <h2>Karşılaştırma Listesi</h2>
-      <div className="compare-items">
-        {compareList.map(
-          (
-            product // map parametrelerinden index'i kaldırdık
-          ) => (
+      <div className="compare-items-wrapper">
+        <div className="compare-items">
+          {compareList.map((product) => (
             <div key={product.id} className="compare-item">
-              {" "}
-              {/* <<< key'i product.id olarak DEĞİŞTİRDİK */}
+              <button className="remove-btn">×</button>
               <img
                 src={product.image}
                 alt={product.name}
@@ -21,8 +18,12 @@ function CompareSection({ compareList }) {
               <h3>{product.name}</h3>
               <p>{product.price}</p>
             </div>
-          )
-        )}
+          ))}
+        </div>
+        <div className="compare-actions">
+          <button className="action-btn">Karşılaştır</button>
+          <button className="action-btn">Temizle</button>
+        </div>
       </div>
     </div>
   );
