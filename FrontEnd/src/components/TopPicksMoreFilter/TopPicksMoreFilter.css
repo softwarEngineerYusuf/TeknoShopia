@@ -6,7 +6,6 @@
     width: 100%;
     max-width: 250px;
     margin: 2rem;
-    border: 1px solid #ddd;
   }
   
   .top-picks-more-filter h4 {
@@ -34,3 +33,45 @@
     }
   }
   
+  .brand-filter-toppicks {
+    max-height: 400px;
+    overflow-y: auto;
+    border: none;
+    background: #f4f7fb;
+    border-radius: 14px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 12px rgba(60, 60, 60, 0.07);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .brand-filter-toppicks label {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    border-radius: 12px;
+    padding: 1rem 1.4rem;
+    font-size: 1.25rem;
+    color: #1a2233;
+    cursor: pointer;
+    box-shadow: none;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    border: 1px solid transparent;
+    font-weight: 600;
+  }
+  
+  .brand-filter-toppicks label img,
+  .brand-filter-toppicks .brand-logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: #f7f9fb;
+  }
+  
+  .brand-filter-toppicks input[type="checkbox"] {
+    accent-color: #007aff;
+    width: 18px;
+    height: 18px;
+    margin-right: 0.5rem;
+  }

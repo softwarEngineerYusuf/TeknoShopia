@@ -1,41 +1,109 @@
-.category-filter {
+
+.category-filter-ctgrfltr {
   display: flex;
   justify-content: center;
-  align-items: center;
-  padding: 1rem;
+  align-items: flex-start;
+  padding: 2rem 1rem;
+  min-height: 100vh;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
 }
 
-.filter-container {
+.filter-container-ctgrfltr {
   width: 100%;
-  max-width: 250px;
+  max-width: 340px;
   margin: 2rem;
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
+  padding: 2.2rem 1.7rem;
+  transition: box-shadow 0.3s;
 }
 
-.brand-filter {
-  max-height: 200px;
+.filter-container-ctgrfltr:hover {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
+}
+
+.brand-filter-ctgrfltr {
+  max-height: 260px;
   overflow-y: auto;
-  border: 1px solid #ddd;
-  padding: 10px;
+  border: none;
+  background: #f4f7fb;
+  border-radius: 14px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 12px rgba(60, 60, 60, 0.07);
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-filter-ctgrfltr label {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  /* background: #fff;  arka planı kaldırıldı */
+  border-radius: 12px;
+  padding: 1rem 1.4rem;
+  font-size: 1.25rem;   /* Yazı büyütüldü */
+  color: #1a2233;
+  cursor: pointer;
+  box-shadow: none; /* Gölge kaldırıldı */
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  border: 1px solid transparent;
+  font-weight: 600; /* Biraz daha kalın */
+}
+
+.brand-filter-ctgrfltr label img,
+.brand-filter-ctgrfltr .brand-logo {
+  width: 36px;   /* Daha büyük logo */
+  height: 36px;
+  object-fit: contain;
   border-radius: 8px;
+  background: #f7f9fb;
 }
 
-.price-filter {
-  margin-top: 1rem;
+.brand-filter-ctgrfltr input[type="checkbox"] {
+  accent-color: #007aff;
+  width: 18px;
+  height: 18px;
+  margin-right: 0.5rem;
 }
 
-.price-filter .ant-input-number {
-  width: 100px;
+.price-filter-ctgrfltr {
+  margin-top: 1.5rem;
+  background: #f4f7fb;
+  padding: 16px;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(60, 60, 60, 0.07);
+}
+
+.price-filter-ctgrfltr .ant-input-number {
+  width: 120px;
+  border-radius: 10px;
+  border: 1px solid #e0e7ef;
+  transition: border 0.2s;
+  font-size: 1rem;
+}
+
+.price-filter-ctgrfltr .ant-input-number:focus,
+.price-filter-ctgrfltr .ant-input-number:hover {
+  border: 1.5px solid #007aff;
 }
 
 @media (max-width: 768px) {
-  .filter-container {
-    width: 100%;
-    margin: 1rem;
+  .category-filter-ctgrfltr {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem 0.5rem;
+  }
+  .filter-container-ctgrfltr {
+    max-width: 100%;
+    margin: 1rem 0;
+    padding: 1.2rem 1rem;
   }
 }
 
 @media (max-width: 480px) {
-  .filter-container {
-    margin: 0.5rem;
+  .filter-container-ctgrfltr {
+    margin: 0.5rem 0;
+    padding: 1rem 0.5rem;
   }
 }

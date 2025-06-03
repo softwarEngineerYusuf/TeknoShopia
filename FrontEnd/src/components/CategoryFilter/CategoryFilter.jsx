@@ -5,14 +5,14 @@ import { getAllBrands } from "../../allAPIs/brand";
 
 // eslint-disable-next-line react/prop-types
 const BrandFilter = ({ brands, selectedBrands, onChange }) => (
-  <div className="brand-filter">
+  <div className="brand-filter-ctgrfltr">
     <Checkbox.Group value={selectedBrands} onChange={onChange}>
       {brands.map((brand) => (
-        <div key={brand._id} style={{ marginBottom: "8px" }}>
+        <div key={brand._id}>
           <Checkbox value={brand._id}>
             {brand.logo?.url ? (
               <div
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
               >
                 <img
                   src={brand.logo.url}
@@ -46,7 +46,7 @@ const PriceFilter = ({ priceRange, setPriceRange }) => {
   ];
 
   return (
-    <div className="price-filter">
+    <div className="price-filter-ctgrfltr">
       <h4 style={{ marginBottom: "0.6rem" }}>Price</h4>
       <div
         style={{
@@ -123,9 +123,9 @@ function CategoryFilter({ onFilterChange }) {
 
   if (loading) {
     return (
-      <div className="category-filter">
+      <div className="category-filter-ctgrfltr">
         <div
-          className="filter-container"
+          className="filter-container-ctgrfltr"
           style={{ display: "flex", justifyContent: "center", padding: "20px" }}
         >
           <Spin />
@@ -135,8 +135,8 @@ function CategoryFilter({ onFilterChange }) {
   }
 
   return (
-    <div className="category-filter">
-      <div className="filter-container">
+    <div className="category-filter-ctgrfltr">
+      <div className="filter-container-ctgrfltr">
         <h4 style={{ marginBottom: "0.6rem" }}>Brands</h4>
         <BrandFilter
           brands={brands}
