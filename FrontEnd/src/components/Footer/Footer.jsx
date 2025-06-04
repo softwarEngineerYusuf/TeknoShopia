@@ -8,7 +8,7 @@ const Footer = () => {
         <nav>
           <ul>
             <li>
-              <a className="fs-5" href="#">Mağazalar</a>
+              <a className="fs-5" href="#">TeknoShopia</a>
             </li>
             <li>
               <div className="social-icons">
