@@ -112,7 +112,7 @@ function DiscountsCarousel() {
                           </div>
                         </div>
                         <button className="buy-button-discount-corousel">
-                          Satın Al
+                          See Detail
                         </button>
                       </div>
                     </div>

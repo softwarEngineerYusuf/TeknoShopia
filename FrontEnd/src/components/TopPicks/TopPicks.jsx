@@ -76,7 +76,7 @@ const TopPicks = () => {
                   className="buy-button-top-picks"
                   onClick={() => goToProductDetail(product._id)}
                 >
-                  İncele
+                  See Detail
                 </button>
               </div>
             </div>
