@@ -196,7 +196,23 @@ function MyOrders() {
   return (
     <div className="orders-page">
       <div className="orders-container">
-        <h1>My Orders</h1>
+        <h1>
+          <span>My Orders</span>
+          <span className="electro-anim" aria-label="Order Animation" title="Order Animation">
+            {/* Elektronik alışveriş temalı SVG animasyon */}
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="6" y="16" width="36" height="22" rx="4" fill="#4F8EF7"/>
+              <rect x="10" y="20" width="28" height="14" rx="2" fill="#fff"/>
+              <rect x="18" y="28" width="12" height="4" rx="2" fill="#4F8EF7"/>
+              <circle cx="16" cy="40" r="3" fill="#FFD600"/>
+              <circle cx="32" cy="40" r="3" fill="#FFD600"/>
+              <rect x="20" y="10" width="8" height="8" rx="2" fill="#FFD600" stroke="#4F8EF7" strokeWidth="1.5"/>
+              <path d="M24 10v-3" stroke="#4F8EF7" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M24 7h2.5" stroke="#4F8EF7" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M24 7h-2.5" stroke="#4F8EF7" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </span>
+        </h1>
         <div className="orders-list">
           {mockOrders.map(order => (
             <OrderCard key={order.id} order={order} />

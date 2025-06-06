@@ -1,18 +1,15 @@
 import "../Login/Login.css";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
-import Stack from "@mui/material/Stack";
-import Button from "@mui/material/Button";
-import GoogleIcon from "@mui/icons-material/Google";
-import IconButton from "@mui/material/IconButton";
-import OutlinedInput from "@mui/material/OutlinedInput";
-import InputLabel from "@mui/material/InputLabel";
-import InputAdornment from "@mui/material/InputAdornment";
-import FormControl from "@mui/material/FormControl";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { useState, useEffect, useRef } from "react";
+import "antd/dist/reset.css";
+import { Card, Input, Button, Typography, Divider, Form, message } from "antd";
+import {
+  GoogleOutlined,
+  EyeInvisibleOutlined,
+  EyeTwoTone,
+  LockOutlined,
+  MailOutlined,
+} from "@ant-design/icons";
 import { useAuth } from "../../context/AuthContext";
 
 function Login() {
@@ -23,6 +20,21 @@ function Login() {
   const [password, setPassword] = useState("123456789");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [form] = Form.useForm();
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    if (cardRef.current) {
+      cardRef.current.style.opacity = 0;
+      cardRef.current.style.transform = "translateY(40px) scale(0.98)";
+      setTimeout(() => {
+        cardRef.current.style.transition =
+          "opacity 0.6s cubic-bezier(.4,0,.2,1), transform 0.6s cubic-bezier(.4,0,.2,1)";
+        cardRef.current.style.opacity = 1;
+        cardRef.current.style.transform = "translateY(0) scale(1)";
+      }, 60);
+    }
+  }, []);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -41,123 +53,161 @@ function Login() {
   const handleLogin = async () => {
     try {
       await login(email, password);
+      message.success("Başarıyla giriş yapıldı!");
       navigate("/");
     } catch (error) {
       setError("E-posta adresi veya şifre yanlış.");
-      console.error("Giriş başarısız:", error);
+      message.error("E-posta adresi veya şifre yanlış.");
     }
   };
-
   return (
-    <>
-      <div className="LoginPageMain">
-        <div className="boxOfLogin" style={{ padding: "50px 50px" }}>
-          <div className="LoginAndRegisterButtonLgn">
-            <div
-              className="UnderLoginAndRegisterButtonLgn"
-              style={{ backgroundColor: "##2C2C2C" }}
-            >
-              <button>Login</button>
-            </div>
-            <div
-              className="UnderLoginAndRegisterButtonLgn"
+    <div
+      style={{
+        minHeight: "100vh",
+        background:
+          "linear-gradient(135deg, #21005D 60%, #7B2FF2 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Card
+        ref={cardRef}
+        style={{
+          width: 380,
+          borderRadius: 16,
+          boxShadow: "0 8px 32px rgba(33,0,93,0.12)",
+          opacity: 0,
+          transform: "translateY(40px) scale(0.98)",
+        }}
+      >
+        <Typography.Title
+          level={3}
+          style={{
+            textAlign: "center",
+            color: "#21005D",
+            marginBottom: 8,
+          }}
+        >
+          TeknoShopia Giriş
+        </Typography.Title>
+        <Divider style={{ margin: "12px 0 24px 0" }} />
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 12,
+            marginBottom: 24,
+          }}
+        >
+          <Button
+            type="primary"
+            style={{
+              background: "#21005D",
+              borderRadius: 8,
+              color: "#fff",
+            }}
+            disabled
+          >
+            Login
+          </Button>
+          <Button
+            style={{
+              background: "#f4f7fb",
+              color: "#21005D",
+              borderRadius: 8,
+              border: "1px solid #e0e0e0",
+            }}
+            onClick={() => navigate("/register")}
+          >
+            Register
+          </Button>
+        </div>
+        {error && (
+          <Typography.Text
+            type="danger"
+            style={{
+              display: "block",
+              textAlign: "center",
+              marginBottom: 12,
+            }}
+          >
+            {error}
+          </Typography.Text>
+        )}
+        <Form form={form} layout="vertical" onFinish={handleLogin}>
+          <Form.Item
+            name="email"
+            initialValue={email}
+            rules={[
+              { required: true, message: "E-posta zorunlu" },
+              { type: "email", message: "Geçerli bir e-posta girin" },
+            ]}
+          >
+            <Input
+              prefix={<MailOutlined />}
+              placeholder="E-Posta"
+              size="large"
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Form.Item>
+          <Form.Item
+            name="password"
+            initialValue={password}
+            rules={[{ required: true, message: "Şifre zorunlu" }]}
+          >
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder="Şifre"
+              size="large"
+              iconRender={(visible) =>
+                visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+              }
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </Form.Item>
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+              size="large"
               style={{
-                backgroundColor: "#2C2C2C",
-                borderRadius: "10px",
-                color: "white",
-                padding: "3px 8px",
+                borderRadius: 8,
+                background: "#21005D",
               }}
             >
-              <button onClick={() => navigate("/register")}>Register</button>
-            </div>
-          </div>
-          {error && (
-            <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>
-          )}
-          <div className="allInputsLgn">
-            <div className="emailInputLogin">
-              <Box
-                component="form"
-                sx={{ "& > :not(style)": { width: "100%" } }}
-                noValidate
-                autoComplete="off"
-              >
-                <TextField
-                  id="outlined-basic"
-                  label="E-Posta"
-                  variant="outlined"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </Box>
-            </div>
-            <div>
-              <Box
-                component="form"
-                sx={{ "& .MuiTextField-root": { width: "100%" } }}
-                noValidate
-                autoComplete="off"
-              >
-                <FormControl sx={{ width: "100%" }} variant="outlined">
-                  <InputLabel htmlFor="outlined-adornment-password">
-                    Password
-                  </InputLabel>
-                  <OutlinedInput
-                    id="outlined-adornment-password"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    endAdornment={
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label={
-                            showPassword
-                              ? "hide the password"
-                              : "display the password"
-                          }
-                          onClick={handleClickShowPassword}
-                          onMouseDown={handleMouseDownPassword}
-                          onMouseUp={handleMouseUpPassword}
-                          edge="end"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    }
-                    label="Password"
-                  />
-                </FormControl>
-              </Box>
-            </div>
-          </div>
-          <div>
-            <div className="loginButtonLogin">
-              <Stack spacing={2} direction="row">
-                <Button variant="contained" onClick={handleLogin}>
-                  Login
-                </Button>
-              </Stack>
-            </div>
-            <div className="forgotPasswordLink">
-              {" "}
-              <a href="">Forgot Password?</a>{" "}
-            </div>
-            <div className="googleLoginButton">
-              <button
-                style={{
-                  border: "1px solid #21005D",
-                  borderRadius: "30px",
-                  width: "100%",
-                }}
-                onClick={handleGoogleLogin}
-              >
-                <GoogleIcon style={{ color: "red" }} /> sign up with google
-              </button>
-            </div>
-          </div>
+              Login
+            </Button>
+          </Form.Item>
+        </Form>
+        <div
+          style={{
+            textAlign: "center",
+            margin: "8px 0 12px 0",
+          }}
+        >
+          <a href="#" style={{ color: "#21005D" }}>
+            Forgot Password?
+          </a>
         </div>
-      </div>
-    </>
+        <Divider plain>veya</Divider>
+        <Button
+          icon={<GoogleOutlined />}
+          block
+          size="large"
+          style={{
+            borderRadius: 8,
+            background: "#fff",
+            color: "#21005D",
+            border: "1px solid #21005D",
+          }}
+          onClick={handleGoogleLogin}
+        >
+          Google ile Giriş Yap
+        </Button>
+      </Card>
+    </div>
   );
 }
 

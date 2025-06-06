@@ -1,86 +1,293 @@
+
 .basketAllMainPage {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    width: 80%;
-    margin: 0 auto;
-    gap: 20px;
+ max-width: 1200px; 
+  margin: 5rem auto;   
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #222;
 }
 
+/* Başlık */
 .orderDetailHeading {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 10px;
-    margin-top: 30px;
-    width: 100%; 
-    text-align: left;
+  width: 100%;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e1e2f;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #1a237e;
+  padding-bottom: 8px;
 }
 
+/* Ürün Detayları ve Sepet Listesi */
 .summaryBasketList {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    width: 60%;
+  flex: 1 1 60%;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(26, 35, 126, 0.15);
+  padding: 25px 30px;
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  min-width: 280px;
 }
 
+/* Ürün Resmi */
 .summaryBasketProductImage img {
-    border-radius: 8px;
+  width: 140px;
+  height: 140px;
+  border-radius: 16px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
 }
 
+.summaryBasketProductImage img:hover {
+  transform: scale(1.05);
+}
+
+/* Ürün Bilgileri */
 .summaryBasketProductDetails {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    font-size: 1rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
+.summaryBasketProductDetails p {
+  margin: 0;
+  font-weight: 600;
+}
+
+.brand {
+  font-size: 1.1rem;
+  color: #1a237e;
+  letter-spacing: 0.05em;
+}
+
+.productName {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.color {
+  font-size: 1rem;
+  color: #666;
+}
+
+/* Adet Kontrolü */
 .pieceOfProductBasketDetail {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  color: #444;
 }
 
 .quantityButton {
-    background-color: #f5f5f5;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 5px 10px;
-    font-size: 1rem;
-    cursor: pointer;
+  background-color: #1a237e;
+  border: none;
+  color: white;
+  font-size: 1.3rem;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  user-select: none;
 }
 
+.quantityButton:hover {
+  background-color: #283593;
+}
+
+.quantityValue {
+  min-width: 28px;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #222;
+}
+
+/* Fiyat Bölümü */
 .priceOfProductBasket {
-    font-weight: bold;
-    font-size: 1.2rem;
-    color: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 100px;
 }
 
+.originalPrice {
+  font-size: 1.1rem;
+  color: #999;
+  text-decoration: line-through;
+  font-weight: 500;
+}
+
+.discountedPrice {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #e63946;
+}
+
+/* Sipariş Özeti */
 .summaryOrderList {
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    width: 30%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  flex: 1 1 35%;
+  background: #f9f9ff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(26, 35, 126, 0.1);
+  padding: 30px 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 280px;
 }
 
-.couponCodeEnterArea{
-    display: flex;
-    justify-content: space-between;
+.summaryOrderList h3 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1e1e2f;
+  border-bottom: 2px solid #1a237e;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
 }
 
+.summaryOrderList p {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  justify-content: space-between;
+}
+
+.summaryOrderList p span {
+  font-weight: 700;
+  color: #1a237e;
+}
+
+/* Kupon Kodu Alanı */
+.couponCodeEnterArea {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.couponCodeEnterArea input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 2px solid #1a237e;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline-offset: 2px;
+  transition: border-color 0.3s ease;
+}
+
+.couponCodeEnterArea input:focus {
+  border-color: #283593;
+  box-shadow: 0 0 6px rgba(40, 53, 147, 0.5);
+}
+
+.useCouponButton {
+  background-color: #1a237e;
+  border: none;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.useCouponButton:hover {
+  background-color: #283593;
+}
+
+/* İndirim ve Toplam */
+.summaryOrderList .finalPrice {
+  font-size: 1.4rem;
+  color: #e63946;
+  font-weight: 700;
+}
+
+/* Satın Alma Butonu */
 .checkoutButton {
-    padding: 10px 20px;
-    background-color: #21005D;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
+  margin-top: 15px;
+  padding: 14px 0;
+  background: linear-gradient(90deg, #1a237e, #283593);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  box-shadow: 0 6px 12px rgba(26, 35, 126, 0.4);
+}
+
+.checkoutButton:hover {
+  background: linear-gradient(90deg, #283593, #0d1333);
+  box-shadow: 0 8px 20px rgba(40, 53, 147, 0.6);
+}
+
+/* Responsive Tasarım */
+@media (max-width: 900px) {
+  .basketAllMainPage {
+    flex-direction: column;
+    align-items: center;
+    width: 90%;
+  }
+
+  .summaryBasketList,
+  .summaryOrderList {
+    width: 100%;
+  }
+
+  .summaryBasketList {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .summaryBasketProductDetails {
+    align-items: center;
+  }
+
+  .pieceOfProductBasketDetail {
+    justify-content: center;
+  }
+
+  .priceOfProductBasket {
+    flex-direction: row;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .orderDetailHeading {
+    font-size: 1.5rem;
+  }
+
+  .summaryBasketProductImage img {
+    width: 110px;
+    height: 110px;
+  }
+
+  .summaryBasketProductDetails .productName {
+    font-size: 1.2rem;
+  }
+
+  .quantityButton {
+    padding: 5px 12px;
+    font-size: 1.1rem;
+  }
+
+  .checkoutButton {
+    font-size: 1.1rem;
+    padding: 12px 0;
+  }
 }

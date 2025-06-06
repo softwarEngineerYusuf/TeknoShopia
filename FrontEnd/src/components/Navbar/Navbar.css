@@ -15,7 +15,6 @@
   height: auto;
 }
 
-
 .navbar-buttons {
   display: flex;
   align-items: center;
@@ -37,4 +36,107 @@
 
 .iconNav {
   margin-right: 0.4rem;
+}
+
+/* Hamburger menu button for mobile */
+.navbar-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: white;
+  cursor: pointer;
+  margin-left: 1rem;
+}
+
+.navbar-menu-icon {
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .navbar {
+    flex-wrap: wrap;
+    padding: 0 10px;
+  }
+  .navbar-search {
+    flex: 1 1 100%;
+    margin: 10px 0;
+    order: 3;
+  }
+  .navbar-menu-btn {
+    display: block;
+    order: 2;
+  }
+  .navbar-buttons {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    background: #003da6;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    z-index: 100;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    border-radius: 0 0 12px 12px;
+    animation: fadeInMenu 0.3s;
+  }
+  .navbar-buttons.open {
+    display: flex;
+  }
+  .navbar-button {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+}
+
+@keyframes fadeInMenu {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Search input modern style */
+.navbar-search-inner {
+  position: relative;
+  width: 320px;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #222;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.navbar-search-input {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  border: 1px solid #e0e7ef;
+  background: #f4f7fa;
+  font-size: 15px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  outline: none;
+  transition: box-shadow 0.2s, border 0.2s;
+}
+
+.navbar-search-input:focus {
+  border: 1.5px solid #003da6;
+  box-shadow: 0 4px 16px rgba(0,61,166,0.08);
+  background: #fff;
+}
+
+@media (max-width: 1000px) {
+  .navbar-search-inner {
+    width: 100%;
+    min-width: 0;
+  }
 }
