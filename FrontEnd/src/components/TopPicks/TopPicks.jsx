@@ -6,6 +6,7 @@ import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { getTopPicksProducts } from "../../allAPIs/product"; // yolunu projenize göre ayarlayın
 import { useGoToProductDetail } from "../GoToProductDetailFunction/GoToProductDetail";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 const TopPicks = () => {
   const [products, setProducts] = useState([]);
   const [favorites, setFavorites] = useState([]);
@@ -30,7 +31,9 @@ const TopPicks = () => {
   return (
     <div className="container">
       <div className="top-picks-and-button d-flex justify-content-between align-items-center">
-        <h2 className="top-picks-title">Top Picks</h2>
+        <h2 className="top-picks-title">
+          <ShoppingCartIcon className="top-picks-icon" /> Top Picks
+        </h2>
         <Link to="/TopPicksmore">
           <button className="buttonShowMore">
             <span>Show More</span>

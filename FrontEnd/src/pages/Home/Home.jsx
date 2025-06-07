@@ -35,9 +35,11 @@ function Home() {
 
         {/* Discounts Slider */}
         <div className="container DiscountsTextOnHomePage ">
-          <p>Discounts</p>
+          
         </div>
+       <div className="DiscountsCarouselOnHomePage">
         <DiscountsCarousel />
+      </div>
       </div>
       <div className="GridCardsOnHomePage">
         <GridCards />
