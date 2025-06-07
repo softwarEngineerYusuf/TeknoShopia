@@ -14,11 +14,8 @@ import MyOrders from "./components/MyOrders/MyOrders";
 import TopPicksMore from "./pages/TopPicksMore/TopPicksMore";
 import Payment from "./pages/Payment/Payment";
 import Brands from "./pages/Brands/Brands";
-// AuthProvider, App bileşeninin kendisini sarmalamalı
 import { AuthProvider } from "./context/AuthContext";
-// Sadece Provider'ı App'de kullanacağız
 import { CompareProvider } from "./context/CompareContext";
-// Hook'u ve Section'ı artık yeni bileşenimizde kullanacağız
 import CompareSection from "./components/CompareSection/CompareSection";
 import { useCompare } from "./context/CompareContext";
 
