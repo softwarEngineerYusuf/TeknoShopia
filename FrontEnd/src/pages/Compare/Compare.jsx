@@ -7,12 +7,12 @@ import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import StarIcon from "@mui/icons-material/Star"; // Örnek için kalabilir
-import { HeartOutlined } from "@ant-design/icons";
+import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 import { Empty } from "antd";
 import { useCompare } from "../../context/CompareContext";
 import "./Compare.css";
 import Navbar2 from "../../components/Navbar2/Navbar2.jsx";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 // TabPanel ve a11yProps fonksiyonları aynı kalacak
 function TabPanel(props) {
@@ -49,8 +49,17 @@ function a11yProps(index) {
 
 const Compare = () => {
   const theme = useTheme();
-  // Artık tek bir sekmemiz olacağı için 'value' ve 'handleChange' state'ine gerek yok.
   const { compareList } = useCompare();
+
+  // Favori butonu için state (her ürün için ayrı)
+  const [favorites, setFavorites] = useState(compareList.map(() => false));
+  const toggleFavorite = (index) => {
+    setFavorites((prev) => {
+      const newFavs = [...prev];
+      newFavs[index] = !newFavs[index];
+      return newFavs;
+    });
+  };
 
   const features = useMemo(() => {
     // ... (bu kısımda değişiklik yok, zaten dinamik)
@@ -106,10 +115,18 @@ const Compare = () => {
 
       <div className="compare-cards-wrapper">
         {/* compareList üzerinden map ile dinamik olarak kartları oluştur */}
-        {compareList.map((product) => (
+        {compareList.map((product, index) => (
           <div key={product.id} className="compare-card">
-            <button className="favorite-button">
-              <HeartOutlined style={{ fontSize: "20px" }} />
+            <button
+              className="favorite-button"
+              onClick={() => toggleFavorite(index)}
+              aria-label="Favorilere ekle/kaldır"
+            >
+              {favorites[index] ? (
+                <HeartFilled style={{ fontSize: "24px", color: "red" }} />
+              ) : (
+                <HeartOutlined style={{ fontSize: "24px" }} />
+              )}
             </button>
             <img
               src={product.image}
@@ -118,10 +135,28 @@ const Compare = () => {
             />
             <div className="card-details">
               <p className="product-name">{product.name}</p>
-              <div className="rating-price">
-                <StarIcon />{" "}
-                {/* Rating bilgisi varsa dinamik hale getirilebilir */}
-                {/* İndirimli fiyat varsa göster, yoksa normal fiyatı göster */}
+              <div className="rating-price" style={{ gap: 6 }}>
+                <span
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    fontSize: "1.1rem",
+                    fontWeight: 600,
+                    color: "#ffb300",
+                  }}
+                >
+                  <StarIcon style={{ fontSize: "1.3em", marginRight: 2 }} />
+                  <span
+                    style={{
+                      fontSize: "1.1em",
+                      color: "#232526",
+                      fontWeight: 700,
+                      marginLeft: 2,
+                    }}
+                  >
+                    {product.ratings?.toFixed(1) || "0.0"}
+                  </span>
+                </span>
                 <p className="product-price">
                   {product.discountedPrice
                     ? `${Math.round(product.discountedPrice)}`
@@ -135,23 +170,28 @@ const Compare = () => {
       </div>
 
       <AppBar position="static" className="compare-tabs">
-        <Tabs
-          // value her zaman 1 olacak (ortadaki sekme) ve değiştirilemeyecek.
-          value={1}
-          indicatorColor="secondary"
-          textColor="inherit"
-          variant="fullWidth"
-          aria-label="compare tabs"
+        <div
+          style={{
+            display: "flex",
+            width: "100%",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "12px 0",
+          }}
         >
-          {/* Ortalamak için sağ ve sola boş, tıklanamayan sekmeler ekliyoruz */}
-          <Tab disabled style={{ flexGrow: 1 }} />
-          <Tab
-            label="Tüm Özellikler"
-            {...a11yProps(0)}
-            style={{ flexGrow: 2, fontWeight: "bold" }}
-          />
-          <Tab disabled style={{ flexGrow: 1 }} />
-        </Tabs>
+          <span
+            style={{
+              flexGrow: 2,
+              fontWeight: "bold",
+              fontSize: "1.1rem",
+              color: "#fff",
+              textAlign: "center",
+              letterSpacing: "0.9px",
+            }}
+          >
+            All Features
+          </span>
+        </div>
       </AppBar>
 
       {/* --- DİNAMİK ÖZELLİK TABLOLARI --- */}
