@@ -6,11 +6,15 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import StarIcon from "@mui/icons-material/Star";
+import StarIcon from "@mui/icons-material/Star"; // Örnek için kalabilir
 import { HeartOutlined } from "@ant-design/icons";
+import { Empty } from "antd";
+import { useCompare } from "../../context/CompareContext";
 import "./Compare.css";
 import Navbar2 from "../../components/Navbar2/Navbar2.jsx";
+import { useMemo } from "react";
 
+// TabPanel ve a11yProps fonksiyonları aynı kalacak
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
   return (
@@ -45,60 +49,54 @@ function a11yProps(index) {
 
 const Compare = () => {
   const theme = useTheme();
-  const [value, setValue] = React.useState(0);
+  // Artık tek bir sekmemiz olacağı için 'value' ve 'handleChange' state'ine gerek yok.
+  const { compareList } = useCompare();
 
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
+  const features = useMemo(() => {
+    // ... (bu kısımda değişiklik yok, zaten dinamik)
+    if (compareList.length < 2) return [];
+    const [p1, p2] = compareList;
+    const allKeys = new Set([
+      ...Object.keys(p1.attributes || {}),
+      ...Object.keys(p2.attributes || {}),
+    ]);
+    return Array.from(allKeys).map((key) => ({
+      title: key,
+      values: [
+        p1.attributes?.[key] || "Belirtilmemiş",
+        p2.attributes?.[key] || "Belirtilmemiş",
+      ],
+    }));
+  }, [compareList]);
+
+  // Bu fonksiyon da dinamik olduğu için bir değişiklik gerekmiyor.
+  const renderAllRows = () => {
+    if (features.length === 0) {
+      return <Empty description="Karşılaştırılacak özellik bulunamadı." />;
+    }
+    return features.map((feature, index) => (
+      <div className="feature-row" key={index}>
+        <div className="feature-title">{feature.title}</div>
+        <div className="feature-value">{feature.values[0]}</div>
+        <div className="feature-value">{feature.values[1]}</div>
+      </div>
+    ));
   };
 
-  const features = [
-    { title: "Sensörler", values: ["Hall Sensörü, İvmeölçer, Jiroskop, Ortam Işığı Sensörü, Sanal Yakınlık Sensörü", "İvmeölçer, Yakınlık Sensörü, Ortam Işığı Sensörü"] },
-    { title: "İşlemci Türü", values: ["Exynos 1480", "Helio G85"] },
-    { title: "İşlemci Hızı", values: ["2.75 GHz", "2.40"] },
-    { title: "İşlemci Sayısı", values: ["8 Çekirdek", "8 Çekirdek"] },
-    { title: "Ekran Boyutu", values: ["6,6 inch", "6,6 inch"] },
-    { title: "Çözünürlük(Piksel)", values: ["1080 x 2340", "1080 x 2340"] },
-    { title: "Ekran Yenileme Hızı", values: ["120 Hz", "80 Hz"] },
-    { title: "Kamera Çözünürlük", values: ["50 MP+8 MP+5 MP", "50 MP+8 MP+5 MP"] },
-    { title: "Arka Kamera Sayısı", values: ["4", "3"] },
-    { title: "Otomatik Odaklama", values: ["VAR", "VAR"] },
-    { title: "Ön Kamera Çözünürlüğü", values: ["32 MP", "13 MP"] },
-    { title: "Video Kayıt Çözünürlüğü", values: ["4K, Ultra HD, FHD, HD", "4K, Ultra HD, FHD, HD"] },
-    { title: "Pil Gücü", values: ["5000 mAh", "5000 mAh"] },
-    { title: "Kablosuz Şarj", values: ["VAR", "YOK"] },
-    { title: "Yüz Tanıma", values: ["VAR", "VAR"] },
-    { title: "Suya Dayanıklılık", values: ["VAR", "VAR"] },
-    { title: "Parmak İzi Okuyucu", values: ["VAR", "VAR"] },
-    { title: "Dahili Hafıza", values: ["256 GB", "128 GB"] },
-    { title: "Ram Boyutu", values: ["8 GB", "8 GB"] },
-    { title: "Renk", values: ["Siyah", "Mavi"] },
-    { title: "Garanti", values: ["24 Ay", "24 Ay"] },
-    { title: "İşletim Sistemi", values: ["İos", "Android"] },
-    { title: "Ağırlık", values: ["209 gr", "213 gr"] },
-    { title: "Genişlik", values: ["78 mm", "77,4 mm"] },
-    { title: "Kalınlık", values: ["8,2 mm", "8,2 mm"] },
-  ];
+  if (compareList.length < 2) {
+    return (
+      <Box
+        className="compare-container"
+        style={{ textAlign: "center", marginTop: "50px" }}
+      >
+        <Navbar2 />
+        <Empty description="Lütfen karşılaştırmak için en az 2 ürün seçin." />
+      </Box>
+    );
+  }
 
-  const renderFilteredRows = (filterType) => {
-    return features
-      .filter((feature) => {
-        const [val1, val2] = feature.values;
-        if (filterType === "all") return true;
-        if (filterType === "same") return val1 === val2;
-        if (filterType === "diff") return val1 !== val2;
-        return true;
-      })
-      .map((feature, index) => (
-        <div
-          className={`feature-row ${index === 0 ? "header" : ""}`}
-          key={index}
-        >
-          <div className="feature-title">{feature.title}</div>
-          <div className="feature-value">{feature.values[0]}</div>
-          <div className="feature-value">{feature.values[1]}</div>
-        </div>
-      ));
-  };
+  // Yeterli ürün varsa, ilk iki ürünü değişkene atayalım
+  const [product1, product2] = compareList;
 
   return (
     <Box className="compare-container">
@@ -107,21 +105,28 @@ const Compare = () => {
       </div>
 
       <div className="compare-cards-wrapper">
-        {[0, 1].map((index) => (
-          <div key={index} className="compare-card">
+        {/* compareList üzerinden map ile dinamik olarak kartları oluştur */}
+        {compareList.map((product) => (
+          <div key={product.id} className="compare-card">
             <button className="favorite-button">
               <HeartOutlined style={{ fontSize: "20px" }} />
             </button>
             <img
-              src="https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/129743-1_large.jpg"
-              alt="Product"
+              src={product.image}
+              alt={product.name}
               className="card-image"
             />
             <div className="card-details">
-              <p className="product-name">iPhone 13 128 Gb Siyah</p>
+              <p className="product-name">{product.name}</p>
               <div className="rating-price">
-                <StarIcon />
-                <p className="product-price">₺1,299.00</p>
+                <StarIcon />{" "}
+                {/* Rating bilgisi varsa dinamik hale getirilebilir */}
+                {/* İndirimli fiyat varsa göster, yoksa normal fiyatı göster */}
+                <p className="product-price">
+                  {product.discountedPrice
+                    ? `${Math.round(product.discountedPrice)}`
+                    : `${product.price} `}
+                </p>
               </div>
               <button className="buy-button">SEPETE EKLE</button>
             </div>
@@ -131,36 +136,38 @@ const Compare = () => {
 
       <AppBar position="static" className="compare-tabs">
         <Tabs
-          value={value}
-          onChange={handleChange}
+          // value her zaman 1 olacak (ortadaki sekme) ve değiştirilemeyecek.
+          value={1}
           indicatorColor="secondary"
           textColor="inherit"
           variant="fullWidth"
-          aria-label="full width tabs example"
+          aria-label="compare tabs"
         >
-          <Tab label="Tüm Özellikler" {...a11yProps(0)} />
-          <Tab label="Sadece Benzerlikler" {...a11yProps(1)} />
-          <Tab label="Sadece Farklar" {...a11yProps(2)} />
+          {/* Ortalamak için sağ ve sola boş, tıklanamayan sekmeler ekliyoruz */}
+          <Tab disabled style={{ flexGrow: 1 }} />
+          <Tab
+            label="Tüm Özellikler"
+            {...a11yProps(0)}
+            style={{ flexGrow: 2, fontWeight: "bold" }}
+          />
+          <Tab disabled style={{ flexGrow: 1 }} />
         </Tabs>
       </AppBar>
 
-      <TabPanel value={value} index={0} dir={theme.direction}>
+      {/* --- DİNAMİK ÖZELLİK TABLOLARI --- */}
+      <TabPanel value={1} index={1} dir={theme.direction}>
         <div className="feature-table">
-          {renderFilteredRows("all")}
-        </div>
-      </TabPanel>
-      <TabPanel value={value} index={1} dir={theme.direction}>
-        <div className="feature-table">
-          {renderFilteredRows("same")}
-        </div>
-      </TabPanel>
-      <TabPanel value={value} index={2} dir={theme.direction}>
-        <div className="feature-table">
-          {renderFilteredRows("diff")}
+          {/* Dinamik Tablo Başlığı */}
+          <div className="feature-row header">
+            <div className="feature-title">Özellik</div>
+            <div className="feature-value">{product1.name}</div>
+            <div className="feature-value">{product2.name}</div>
+          </div>
+          {/* Sadece tüm özellikleri gösteren fonksiyonu çağırıyoruz */}
+          {renderAllRows()}
         </div>
       </TabPanel>
     </Box>
   );
 };
-
 export default Compare;

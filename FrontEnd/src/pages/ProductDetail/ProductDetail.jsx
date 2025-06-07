@@ -19,26 +19,28 @@ import {
 } from "@ant-design/icons";
 import "./ProductDetail.css";
 import { getProductById } from "../../allAPIs/product";
-import CompareSection from "../../components/CompareSection/CompareSection.jsx"; // CompareSection bileşenini içe aktar
 
+import { useCompare } from "../../context/CompareContext";
 const { Title, Text } = Typography;
 
 function ProductDetail() {
   const { id } = useParams(); // URL'den ID'yi al
-  const [compareList, setCompareList] = useState([]);
-  const [showCompareSection, setShowCompareSection] = useState(false);
+  // const [compareList, setCompareList] = useState([]);
+  const { addToCompare } = useCompare();
+  // const [showCompareSection, setShowCompareSection] = useState(false);
   const [product, setProduct] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProduct = async () => {
+      setLoading(true); // Yüklemeyi başlat
       const data = await getProductById(id);
       setProduct(data);
-      setLoading(false);
+      setCurrentImageIndex(0); // Yeni ürün geldiğinde resmi sıfırla
+      setLoading(false); // Yüklemeyi bitir
     };
     fetchProduct();
-    console.log("Product data:", id);
   }, [id]);
 
   const handleAddToCompare = () => {
@@ -46,19 +48,19 @@ function ProductDetail() {
       const productForCompare = {
         id: product.id,
         name: product.name,
-        image: product.mainImage,
+        // Ana resim ve ek resimler varsa kullan, yoksa boş bir string ata
+        image:
+          product.mainImage ||
+          (product.additionalImages && product.additionalImages[0]) ||
+          "",
         price: product.discountedPrice
           ? `${Math.round(product.discountedPrice)} TL`
           : `${product.price} TL`,
+        // Compare sayfasında lazım olacak tüm özellikler
+        attributes: product.attributes,
       };
-
-      setCompareList((prevList) => {
-        if (prevList.find((p) => p.id === productForCompare.id)) {
-          return prevList;
-        }
-        return [...prevList, productForCompare];
-      });
-      setShowCompareSection(true);
+      // Context'teki fonksiyonu çağır
+      addToCompare(productForCompare);
     }
   };
 
@@ -225,10 +227,6 @@ function ProductDetail() {
           </Col>
         </Row>
       </div>
-
-      {showCompareSection && compareList.length > 0 && (
-        <CompareSection compareList={compareList} />
-      )}
     </>
   );
 }
