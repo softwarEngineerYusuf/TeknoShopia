@@ -19,20 +19,28 @@ import {
 } from "@ant-design/icons";
 import "./ProductDetail.css";
 import { getProductById } from "../../allAPIs/product";
-
+import { addCart } from "../../allAPIs/cart";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequiredModal from "../../components/LoginRequireModal/LoginRequireModal";
 import { useCompare } from "../../context/CompareContext";
-const { Title, Text } = Typography;
 
+import { message } from "antd";
 function ProductDetail() {
   const { id } = useParams(); // URL'den ID'yi al
+  const { user } = useAuth();
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
+  const { Title, Text } = Typography;
   // const [compareList, setCompareList] = useState([]);
   const { addToCompare } = useCompare();
   // const [showCompareSection, setShowCompareSection] = useState(false);
   const [product, setProduct] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [isAdding, setIsAdding] = useState(false);
+  const PENDING_CART_ITEM_KEY = "pendingCartItemProductId";
 
   useEffect(() => {
+    console.log("user", user);
     const fetchProduct = async () => {
       setLoading(true); // Yüklemeyi başlat
       const data = await getProductById(id);
@@ -42,6 +50,36 @@ function ProductDetail() {
     };
     fetchProduct();
   }, [id]);
+
+  const handleAddToCart = async () => {
+    if (user && user.id) {
+      // --- SENARYO 1: KULLANICI GİRİŞ YAPMIŞ ---
+      setIsAdding(true);
+      try {
+        const response = await addCart(user.id, product.id, 1);
+        if (response && response.cart) {
+          message.success(`${product.name} başarıyla sepete eklendi!`);
+        } else {
+          message.error("Ürün sepete eklenirken bir sorun oluştu.");
+        }
+      } catch (error) {
+        message.error("Bir hata oluştu. Lütfen tekrar deneyin.");
+        console.error("Sepete ekleme hatası:", error);
+      } finally {
+        setIsAdding(false);
+      }
+    } else {
+      // --- SENARYO 2: KULLANICI GİRİŞ YAPMAMIŞ (MİSAFİR) ---
+      // Ürün ID'sini localStorage'a kaydet
+      localStorage.setItem(PENDING_CART_ITEM_KEY, product._id);
+
+      // Kullanıcıya bilgi ver
+      message.info("Giriş yaptıktan sonra bu ürün sepetinize eklenecektir.");
+
+      // Giriş yapma modalını göster
+      setIsLoginModalVisible(true);
+    }
+  };
 
   const handleAddToCompare = () => {
     if (product) {
@@ -209,6 +247,8 @@ function ProductDetail() {
                   icon={<ShoppingCartOutlined />}
                   size="large"
                   style={{ backgroundColor: "#32174D", width: "70%" }}
+                  onClick={handleAddToCart}
+                  loading={isAdding}
                 >
                   Sepete Ekle
                 </Button>
@@ -227,6 +267,10 @@ function ProductDetail() {
           </Col>
         </Row>
       </div>
+      <LoginRequiredModal
+        visible={isLoginModalVisible}
+        onClose={() => setIsLoginModalVisible(false)}
+      />
     </>
   );
 }

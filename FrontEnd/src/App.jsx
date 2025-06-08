@@ -1,26 +1,27 @@
 import "./App.css";
 import { Route, Routes, Outlet } from "react-router-dom";
-import Login from "./pages/Login/Login";
-import Register from "./pages/Register/Register";
-import Home from "./pages/Home/Home";
-import Navbar from "./components/Navbar/Navbar";
-import Basket from "./pages/Basket/Basket";
-import ProductDetail from "./pages/ProductDetail/ProductDetail";
-import Footer from "./components/Footer/Footer";
-import Compare from "./pages/Compare/Compare";
-import Category from "./pages/Category/Category";
-import Favorites from "./components/Favorites/Favorites";
-import MyOrders from "./components/MyOrders/MyOrders";
-import TopPicksMore from "./pages/TopPicksMore/TopPicksMore";
-import Payment from "./pages/Payment/Payment";
-import Brands from "./pages/Brands/Brands";
 import { AuthProvider } from "./context/AuthContext";
 import { CompareProvider } from "./context/CompareContext";
-import CompareSection from "./components/CompareSection/CompareSection";
 import { useCompare } from "./context/CompareContext";
 
-// Layout bileşeni aynı kalabilir, bir sorun yok.
-function Layout() {
+import Home from "./pages/Home/Home";
+import Login from "./pages/Login/Login";
+import Register from "./pages/Register/Register";
+import Basket from "./pages/Basket/Basket";
+import ProductDetail from "./pages/ProductDetail/ProductDetail";
+import Compare from "./pages/Compare/Compare";
+import Category from "./pages/Category/Category";
+import Payment from "./pages/Payment/Payment";
+import Brands from "./pages/Brands/Brands";
+import TopPicksMore from "./pages/TopPicksMore/TopPicksMore";
+
+import Navbar from "./components/Navbar/Navbar";
+import Footer from "./components/Footer/Footer";
+import Favorites from "./components/Favorites/Favorites";
+import MyOrders from "./components/MyOrders/MyOrders";
+import CompareSection from "./components/CompareSection/CompareSection";
+
+function MainLayout() {
   return (
     <>
       <Navbar />
@@ -30,17 +31,14 @@ function Layout() {
   );
 }
 
-// 1. Rotaları ve context'i kullanan mantığı içeren yeni bir bileşen oluşturun.
-function AppContent() {
-  // useCompare hook'u artık CompareProvider'ın içinde çağrıldığı için doğru çalışacak.
+function AppRoutes() {
   const { compareList } = useCompare();
 
   return (
     <>
       <Routes>
-        <Route element={<Layout />}>
+        <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
-          {/* productDetail yerine product/:id daha standart bir kullanımdır */}
           <Route path="/productDetail/:id" element={<ProductDetail />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/myorders" element={<MyOrders />} />
@@ -50,24 +48,22 @@ function AppContent() {
           <Route path="/brands" element={<Brands />} />
           <Route path="/compare" element={<Compare />} />
         </Route>
+
         <Route path="/Login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/basket" element={<Basket />} />
       </Routes>
 
-      {/* Bu mantık artık doğru yerde. */}
       {compareList.length > 0 && <CompareSection />}
     </>
   );
 }
 
-// 2. App bileşenini basitleştirin. Görevi sadece Provider'ları ayarlamak olsun.
 function App() {
   return (
     <AuthProvider>
       <CompareProvider>
-        {/* Asıl uygulama mantığını içeren AppContent'i burada render edin */}
-        <AppContent />
+        <AppRoutes />
       </CompareProvider>
     </AuthProvider>
   );
