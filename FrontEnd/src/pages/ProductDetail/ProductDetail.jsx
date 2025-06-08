@@ -150,128 +150,109 @@ function ProductDetail() {
   ];
 
   return (
-    <>
-      <div className="container">
-        <Row gutter={[24, 24]}>
-          <Col xs={24} md={12}>
-            <div
-              style={{ position: "relative", width: "90%", margin: "0 auto" }}
-            >
-              <Button
-                icon={<LeftOutlined />}
-                style={{
-                  position: "absolute",
-                  left: 10,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  zIndex: 1,
-                  backgroundColor: "rgba(255,255,255,0.8)",
-                }}
-                onClick={prevImage}
+    <div className="product-detail-root">
+      <div className="product-detail-flex-row">
+        <div className="product-detail-image-side">
+          <div className="product-detail-image-box">
+            <Button
+              icon={<LeftOutlined />}
+              className="product-detail-arrow-btn left"
+              onClick={prevImage}
+            />
+            <Image
+              src={images[currentImageIndex]}
+              alt={product.name}
+              className="product-detail-main-img"
+            />
+            <Button
+              icon={<RightOutlined />}
+              className="product-detail-arrow-btn right"
+              onClick={nextImage}
+            />
+          </div>
+          <div className="product-detail-thumbs-row">
+            {images.map((img, index) => (
+              <img
+                src={img}
+                alt={`Thumbnail ${index + 1}`}
+                key={index}
+                className={`product-detail-thumb${
+                  currentImageIndex === index ? " selected" : ""
+                }`}
+                onClick={() => setCurrentImageIndex(index)}
               />
-              <Image
-                src={images[currentImageIndex]}
-                alt={product.name}
-                style={{ width: "100%" }}
-              />
+            ))}
+          </div>
+        </div>
+        <div className="product-detail-info-side">
+          <Card className="product-detail-card">
+            <Title level={2} className="product-detail-title">
+              {product.name}
+            </Title>
+            <Rate
+              disabled
+              defaultValue={4}
+              className="product-detail-rate"
+            />
+            <Text className="product-detail-comments"> (Yorumlar)</Text>
+            <div className="product-detail-pricing">
+              {product.discount > 0 && (
+                <p className="product-detail-old-price">
+                  <del>{product.price}₺</del>
+                </p>
+              )}
+              <Title level={3} className="product-detail-current-price">
+                {product.discountedPrice
+                  ? `${Math.round(product.discountedPrice)} TL`
+                  : `${product.price} TL`}
+              </Title>
+              <Text type="secondary" className="product-detail-brand">
+                Marka: {product.brand?.name}
+              </Text>
+              <br />
+              <Text type="secondary" className="product-detail-category">
+                Kategori: {product.category?.name}
+              </Text>
+            </div>
+            <div className="product-detail-buttons">
               <Button
-                icon={<RightOutlined />}
-                style={{
-                  position: "absolute",
-                  right: 10,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  zIndex: 1,
-                  backgroundColor: "rgba(255,255,255,0.8)",
-                }}
-                onClick={nextImage}
+                type="primary"
+                icon={<SwapOutlined />}
+                size="large"
+                className="product-detail-compare-btn"
+                onClick={handleAddToCompare}
+              >
+                Compare
+              </Button>
+              <Button
+                type="primary"
+                icon={<ShoppingCartOutlined />}
+                size="large"
+                className="product-detail-cart-btn"
+                onClick={handleAddToCart}
+                loading={isAdding}
+              >
+                Sepete Ekle
+              </Button>
+            </div>
+            <div className="product-detail-specs">
+              <Title level={4}>Teknik Özellikler</Title>
+              <Table
+                dataSource={specifications}
+                columns={columns}
+                pagination={false}
+                size="small"
+                className="product-detail-specs-table"
               />
             </div>
-
-            <Row
-              gutter={[8, 8]}
-              style={{ marginTop: 16, width: "80%", margin: "0 auto" }}
-            >
-              {images.map((img, index) => (
-                <Col span={8} key={index}>
-                  <Image
-                    src={img}
-                    alt={`Thumbnail ${index + 1}`}
-                    style={{ width: "100%", cursor: "pointer" }}
-                    onClick={() => setCurrentImageIndex(index)}
-                  />
-                </Col>
-              ))}
-            </Row>
-          </Col>
-
-          <Col xs={24} md={12}>
-            <Card>
-              <Title level={2}>{product.name}</Title>
-              <Rate disabled defaultValue={4} />
-              <Text> (Yorumlar)</Text>
-
-              <div style={{ margin: "24px 0" }}>
-                {product.discount > 0 && (
-                  <p style={{ color: "red" }}>
-                    <del>{product.price}₺</del>
-                  </p>
-                )}
-                <Title level={3}>
-                  {product.discountedPrice
-                    ? `${Math.round(product.discountedPrice)} TL`
-                    : `${product.price} TL`}
-                </Title>
-                <Text type="secondary">Marka: {product.brand?.name}</Text>
-                <br />
-                <Text type="secondary">Kategori: {product.category?.name}</Text>
-              </div>
-
-              <div
-                className="product-buttons"
-                style={{ display: "flex", gap: 4 }}
-              >
-                <Button
-                  type="primary"
-                  icon={<SwapOutlined />}
-                  size="large"
-                  style={{ backgroundColor: "green", width: "30%" }}
-                  className="compare-btn-product-detail"
-                  onClick={handleAddToCompare}
-                >
-                  Compare
-                </Button>
-
-                <Button
-                  type="primary"
-                  icon={<ShoppingCartOutlined />}
-                  size="large"
-                  style={{ backgroundColor: "#32174D", width: "70%" }}
-                  onClick={handleAddToCart}
-                  loading={isAdding}
-                >
-                  Sepete Ekle
-                </Button>
-              </div>
-
-              <div style={{ marginTop: 24 }}>
-                <Title level={4}>Teknik Özellikler</Title>
-                <Table
-                  dataSource={specifications}
-                  columns={columns}
-                  pagination={false}
-                  size="small"
-                />
-              </div>
-            </Card>
-          </Col>
-        </Row>
+          </Card>
+        </div>
       </div>
       <LoginRequiredModal
         visible={isLoginModalVisible}
         onClose={() => setIsLoginModalVisible(false)}
       />
-    </>
+    </div>
   );
 }
 
