@@ -8,6 +8,7 @@ import {
   getProductsByCategory,
   getProductsByBrand,
 } from "../../allAPIs/product";
+import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 
 // eslint-disable-next-line react/prop-types
 function CategoryCards({ categoryId, filters }) {
@@ -15,6 +16,7 @@ function CategoryCards({ categoryId, filters }) {
   const [products, setProducts] = useState([]);
   const [categoryName, setCategoryName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -62,6 +64,11 @@ function CategoryCards({ categoryId, filters }) {
     fetchProducts();
   }, [categoryId, filters]);
 
+  useEffect(() => {
+    // Favoriler dizisini ürün sayısına göre güncelle
+    setFavorites(Array(products.length).fill(false));
+  }, [categoryId, filters, products.length]);
+
   const handleSortChange = (sortType) => {
     setCurrentSort(sortType);
     const sorted = [...products].sort((a, b) => {
@@ -72,6 +79,14 @@ function CategoryCards({ categoryId, filters }) {
       return 0;
     });
     setProducts(sorted);
+  };
+
+  const toggleFavorite = (index) => {
+    setFavorites((prev) => {
+      const newFavs = [...prev];
+      newFavs[index] = !newFavs[index];
+      return newFavs;
+    });
   };
 
   const ProductSort = () => {
@@ -132,9 +147,36 @@ function CategoryCards({ categoryId, filters }) {
       </div>
 
       <div className="row">
-        {products.map((product) => (
+        {products.map((product, index) => (
           <div key={product._id} className="col-md-3 mb-4">
-            <div className="category-cards container">
+            <div className="category-cards container" style={{position:'relative'}}>
+              <button
+                className="favorite-button"
+                onClick={() => toggleFavorite(index)}
+                style={{
+                  position: 'absolute',
+                  top: 10,
+                  right: 10,
+                  background: 'white',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: 36,
+                  height: 36,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  zIndex: 2,
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer'
+                }}
+              >
+                {favorites[index] ? (
+                  <HeartFilled style={{ fontSize: 24, color: 'red' }} />
+                ) : (
+                  <HeartOutlined style={{ fontSize: 24, color: '#bbb' }} />
+                )}
+              </button>
               <img
                 src={product.mainImage}
                 alt={product.name}
@@ -163,7 +205,7 @@ function CategoryCards({ categoryId, filters }) {
                     </p>
                   </div>
                 </div>
-                <button className="buy-button-category-cards">İncele</button>
+                <button className="buy-button-category-cards">See Detail</button>
               </div>
             </div>
           </div>

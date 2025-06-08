@@ -5,16 +5,19 @@ import StarIcon from "@mui/icons-material/Star";
 import SortIcon from "@mui/icons-material/Sort";
 import { Dropdown, Menu, Space } from "antd";
 import { getTopPicksProducts } from "../../allAPIs/product"; // API çağrısını içe aktar
+import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 
 function TopPicksMoreCards({ selectedBrands }) {
   const [currentSort, setCurrentSort] = useState("price-asc");
   const [products, setProducts] = useState([]);
   const [sortedProducts, setSortedProducts] = useState([]);
+  const [favorites, setFavorites] = useState([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
       const data = await getTopPicksProducts(selectedBrands);
       setProducts(data);
+      setFavorites(Array(data.length).fill(false));
       const sorted = [...data].sort((a, b) =>
         currentSort === "price-asc" ? a.price - b.price : b.price - a.price
       );
@@ -32,6 +35,14 @@ function TopPicksMoreCards({ selectedBrands }) {
       return 0;
     });
     setSortedProducts(sorted);
+  };
+
+  const toggleFavorite = (index) => {
+    setFavorites((prev) => {
+      const newFavs = [...prev];
+      newFavs[index] = !newFavs[index];
+      return newFavs;
+    });
   };
 
   const ProductSort = () => {
@@ -71,9 +82,36 @@ function TopPicksMoreCards({ selectedBrands }) {
     );
   };
 
-  const cards = sortedProducts.map((product) => (
+  const cards = sortedProducts.map((product, index) => (
     <div key={product._id} className="col-md-3 mb-4">
-      <div className="top-picks-more-cards container">
+      <div className="top-picks-more-cards container" style={{ position: "relative" }}>
+        <button
+          className="favorite-button"
+          onClick={() => toggleFavorite(index)}
+          style={{
+            position: "absolute",
+            top: 10,
+            right: 10,
+            background: "white",
+            border: "none",
+            borderRadius: "50%",
+            width: 36,
+            height: 36,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+            zIndex: 2,
+            transition: "all 0.3s ease",
+            cursor: "pointer",
+          }}
+        >
+          {favorites[index] ? (
+            <HeartFilled style={{ fontSize: 24, color: "red" }} />
+          ) : (
+            <HeartOutlined style={{ fontSize: 24, color: "#bbb" }} />
+          )}
+        </button>
         <img
           src={product.mainImage}
           alt={product.name}

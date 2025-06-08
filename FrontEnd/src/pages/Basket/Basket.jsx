@@ -118,7 +118,7 @@ function Basket() {
             aria-label="Clear entire basket"
           >
             <MdDeleteSweep size={20} />
-            Sepeti Temizle
+            Clean the basket
           </button>
         </div>
 
