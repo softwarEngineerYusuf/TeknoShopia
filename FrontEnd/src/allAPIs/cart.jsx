@@ -101,3 +101,27 @@ export const removeItemFromCart = async (userId, cartItemId) => {
     return null;
   }
 };
+
+export const updateItemQuantity = async (userId, cartItemId, newQuantity) => {
+  if (!userId || !cartItemId || newQuantity === undefined) {
+    console.error(
+      "updateItemQuantity için userId, cartItemId ve newQuantity gereklidir."
+    );
+    return null;
+  }
+  try {
+    const response = await axios.put(`${API_URL}/item/update-quantity`, {
+      userId,
+      cartItemId,
+      newQuantity,
+    });
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Ürün miktarı güncellenirken bir hata oluştu:",
+      error.response?.data || error.message
+    );
+    // Hata mesajını da döndürerek frontend'de göstermek için
+    throw error.response?.data || new Error("Bilinmeyen bir sunucu hatası.");
+  }
+};

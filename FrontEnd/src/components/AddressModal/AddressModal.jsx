@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import "./AddressModal.css";
 
+// eslint-disable-next-line react/prop-types
 const AddressModal = ({ onClose, onSave, address }) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -15,11 +16,16 @@ const AddressModal = ({ onClose, onSave, address }) => {
   useEffect(() => {
     if (address) {
       setFormData({
+        // eslint-disable-next-line react/prop-types
         name: address.name || "",
+        // eslint-disable-next-line react/prop-types
         street: address.street || "",
+        // eslint-disable-next-line react/prop-types
         city: address.city || "",
         // state: address.state || '',
+        // eslint-disable-next-line react/prop-types
         zipCode: address.zipCode || "",
+        // eslint-disable-next-line react/prop-types
         country: address.country || "Turkey",
       });
     }

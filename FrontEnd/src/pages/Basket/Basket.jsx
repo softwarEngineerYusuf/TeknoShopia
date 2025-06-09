@@ -1,76 +1,73 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { MdDeleteSweep } from "react-icons/md";
 import { Spin, Empty, Button, message } from "antd";
 import { useAuth } from "../../context/AuthContext";
+import { useCart } from "../../context/CartContext";
 import {
-  getCartByUserId,
   clearCart,
   removeItemFromCart,
+  updateItemQuantity,
 } from "../../allAPIs/cart";
 import "./Basket.css";
 import { useNavigate } from "react-router-dom";
 
 function Basket() {
   const { user } = useAuth();
-  const [cart, setCart] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { cart, setCart, loading } = useCart();
+
   const [deletingItemId, setDeletingItemId] = useState(null);
   const navigate = useNavigate();
-  // Sayfa yüklendiğinde kullanıcının sepetini çeken useEffect
-  useEffect(() => {
-    if (user && user.id) {
-      const fetchCartData = async () => {
-        setLoading(true);
-        const cartData = await getCartByUserId(user.id);
-        setCart(cartData);
-        setLoading(false);
-      };
-      fetchCartData();
-    } else {
-      // Kullanıcı yoksa veya user.id bulunmuyorsa yüklemeyi durdur.
-      setLoading(false);
-    }
-  }, [user]);
+  const [updatingItemId, setUpdatingItemId] = useState(null);
 
-  // Placeholder fonksiyonlar (gelecekte bu fonksiyonların içini API çağrıları ile dolduracaksınız)
-  const handleQuantityChange = (itemId, newQuantity) => {
-    // TODO: Backend'e istek atarak ürün miktarını güncelleyecek API'yi çağır.
-    // Örnek: await updateItemQuantity(user.id, itemId, newQuantity);
-    // Şimdilik sadece konsola yazdırıyoruz.
-    console.log(`Ürün ${itemId} miktarı ${newQuantity} olarak güncellenecek.`);
-    message.info("Miktar güncelleme özelliği yakında eklenecektir.");
+  const handleQuantityChange = async (itemId, newQuantity) => {
+    if (newQuantity < 1) return;
+
+    setUpdatingItemId(itemId);
+    try {
+      const response = await updateItemQuantity(user.id, itemId, newQuantity);
+      if (response && response.cart) {
+        setCart(response.cart);
+        message.success(response.message);
+      }
+    } catch (error) {
+      message.error(error.message || "Miktar güncellenirken bir hata oluştu.");
+    } finally {
+      setUpdatingItemId(null);
+    }
   };
 
   const handleCheckout = () => {
-    navigate("/payment");
+    if (!cart || cart.cartItems.length === 0) {
+      message.error("Ödeme sayfasına gitmek için sepette ürün olmalıdır.");
+      return;
+    }
+    navigate("/payment", { state: { cartData: cart } });
   };
+
   const handleRemoveItem = async (itemId) => {
     if (!user || !user.id) return;
 
-    setDeletingItemId(itemId); // Silme işlemi başlarken ilgili butonu disable et
+    setDeletingItemId(itemId);
     const response = await removeItemFromCart(user.id, itemId);
 
     if (response && response.cart) {
-      setCart(response.cart); // State'i API'den dönen güncel sepetle değiştir
+      setCart(response.cart);
       message.success(response.message);
     } else {
       message.error("Ürün silinirken bir hata oluştu.");
     }
-    setDeletingItemId(null); // İşlem bitince butonu tekrar aktif et
+    setDeletingItemId(null);
   };
-
   const handleClearCart = async () => {
     if (user && user.id) {
-      setLoading(true);
       const response = await clearCart(user.id);
       if (response) {
-        setCart(response.cart); // Backend'den dönen boş sepeti state'e ata
+        setCart(response.cart);
         message.success("Sepet başarıyla temizlendi.");
       } else {
         message.error("Sepet temizlenirken bir hata oluştu.");
       }
-      setLoading(false);
     }
   };
 
@@ -126,16 +123,18 @@ function Basket() {
             Clean the basket
           </button>
         </div>
-
-        {/* Sepetteki ürünleri listeleme */}
         {cart.cartItems.map((item) => (
           <div className="summaryBasketList" key={item._id}>
             <div className="summaryBasketProductImage">
-              <img src={item.product.mainImage} alt={item.product.name} />
+              <Link
+                to={`/productDetail/${item.product._id}`}
+                className="summaryBasketProductImage"
+              >
+                <img src={item.product.mainImage} alt={item.product.name} />
+              </Link>
             </div>
 
             <div className="summaryBasketProductDetails">
-              {/* Marka adı brand objesi içinde geliyorsa item.product.brand.name kullanın */}
               <p className="brand">
                 {item.product.brand?.name || "Marka Bilgisi Yok"}
               </p>
@@ -150,17 +149,24 @@ function Basket() {
                   }
                   className="quantityButton"
                   aria-label="Decrease quantity"
-                  disabled={item.quantity <= 1}
+                  disabled={item.quantity <= 1 || updatingItemId === item._id}
                 >
                   −
                 </button>
-                <span className="quantityValue">{item.quantity}</span>
+                <span className="quantityValue">
+                  {updatingItemId === item._id ? (
+                    <Spin size="small" />
+                  ) : (
+                    item.quantity
+                  )}
+                </span>
                 <button
                   onClick={() =>
                     handleQuantityChange(item._id, item.quantity + 1)
                   }
                   className="quantityButton"
                   aria-label="Increase quantity"
+                  disabled={updatingItemId === item._id}
                 >
                   +
                 </button>

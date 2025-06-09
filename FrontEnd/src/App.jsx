@@ -1,6 +1,7 @@
 import "./App.css";
 import { Route, Routes, Outlet } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { CartProvider } from "./context/CartContext";
 import { CompareProvider } from "./context/CompareContext";
 import { useCompare } from "./context/CompareContext";
 
@@ -20,11 +21,13 @@ import Footer from "./components/Footer/Footer";
 import Favorites from "./components/Favorites/Favorites";
 import MyOrders from "./components/MyOrders/MyOrders";
 import CompareSection from "./components/CompareSection/CompareSection";
+import Navbar2 from "./components/Navbar2/Navbar2";
 
 function MainLayout() {
   return (
     <>
       <Navbar />
+      <Navbar2 />
       <Outlet />
       <Footer />
     </>
@@ -47,6 +50,7 @@ function AppRoutes() {
           <Route path="/payment" element={<Payment />} />
           <Route path="/brands" element={<Brands />} />
           <Route path="/compare" element={<Compare />} />
+          <Route path="/basket" element={<Basket />} />
         </Route>
 
         <Route path="/Login" element={<Login />} />
@@ -62,9 +66,11 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <CompareProvider>
-        <AppRoutes />
-      </CompareProvider>
+      <CartProvider>
+        <CompareProvider>
+          <AppRoutes />
+        </CompareProvider>
+      </CartProvider>
     </AuthProvider>
   );
 }

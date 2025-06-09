@@ -16,7 +16,7 @@ function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const [email, setEmail] = useState("yusuf1@gmail.com");
+  const [email, setEmail] = useState("yusufkaya722172@gmail.com");
   const [password, setPassword] = useState("123456789");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -64,8 +64,7 @@ function Login() {
     <div
       style={{
         minHeight: "100vh",
-        background:
-          "linear-gradient(135deg, #21005D 60%, #7B2FF2 100%)",
+        background: "linear-gradient(135deg, #21005D 60%, #7B2FF2 100%)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

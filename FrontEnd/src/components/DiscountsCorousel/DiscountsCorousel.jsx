@@ -5,11 +5,13 @@ import StarIcon from "@mui/icons-material/Star";
 import { HeartOutlined, HeartFilled } from "@ant-design/icons"; // Import heart icons
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import "./DiscountsCorousel.css";
+import { useGoToProductDetail } from "../GoToProductDetailFunction/GoToProductDetail";
 
 function DiscountsCarousel() {
   const [products, setProducts] = useState([]);
   const [itemsPerSlide, setItemsPerSlide] = useState(4);
   const [favorites, setFavorites] = useState([]);
+  const goToProductDetail = useGoToProductDetail();
 
   useEffect(() => {
     const fetchDiscountedProducts = async () => {
@@ -118,7 +120,10 @@ function DiscountsCarousel() {
                               </p>
                             </div>
                           </div>
-                          <button className="buy-button-discount-corousel">
+                          <button
+                            className="buy-button-discount-corousel"
+                            onClick={() => goToProductDetail(product._id)}
+                          >
                             See Detail
                           </button>
                         </div>
@@ -136,7 +141,10 @@ function DiscountsCarousel() {
           data-bs-target="#carouselExampleFade"
           data-bs-slide="prev"
         >
-          <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span
+            className="carousel-control-prev-icon"
+            aria-hidden="true"
+          ></span>
           <span className="visually-hidden">Previous</span>
         </button>
         <button
@@ -145,7 +153,10 @@ function DiscountsCarousel() {
           data-bs-target="#carouselExampleFade"
           data-bs-slide="next"
         >
-          <span className="carousel-control-next-icon" aria-hidden="true"></span>
+          <span
+            className="carousel-control-next-icon"
+            aria-hidden="true"
+          ></span>
           <span className="visually-hidden">Next</span>
         </button>
       </div>

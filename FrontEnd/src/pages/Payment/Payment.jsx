@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom"; // useNavigate eklendi
 import { Pencil, Trash2, MapPin, Plus, CreditCard } from "lucide-react";
-import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
+import { Spin, Modal } from "antd";
+
+// CONTEXT & API'LER
 import { useAuth } from "../../context/AuthContext";
 import {
   getAddressesByUserId,
@@ -8,80 +11,112 @@ import {
   updateAddress,
   deleteAddress,
 } from "../../allAPIs/address";
+import {
+  getCardsByUserId,
+  addCard,
+  updateCard,
+  deleteCard,
+} from "../../allAPIs/card";
+import { getCartByUserId } from "../../allAPIs/cart";
+import { createOrder } from "../../allAPIs/order";
+// YENİ: Sipariş oluşturma API'sini import ettiğinizi varsayıyorum
+// import { createOrder } from "../../allAPIs/order";
 
 // BİLEŞENLER & STİL
-// Bu yolların kendi projenizdeki dosya yapısıyla doğru olduğundan emin olun.
 import "./Payment.css";
 import AddressModal from "../../components/AddressModal/AddressModal";
 import CardModal from "../../components/CardModal/CardModal";
+import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 
 const Payment = () => {
-  // --- CONTEXT & STATE YÖNETİMİ ---
+  // --- HOOKS & CONTEXT ---
   const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate(); // YENİ: Sipariş sonrası yönlendirme için
 
-  // Dinamik Adres State'leri
+  // --- TÜM STATE'LER ---
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
   const [addressError, setAddressError] = useState(null);
   const [editingAddress, setEditingAddress] = useState(null);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showAddressConfirmModal, setShowAddressConfirmModal] = useState(false);
   const [addressToDelete, setAddressToDelete] = useState(null);
-  // Statik Kart State'leri
-  const [savedCards, setSavedCards] = useState([
-    {
-      id: 1,
-      cardNumber: "**** **** **** 5678",
-      cardHolder: "John Doe",
-      expiryDate: "12/24",
-    },
-    {
-      id: 2,
-      cardNumber: "**** **** **** 1234",
-      cardHolder: "Jane Smith",
-      expiryDate: "05/25",
-    },
-  ]);
+
+  const [savedCards, setSavedCards] = useState([]);
+  const [loadingCards, setLoadingCards] = useState(true);
+  const [cardError, setCardError] = useState(null);
+  const [editingCard, setEditingCard] = useState(null);
   const [showCardModal, setShowCardModal] = useState(false);
-  const [editingCard, setEditingCard] = useState(null); // Statik kart düzenlemesi için
   const [selectedCard, setSelectedCard] = useState(null);
+  const [showCardConfirmModal, setShowCardConfirmModal] = useState(false);
+  const [cardToDelete, setCardToDelete] = useState(null);
+
+  const [orderSummary, setOrderSummary] = useState(null);
+  const [loadingSummary, setLoadingSummary] = useState(true);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false); // YENİ: Ödeme butonu için yükleme durumu
 
   // --- VERİ ÇEKME (useEffect) ---
   useEffect(() => {
     if (user && user.id) {
-      const fetchAddresses = async () => {
+      const fetchInitialData = async () => {
         setLoadingAddresses(true);
-        setAddressError(null);
+        setLoadingCards(true);
+        setLoadingSummary(true);
+
+        // Sepet verisini al
+        let cartData = location.state?.cartData;
+        if (!cartData) {
+          try {
+            cartData = await getCartByUserId(user.id);
+          } catch (error) {
+            console.error("Sepet bilgisi alınamadı:", error);
+          }
+        }
+
+        // Eğer sepet boşsa veya alınamadıysa, kullanıcıyı sepete geri yönlendir
+        if (!cartData || cartData.cartItems.length === 0) {
+          navigate("/basket");
+          return;
+        }
+
+        setOrderSummary(cartData);
+        setLoadingSummary(false);
+
+        // Adres ve kartları paralel olarak çek
         try {
-          const addressesFromApi = await getAddressesByUserId(user.id);
-          setSavedAddresses(addressesFromApi);
-        } catch (apiError) {
-          setAddressError("Adresler yüklenirken bir sorun oluştu.");
-          console.error("Adresleri getirme hatası:", apiError);
+          const [addresses, cards] = await Promise.all([
+            getAddressesByUserId(user.id),
+            getCardsByUserId(user.id),
+          ]);
+          setSavedAddresses(addresses);
+          setSavedCards(cards);
+        } catch (error) {
+          console.error("Adres veya kartlar yüklenirken hata:", error);
+          setAddressError("Adresler yüklenemedi.");
+          setCardError("Kartlar yüklenemedi.");
         } finally {
           setLoadingAddresses(false);
+          setLoadingCards(false);
         }
       };
-      fetchAddresses();
-    } else {
-      setLoadingAddresses(false);
-      setSavedAddresses([]);
+
+      fetchInitialData();
     }
-  }, [user]);
+  }, [user, location.state, navigate]);
 
-  // --- ADRES İŞLEM FONKSİYONLARI (DİNAMİK) ---
+  // --- TÜM FONKSİYONLAR ---
 
+  // ADRES FONKSİYONLARI (EKSİKSİZ)
   const handleOpenAddAddressModal = () => {
     setEditingAddress(null);
     setShowAddressModal(true);
   };
-
   const handleOpenEditAddressModal = (address) => {
     setEditingAddress(address);
     setShowAddressModal(true);
   };
-
   const handleSaveAddress = async (dataFromModal) => {
     const payload = {
       country: dataFromModal.country,
@@ -92,7 +127,6 @@ const Payment = () => {
     };
     try {
       if (editingAddress) {
-        // Güncelleme
         const result = await updateAddress(editingAddress._id, payload);
         setSavedAddresses((prev) =>
           prev.map((addr) =>
@@ -100,7 +134,6 @@ const Payment = () => {
           )
         );
       } else {
-        // Ekleme
         const result = await addAddress(user.id, payload);
         setSavedAddresses((prev) => [...prev, result.address]);
       }
@@ -110,94 +143,145 @@ const Payment = () => {
       alert(apiError.message || "Bir hata oluştu.");
     }
   };
-
   const handleDeleteAddress = (addressId) => {
-    setAddressToDelete(addressId); // Hangi adresin silineceğini state'e kaydet
-    setShowConfirmModal(true); // Onay modalını göster
+    setAddressToDelete(addressId);
+    setShowAddressConfirmModal(true);
   };
-
-  // YENİ: Kullanıcı silmeyi onayladığında bu fonksiyon çalışır
-  const handleConfirmDelete = async () => {
-    if (!addressToDelete) return; // Güvenlik kontrolü
-
+  const handleConfirmDeleteAddress = async () => {
+    if (!addressToDelete) return;
     try {
       await deleteAddress(addressToDelete);
       setSavedAddresses((prev) =>
         prev.filter((addr) => addr._id !== addressToDelete)
       );
-      if (selectedAddress?._id === addressToDelete) {
-        setSelectedAddress(null);
-      }
+      if (selectedAddress?._id === addressToDelete) setSelectedAddress(null);
     } catch (apiError) {
       alert(apiError.message || "Adres silinirken bir hata oluştu.");
     } finally {
-      // İşlem başarılı da olsa, başarısız da olsa modalı kapat ve state'i sıfırla
-      setShowConfirmModal(false);
+      setShowAddressConfirmModal(false);
       setAddressToDelete(null);
     }
   };
-
-  const handleSelectAddress = (address) => {
+  const handleSelectAddress = (address) =>
     setSelectedAddress(selectedAddress?._id === address._id ? null : address);
-  };
 
-  // --- KART İŞLEM FONKSİYONLARI (STATİK) ---
-
+  // KART FONKSİYONLARI (EKSİKSİZ)
   const handleOpenAddCardModal = () => {
     setEditingCard(null);
     setShowCardModal(true);
   };
-
   const handleOpenEditCardModal = (card) => {
     setEditingCard(card);
     setShowCardModal(true);
   };
-
-  const handleSaveCard = (newCardData) => {
-    if (editingCard) {
-      setSavedCards(
-        savedCards.map((card) =>
-          card.id === editingCard.id ? { ...newCardData, id: card.id } : card
-        )
-      );
-    } else {
-      setSavedCards([...savedCards, { ...newCardData, id: Date.now() }]);
+  const handleSaveCard = async (dataFromModal) => {
+    try {
+      if (editingCard) {
+        const payload = {
+          cardHolder: dataFromModal.cardHolder,
+          expiryDate: dataFromModal.expiryDate,
+        };
+        const result = await updateCard(editingCard._id, payload);
+        setSavedCards((prev) =>
+          prev.map((c) => (c._id === editingCard._id ? result.card : c))
+        );
+      } else {
+        const result = await addCard(user.id, dataFromModal);
+        setSavedCards((prev) => [...prev, result.card]);
+      }
+      setShowCardModal(false);
+      setEditingCard(null);
+    } catch (apiError) {
+      alert(apiError.message || "Kart işlemi sırasında bir hata oluştu.");
     }
-    setShowCardModal(false);
-    setEditingCard(null);
   };
-
   const handleDeleteCard = (cardId) => {
-    setSavedCards(savedCards.filter((card) => card.id !== cardId));
-    if (selectedCard?.id === cardId) {
-      setSelectedCard(null);
+    setCardToDelete(cardId);
+    setShowCardConfirmModal(true);
+  };
+  const handleConfirmDeleteCard = async () => {
+    if (!cardToDelete) return;
+    try {
+      await deleteCard(cardToDelete);
+      setSavedCards((prev) => prev.filter((c) => c._id !== cardToDelete));
+      if (selectedCard?._id === cardToDelete) setSelectedCard(null);
+    } catch (apiError) {
+      alert(apiError.message || "Kart silinirken bir hata oluştu.");
+    } finally {
+      setShowCardConfirmModal(false);
+      setCardToDelete(null);
+    }
+  };
+  const handleSelectCard = (card) =>
+    setSelectedCard(selectedCard?._id === card._id ? null : card);
+
+  // ÖDEME VE HESAPLAMA MANTIĞI (DÜZELTİLMİŞ)
+  const handleProceedToCheckout = async () => {
+    if (!selectedAddress || !selectedCard || !orderSummary) {
+      Modal.warning({
+        title: "Eksik Bilgi",
+        content: "Lütfen teslimat adresi ve ödeme yöntemi seçin.",
+      });
+      return;
+    }
+    setIsPlacingOrder(true);
+    try {
+      const orderPayload = {
+        userId: user.id,
+        addressId: selectedAddress._id,
+        cartId: user.cart,
+        orderItems: orderSummary.cartItems.map((item) => ({
+          product: item.product._id,
+          quantity: item.quantity,
+          price: item.subtotal / item.quantity,
+        })),
+        totalPrice: finalTotal,
+      };
+      const response = await createOrder(orderPayload);
+      Modal.success({
+        title: "Siparişiniz Başarıyla Alındı!",
+        content: `Sipariş numaranız: ${response.order._id}. Detaylar e-posta adresinize gönderildi.`,
+        onOk() {
+          navigate("/myorders");
+        }, // Kullanıcıyı Siparişlerim sayfasına yönlendir
+      });
+    } catch (error) {
+      Modal.error({ title: "Sipariş Oluşturulamadı", content: error.message });
+    } finally {
+      setIsPlacingOrder(false);
     }
   };
 
-  const handleSelectCard = (card) => {
-    setSelectedCard(selectedCard?.id === card.id ? null : card);
-  };
+  // HESAPLAMA BÖLÜMÜ (DÜZELTİLMİŞ)
+  // Sepetten gelen totalPrice, vergisi dahil nihai fiyattır.
+  const finalTotal = orderSummary?.totalPrice || 0;
 
-  // --- SİPARİŞ ÖZETİ (STATİK) ---
-  const orderSummary = {
-    subtotal: 1000.0,
-    tax: 80.0,
-    total: 1080.0,
-  };
+  // Ara toplam, ürünlerin indirimsiz orijinal fiyatları toplamıdır.
+  // Bu, vergili mi vergisiz mi olduğu ürün fiyatlandırmanıza bağlıdır.
+  // Basket.js'dekiyle aynı mantığı kullanıyoruz.
+  const originalSubtotal =
+    orderSummary?.cartItems.reduce(
+      (sum, item) => sum + item.product.price * item.quantity,
+      0
+    ) || 0;
+
+  // İndirim miktarı
+  const discountAmount = originalSubtotal - finalTotal;
 
   return (
     <div className="payment-container">
       <h1 className="payment-title">Payment Information</h1>
-
       <div className="payment-layout">
         <div className="payment-left-panel">
-          {/* === Kayıtlı Adresler Bölümü (Dinamik) === */}
           <div className="payment-section">
             <div className="section-header">
               <h2>Saved Addresses</h2>
             </div>
             {loadingAddresses ? (
-              <p>Adresler yükleniyor...</p>
+              <div className="loading-placeholder">
+                <Spin />
+                <p>Adresler yükleniyor...</p>
+              </div>
             ) : addressError ? (
               <p className="error-message">{addressError}</p>
             ) : savedAddresses.length === 0 ? (
@@ -254,52 +338,61 @@ const Payment = () => {
               <span>Address</span>
             </button>
           </div>
-
-          {/* === Kayıtlı Kartlar Bölümü (Statik) === */}
           <div className="payment-section">
             <div className="section-header">
               <h2>Saved Cards</h2>
             </div>
-            <div className="saved-items">
-              {savedCards.map((card) => (
-                <div
-                  key={card.id}
-                  className={`saved-item card-item ${
-                    selectedCard?.id === card.id ? "selected" : ""
-                  }`}
-                  onClick={() => handleSelectCard(card)}
-                >
-                  <div className="item-icon">
-                    <CreditCard />
+            {loadingCards ? (
+              <div className="loading-placeholder">
+                <Spin />
+                <p>Kartlar yükleniyor...</p>
+              </div>
+            ) : cardError ? (
+              <p className="error-message">{cardError}</p>
+            ) : savedCards.length === 0 ? (
+              <p>Kayıtlı kartınız bulunmuyor.</p>
+            ) : (
+              <div className="saved-items">
+                {savedCards.map((card) => (
+                  <div
+                    key={card._id}
+                    className={`saved-item card-item ${
+                      selectedCard?._id === card._id ? "selected" : ""
+                    }`}
+                    onClick={() => handleSelectCard(card)}
+                  >
+                    <div className="item-icon">
+                      <CreditCard />
+                    </div>
+                    <div className="item-details">
+                      <h3>{card.cardHolder}</h3>
+                      <p>**** **** **** {card.last4}</p>
+                      <p>Expires: {card.expiryDate}</p>
+                    </div>
+                    <div className="item-actions">
+                      <button
+                        className="action-button edit"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenEditCardModal(card);
+                        }}
+                      >
+                        <Pencil size={18} />
+                      </button>
+                      <button
+                        className="action-button delete"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteCard(card._id);
+                        }}
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </div>
-                  <div className="item-details">
-                    <h3>{card.cardHolder}</h3>
-                    <p>{card.cardNumber}</p>
-                    <p>Expires: {card.expiryDate}</p>
-                  </div>
-                  <div className="item-actions">
-                    <button
-                      className="action-button edit"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenEditCardModal(card);
-                      }}
-                    >
-                      <Pencil size={18} />
-                    </button>
-                    <button
-                      className="action-button delete"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteCard(card.id);
-                      }}
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
             <button
               className="add-button bottom-button"
               onClick={handleOpenAddCardModal}
@@ -309,37 +402,68 @@ const Payment = () => {
             </button>
           </div>
         </div>
-
-        {/* === Sipariş Özeti Bölümü (Statik) === */}
         <div className="payment-right-panel">
           <div className="order-summary">
             <h2>Order Summary</h2>
-            <div className="summary-details">
-              <div className="summary-row">
-                <span>Subtotal</span>
-                <span>${orderSummary.subtotal.toFixed(2)}</span>
+            {loadingSummary ? (
+              <div
+                className="loading-placeholder"
+                style={{ padding: "40px 0" }}
+              >
+                <Spin size="large" />
+                <p style={{ marginTop: "10px" }}>Özet Yükleniyor...</p>
               </div>
-              <div className="summary-row">
-                <span>Tax</span>
-                <span>${orderSummary.tax.toFixed(2)}</span>
-              </div>
-              <div className="summary-divider"></div>
-              <div className="summary-row total">
-                <span>Total</span>
-                <span>${orderSummary.total.toFixed(2)}</span>
-              </div>
-            </div>
-            <button
-              className="checkout-button"
-              disabled={!selectedAddress || !selectedCard}
-            >
-              Proceed to Checkout
-            </button>
+            ) : !orderSummary ? (
+              <p style={{ textAlign: "center", padding: "20px" }}>
+                Sipariş özeti bulunamadı.
+              </p>
+            ) : (
+              <>
+                <div className="summary-details">
+                  <div className="summary-row">
+                    <span>Subtotal</span>
+                    <span>
+                      {originalSubtotal.toLocaleString("tr-TR", {
+                        minimumFractionDigits: 2,
+                      })}{" "}
+                      TL
+                    </span>
+                  </div>
+                  {discountAmount > 0 && (
+                    <div className="summary-row discount">
+                      <span>Discount</span>
+                      <span>
+                        -
+                        {discountAmount.toLocaleString("tr-TR", {
+                          minimumFractionDigits: 2,
+                        })}{" "}
+                        TL
+                      </span>
+                    </div>
+                  )}
+                  <div className="summary-divider"></div>
+                  <div className="summary-row total">
+                    <span>Total</span>
+                    <strong>
+                      {finalTotal.toLocaleString("tr-TR", {
+                        minimumFractionDigits: 2,
+                      })}{" "}
+                      TL
+                    </strong>
+                  </div>
+                </div>
+                <button
+                  className="checkout-button"
+                  onClick={handleProceedToCheckout}
+                  disabled={!selectedAddress || !selectedCard || isPlacingOrder}
+                >
+                  {isPlacingOrder ? <Spin size="small" /> : "Confirm and Pay"}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
-
-      {/* === Modallar === */}
       {showAddressModal && (
         <AddressModal
           onClose={() => {
@@ -360,7 +484,6 @@ const Payment = () => {
           }
         />
       )}
-
       {showCardModal && (
         <CardModal
           onClose={() => {
@@ -371,17 +494,30 @@ const Payment = () => {
           card={editingCard}
         />
       )}
-      {showConfirmModal && (
+      {showAddressConfirmModal && (
         <ConfirmationModal
-          isOpen={showConfirmModal}
+          isOpen={showAddressConfirmModal}
           title="Adresi Silmeyi Onayla"
-          message="Bu adresi kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+          message="Bu adresi kalıcı olarak silmek istediğinizden emin misiniz?"
           confirmButtonText="Sil"
           onClose={() => {
-            setShowConfirmModal(false);
+            setShowAddressConfirmModal(false);
             setAddressToDelete(null);
           }}
-          onConfirm={handleConfirmDelete}
+          onConfirm={handleConfirmDeleteAddress}
+        />
+      )}
+      {showCardConfirmModal && (
+        <ConfirmationModal
+          isOpen={showCardConfirmModal}
+          title="Kartı Silmeyi Onayla"
+          message="Bu kartı kalıcı olarak silmek istediğinizden emin misiniz?"
+          confirmButtonText="Sil"
+          onClose={() => {
+            setShowCardConfirmModal(false);
+            setCardToDelete(null);
+          }}
+          onConfirm={handleConfirmDeleteCard}
         />
       )}
     </div>

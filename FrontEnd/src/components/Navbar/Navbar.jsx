@@ -8,10 +8,11 @@ import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import { HeartFilled } from "@ant-design/icons";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import { useAuth } from "../../context/AuthContext";
-
+import { useCart } from "../../context/CartContext";
 function Navbar() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { cartItemCount } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const ClearUser = () => {
@@ -43,7 +44,10 @@ function Navbar() {
         </div>
       </div>
 
-      <button className="navbar-menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
+      <button
+        className="navbar-menu-btn"
+        onClick={() => setMenuOpen(!menuOpen)}
+      >
         <span className="navbar-menu-icon">☰</span>
       </button>
 
@@ -63,9 +67,15 @@ function Navbar() {
             <span>Giriş Yap</span>
           </Link>
         )}
-        <Link to="/basket" className="navbar-button">
+        <Link to="/basket" className="navbar-button navbar-cart-button">
+          {" "}
+          {/* YENİ: Özel bir class ekledik */}
           <FaShoppingCart className="iconNav" />
           <span>Sepetim</span>
+          {/* Ürün sayısı 0'dan büyükse rozeti göster */}
+          {cartItemCount > 0 && (
+            <span className="cart-badge">{cartItemCount}</span>
+          )}
         </Link>
         <Link to="/favorites" className="navbar-button">
           <HeartFilled className="iconNav" />
