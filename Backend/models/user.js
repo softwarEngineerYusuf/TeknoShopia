@@ -5,6 +5,7 @@ const userSchema = new Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    cards: [{ type: Schema.Types.ObjectId, ref: "Card" }],
     password: {
       type: String,
       required: function () {

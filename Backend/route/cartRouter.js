@@ -32,104 +32,143 @@ const calculateCartTotal = async (cartId) => {
 router.post("/addCart", async (req, res) => {
   const { userId, productId, quantity = 1 } = req.body;
 
+  console.log(
+    `\n--- YENİ SEPETE EKLEME İSTEĞİ: ${new Date().toLocaleTimeString()} ---`
+  );
+  console.log(
+    `Gelen İstek => userId: ${userId}, productId: ${productId}, quantity: ${quantity}`
+  );
+
+  // 1. Girdi Kontrolü
   if (!userId || !productId) {
-    return res.status(400).json({
-      message: "Kullanıcı ID (userId) ve Ürün ID (productId) gereklidir.",
-    });
+    console.error(
+      "HATA: Girdi kontrolü başarısız. userId veya productId eksik."
+    );
+    return res
+      .status(400)
+      .json({ message: "Kullanıcı ID ve Ürün ID gereklidir." });
   }
 
   try {
-    const user = await User.findById(userId);
-    const product = await Product.findById(productId);
+    // 2. Veritabanından Gerekli Dökümanları Çek
+    console.log("Adım 1: Kullanıcı ve Ürün veritabanından aranıyor...");
+    const [user, product] = await Promise.all([
+      User.findById(userId),
+      Product.findById(productId),
+    ]);
 
-    if (user && product) {
-      console.log("\n--- Sepete Ekleme İşlemi Detayları ---");
-      console.log("Kullanıcı Adı :", user.name);
-      console.log("Kullanıcı ID  :", user._id);
-      console.log("--------------------------------------");
-      console.log("Ürün Adı      :", product.name);
-      console.log("Ürün ID       :", product._id);
-      console.log("Normal Fiyat  :", product.price);
-      console.log("İndirim (%)   :", product.discount);
-      console.log("Sanal Fiyat   :", product.discountedPrice);
-      console.log("--------------------------------------\n");
-    }
-
-    if (!user)
+    if (!user) {
+      console.error(`HATA: Kullanıcı bulunamadı. Aranan ID: ${userId}`);
       return res.status(404).json({ message: "Kullanıcı bulunamadı." });
-    if (!product) return res.status(404).json({ message: "Ürün bulunamadı." });
-    if (product.stock < quantity)
-      return res.status(400).json({ message: "Yetersiz stok." });
+    }
+    console.log(`OK: Kullanıcı bulundu -> ${user.email}`);
 
-    let cart = await Cart.findById(user.cart);
-    if (!cart) {
-      cart = new Cart({ userId: user._id, cartItems: [], totalPrice: 0 });
+    if (!product) {
+      console.error(`HATA: Ürün bulunamadı. Aranan ID: ${productId}`);
+      return res.status(404).json({ message: "Ürün bulunamadı." });
+    }
+    // ÜRÜN BİLGİLERİNİ KONSOLA YAZDIRIYORUZ
+    console.log("OK: Ürün bulundu. Detaylar aşağıda:");
+    console.log("-----------------------------------------");
+    console.log(`  Ürün Adı: ${product.name}`);
+    console.log(`  Stok: ${product.stock}`);
+    console.log(`  Fiyat (Normal): ${product.price}`);
+    console.log(`  İndirim Oranı (%): ${product.discount}`);
+    console.log(`  İndirimli Fiyat (Hesaplanmış): ${product.discountedPrice}`);
+    console.log("-----------------------------------------");
+
+    if (product.stock < quantity) {
+      console.error(
+        `HATA: Yetersiz stok. Mevcut: ${product.stock}, İstenen: ${quantity}`
+      );
+      return res.status(400).json({ message: "Yetersiz stok." });
     }
 
+    // 3. SEPETİ BUL VEYA OLUŞTUR
+    console.log("Adım 2: Kullanıcının sepeti aranıyor veya oluşturuluyor...");
+    let cart = await Cart.findOne({ userId: user._id });
+
+    if (!cart) {
+      console.log(
+        `BİLGİ: Kullanıcı için mevcut sepet yok. YENİ SEPET OLUŞTURULUYOR.`
+      );
+      cart = new Cart({ userId: user._id, cartItems: [], totalPrice: 0 });
+      await cart.save();
+      user.cart = cart._id;
+      await user.save();
+      console.log(
+        `OK: Yeni sepet (${cart._id}) oluşturuldu ve kullanıcıya bağlandı.`
+      );
+    } else {
+      console.log(`OK: Mevcut sepet bulundu. Sepet ID: ${cart._id}`);
+    }
+
+    // 4. SEPETTEKİ ÜRÜNÜ (CARTITEM) BUL VEYA OLUŞTUR
+    console.log("Adım 3: Ürünün sepette olup olmadığı kontrol ediliyor...");
     let cartItem = await CartItem.findOne({
       cartId: cart._id,
-      product: productId,
+      product: product._id,
     });
 
-    // Ürünün o anki geçerli fiyatını al (indirimli veya normal)
-    const priceToUse =
-      product.discountedPrice && product.discountedPrice < product.price
-        ? product.discountedPrice
-        : product.price;
+    // Fiyat belirleme - Hata ayıklama için konsola yazdırıyoruz.
+    const priceToUse = product.discountedPrice ?? product.price;
+    console.log(`BİLGİ: Ürün için kullanılacak fiyat: ${priceToUse}`);
 
     if (cartItem) {
+      console.log("BİLGİ: Ürün zaten sepette. Miktar güncelleniyor.");
       cartItem.quantity += quantity;
       cartItem.subtotal = cartItem.quantity * priceToUse;
-      await cartItem.save();
     } else {
-      const subtotal = quantity * priceToUse;
+      console.log("BİLGİ: Ürün sepette değil. Yeni CartItem oluşturuluyor.");
       cartItem = new CartItem({
         cartId: cart._id,
-        product: productId,
-        quantity,
-        price: priceToUse, // CartItem'a da doğru fiyatı kaydet
-        subtotal,
+        product: product._id,
+        quantity: quantity,
+        price: priceToUse,
+        subtotal: quantity * priceToUse,
       });
-      await cartItem.save();
       cart.cartItems.push(cartItem._id);
     }
 
-    // 1. POPULATE ET (Hesaplama için gerekli alanları seç)
-    await cart.populate({
-      path: "cartItems",
-      populate: {
-        path: "product",
-        select: "price discount", // SANAL ALAN YERİNE GERÇEK ALANLARI SEÇİYORUZ
-      },
+    await cartItem.save();
+    console.log(
+      `OK: CartItem kaydedildi. ID: ${cartItem._id}, Yeni Miktar: ${cartItem.quantity}`
+    );
+
+    // 5. SEPETİN TOPLAM FİYATINI GÜNCELLE
+    console.log("Adım 4: Sepet toplam fiyatı yeniden hesaplanıyor...");
+    const allItemsInCart = await CartItem.find({
+      _id: { $in: cart.cartItems },
     });
+    cart.totalPrice = allItemsInCart.reduce(
+      (sum, item) => sum + item.subtotal,
+      0
+    );
+    console.log(`OK: Yeni toplam fiyat hesaplandı: ${cart.totalPrice}`);
 
-    // 2. TOPLAM FİYATI, GERÇEK VERİLER ÜZERİNDEN HESAPLA
-    cart.totalPrice = cart.cartItems.reduce((sum, item) => {
-      if (item.product) {
-        const price = item.product.price;
-        const discount = item.product.discount || 0; // discount yoksa 0 kabul et
-
-        let finalPrice = price;
-        if (discount > 0) {
-          finalPrice = price - (price * discount) / 100;
-        }
-        return sum + finalPrice * item.quantity;
-      }
-      return sum;
-    }, 0);
-
-    // 3. KAYDET
+    // 6. ANA SEPET DÖKÜMANINI KAYDET
     await cart.save();
+    console.log("OK: Ana sepet dökümanı son haliyle kaydedildi.");
 
-    // YANIT GÖNDER (Kullanıcıya güzel görünsün diye tekrar ve tam populate edebiliriz)
-    await cart.populate({
+    // 7. KULLANICIYA YANIT GÖNDER
+    console.log(
+      "Adım 5: Son sepet verisi hazırlanıp kullanıcıya gönderiliyor..."
+    );
+    const finalCartData = await Cart.findById(cart._id).populate({
       path: "cartItems",
-      populate: { path: "product" },
+      populate: { path: "product", model: "Product" },
     });
 
-    res.status(200).json({ message: "Ürün sepete başarıyla eklendi.", cart });
+    console.log("--- İŞLEM BAŞARIYLA TAMAMLANDI ---");
+    res.status(200).json({
+      message: `${product.name} sepete başarıyla eklendi.`,
+      cart: finalCartData,
+    });
   } catch (error) {
-    console.error("Sepete ekleme hatası:", error);
+    console.error("\n*** KRİTİK HATA YAKALANDI ***");
+    console.error(`Hata Mesajı: ${error.message}`);
+    console.error("Hata Detayları:", error);
+    console.error("***************************\n");
     res
       .status(500)
       .json({ message: "Sunucuda bir hata oluştu.", error: error.message });
@@ -252,11 +291,9 @@ router.delete("/item/:cartItemId", async (req, res) => {
     // 2. Kullanıcının sepetini bul ve bu item'ın o sepete ait olduğunu doğrula.
     const cart = await Cart.findOne({ userId });
     if (!cart || !cart.cartItems.includes(itemToDelete._id)) {
-      return res
-        .status(403)
-        .json({
-          message: "Bu işlemi yapma yetkiniz yok veya ürün sepetinizde değil.",
-        });
+      return res.status(403).json({
+        message: "Bu işlemi yapma yetkiniz yok veya ürün sepetinizde değil.",
+      });
     }
 
     // 3. CartItem dökümanını veritabanından kalıcı olarak sil.
@@ -294,6 +331,93 @@ router.delete("/item/:cartItemId", async (req, res) => {
     res.status(200).json({ message: "Ürün sepetten başarıyla silindi.", cart });
   } catch (error) {
     console.error("Sepetten ürün silinirken hata oluştu:", error);
+    res
+      .status(500)
+      .json({ message: "Sunucuda bir hata oluştu.", error: error.message });
+  }
+});
+
+router.put("/item/update-quantity", async (req, res) => {
+  const { userId, cartItemId, newQuantity } = req.body;
+
+  // 1. Girdi Kontrolü
+  if (!userId || !cartItemId || !newQuantity) {
+    return res
+      .status(400)
+      .json({ message: "userId, cartItemId ve newQuantity gereklidir." });
+  }
+
+  if (newQuantity < 1) {
+    return res
+      .status(400)
+      .json({
+        message:
+          "Miktar 1'den az olamaz. Ürünü silmek için sil butonunu kullanın.",
+      });
+  }
+
+  try {
+    // 2. Gerekli dökümanları bul
+    const cart = await Cart.findOne({ userId });
+    const cartItem = await CartItem.findById(cartItemId).populate(
+      "product",
+      "stock price discountedPrice"
+    );
+
+    if (!cart) {
+      return res
+        .status(404)
+        .json({ message: "Kullanıcıya ait sepet bulunamadı." });
+    }
+    if (!cartItem) {
+      return res
+        .status(404)
+        .json({ message: "Sepette güncellenecek ürün bulunamadı." });
+    }
+    // Güvenlik kontrolü: Bu item gerçekten bu kullanıcının sepetine mi ait?
+    if (cartItem.cartId.toString() !== cart._id.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Bu ürün üzerinde işlem yapma yetkiniz yok." });
+    }
+    // Stok kontrolü
+    if (cartItem.product.stock < newQuantity) {
+      return res
+        .status(400)
+        .json({
+          message: `Yetersiz stok. Sadece ${cartItem.product.stock} adet ürün kaldı.`,
+        });
+    }
+
+    // 3. CartItem'ı güncelle
+    cartItem.quantity = newQuantity;
+    const priceToUse =
+      cartItem.product.discountedPrice ?? cartItem.product.price;
+    cartItem.subtotal = newQuantity * priceToUse;
+    await cartItem.save();
+
+    // 4. Sepetin toplam fiyatını yeniden hesapla (Güvenilir yöntem)
+    const allItemsInCart = await CartItem.find({ cartId: cart._id });
+    cart.totalPrice = allItemsInCart.reduce(
+      (sum, item) => sum + item.subtotal,
+      0
+    );
+    await cart.save();
+
+    // 5. Kullanıcıya güncel ve tam dolu sepeti geri döndür
+    const finalCartData = await Cart.findById(cart._id).populate({
+      path: "cartItems",
+      populate: { path: "product", model: "Product" },
+    });
+
+    res
+      .status(200)
+      .json({
+        message: "Ürün miktarı başarıyla güncellendi.",
+        cart: finalCartData,
+      });
+  } catch (error) {
+    console.error("Miktar güncellenirken hata oluştu:", error);
     res
       .status(500)
       .json({ message: "Sunucuda bir hata oluştu.", error: error.message });

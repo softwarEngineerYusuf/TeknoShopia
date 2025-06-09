@@ -13,22 +13,24 @@ const shippingAddressRouter = require("./shippingAddressRouter");
 const cartRouter = require("./cartRouter");
 const cartItemRouter = require("./cartItemRouter");
 const emailRoutes = require("./emailRouter");
+const cardRouter = require("./cardsRouter.js");
 
 const base = "/api";
 
-router.use(`${base}/auth`, authRouter); //localhost:3000/api/auth
-router.use(`${base}/user`, userRouter); //localhost:3000/api/user
-router.use(`${base}/category`, categoryRouter); //localhost:3000/api/category
-router.use(`${base}/brand`, brandRouter); //localhost:3000/api/brand
-router.use(`${base}/address`, addressRouter); //localhost:3000/api/address
-router.use(`${base}/product`, productRouter); //localhost:3000/api/product
-router.use(`${base}/review`, reviewRouter); //localhost:3000/api/review
-router.use(`${base}/order`, orderRouter); //localhost:3000/api/order
-router.use(`${base}/orderItem`, orderItemRouter); //localhost:3000/api/orderItem
-router.use(`${base}/billingAddress`, billingAddressRouter); //localhost:3000/api/billingAddress
-router.use(`${base}/shippingAddress`, shippingAddressRouter); //localhost:3000/api/shippingAddress
-router.use(`${base}/cart`, cartRouter); //localhost:3000/api/cart
-router.use(`${base}/cartItem`, cartItemRouter); //localhost:3000/api/cartItem
+router.use(`${base}/auth`, authRouter); //localhost:5000/api/auth
+router.use(`${base}/user`, userRouter); //localhost:5000/api/user
+router.use(`${base}/category`, categoryRouter); //localhost:5000/api/category
+router.use(`${base}/brand`, brandRouter); //localhost:5000/api/brand
+router.use(`${base}/address`, addressRouter); //localhost:5000/api/address
+router.use(`${base}/product`, productRouter); //localhost:5000/api/product
+router.use(`${base}/review`, reviewRouter); //localhost:5000/api/review
+router.use(`${base}/order`, orderRouter); //localhost:5000/api/order
+router.use(`${base}/orderItem`, orderItemRouter); //localhost:5000/api/orderItem
+router.use(`${base}/billingAddress`, billingAddressRouter); //localhost:5000/api/billingAddress
+router.use(`${base}/shippingAddress`, shippingAddressRouter); //localhost:5000/api/shippingAddress
+router.use(`${base}/cart`, cartRouter); //localhost:5000/api/cart
+router.use(`${base}/cartItem`, cartItemRouter); //localhost:5000/api/cartItem
 router.use(`${base}/email`, emailRoutes);
+router.use(`${base}/card`, cardRouter); //localhost:5000/api/card
 
 module.exports = router;
