@@ -1,35 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
-import './AddressModal.css';
+import React, { useState, useEffect } from "react";
+import { X } from "lucide-react";
+import "./AddressModal.css";
 
 const AddressModal = ({ onClose, onSave, address }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    street: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: 'Turkey'
+    name: "",
+    street: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "Turkey",
   });
 
   useEffect(() => {
     if (address) {
       setFormData({
-        name: address.name || '',
-        street: address.street || '',
-        city: address.city || '',
-        state: address.state || '',
-        zipCode: address.zipCode || '',
-        country: address.country || 'Turkey'
+        name: address.name || "",
+        street: address.street || "",
+        city: address.city || "",
+        // state: address.state || '',
+        zipCode: address.zipCode || "",
+        country: address.country || "Turkey",
       });
     }
   }, [address]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -42,12 +42,12 @@ const AddressModal = ({ onClose, onSave, address }) => {
     <div className="modal-overlay">
       <div className="modal-container">
         <div className="modal-header">
-          <h2>{address ? 'Edit Address' : 'Add New Address'}</h2>
+          <h2>{address ? "Edit Address" : "Add New Address"}</h2>
           <button className="modal-close" onClick={onClose}>
             <X size={24} />
           </button>
         </div>
-        
+
         <div className="modal-content">
           <form onSubmit={handleSubmit}>
             <div className="form-group">
@@ -62,7 +62,7 @@ const AddressModal = ({ onClose, onSave, address }) => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="street">Street Address</label>
               <input
@@ -75,7 +75,7 @@ const AddressModal = ({ onClose, onSave, address }) => {
                 required
               />
             </div>
-            
+
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="city">City</label>
@@ -89,8 +89,8 @@ const AddressModal = ({ onClose, onSave, address }) => {
                   required
                 />
               </div>
-              
-              <div className="form-group">
+
+              {/* <div className="form-group">
                 <label htmlFor="state">State/Province</label>
                 <input
                   type="text"
@@ -101,9 +101,9 @@ const AddressModal = ({ onClose, onSave, address }) => {
                   placeholder="State or Province"
                   required
                 />
-              </div>
+              </div> */}
             </div>
-            
+
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="zipCode">Postal Code</label>
@@ -117,7 +117,7 @@ const AddressModal = ({ onClose, onSave, address }) => {
                   required
                 />
               </div>
-              
+
               <div className="form-group">
                 <label htmlFor="country">Country</label>
                 <select
@@ -136,7 +136,7 @@ const AddressModal = ({ onClose, onSave, address }) => {
                 </select>
               </div>
             </div>
-            
+
             <div className="modal-actions">
               <button type="button" className="btn-secondary" onClick={onClose}>
                 Cancel

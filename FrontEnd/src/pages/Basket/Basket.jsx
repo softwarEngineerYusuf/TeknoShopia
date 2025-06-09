@@ -9,12 +9,14 @@ import {
   removeItemFromCart,
 } from "../../allAPIs/cart";
 import "./Basket.css";
+import { useNavigate } from "react-router-dom";
 
 function Basket() {
   const { user } = useAuth();
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deletingItemId, setDeletingItemId] = useState(null);
+  const navigate = useNavigate();
   // Sayfa yüklendiğinde kullanıcının sepetini çeken useEffect
   useEffect(() => {
     if (user && user.id) {
@@ -40,6 +42,9 @@ function Basket() {
     message.info("Miktar güncelleme özelliği yakında eklenecektir.");
   };
 
+  const handleCheckout = () => {
+    navigate("/payment");
+  };
   const handleRemoveItem = async (itemId) => {
     if (!user || !user.id) return;
 
@@ -216,7 +221,9 @@ function Basket() {
           Genel Toplam:{" "}
           <span>{cart.totalPrice.toLocaleString("tr-TR")} TL</span>
         </p>
-        <button className="checkoutButton">Ödemeye Geç</button>
+        <button className="checkoutButton" onClick={handleCheckout}>
+          Ödemeye Geç
+        </button>
       </div>
     </div>
   );
