@@ -23,3 +23,21 @@ export const getMyOrders = async (userId) => {
     throw new Error(error.response?.data?.message || "Siparişler alınamadı.");
   }
 };
+
+export const getOrdersByUserId = async (userId) => {
+  if (!userId) {
+    console.error("getOrdersByUserId çağrısı için userId gereklidir.");
+    return []; // veya bir hata fırlat
+  }
+  try {
+    const response = await axios.get(`${API_URL}/GetOrdersByUserId/${userId}`);
+    return response.data; // API'niz doğrudan sipariş dizisini döndürüyor
+  } catch (error) {
+    console.error(
+      "Kullanıcı siparişleri çekilirken hata oluştu:",
+      error.response?.data?.message || error.message
+    );
+    // Hata durumunda boş bir dizi döndürerek uygulamanın çökmesini engelle
+    return [];
+  }
+};

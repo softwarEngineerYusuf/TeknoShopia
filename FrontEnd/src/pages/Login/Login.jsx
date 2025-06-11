@@ -55,6 +55,7 @@ function Login() {
       await login(email, password);
       message.success("Başarıyla giriş yapıldı!");
       navigate("/");
+      // eslint-disable-next-line no-unused-vars
     } catch (error) {
       setError("E-posta adresi veya şifre yanlış.");
       message.error("E-posta adresi veya şifre yanlış.");

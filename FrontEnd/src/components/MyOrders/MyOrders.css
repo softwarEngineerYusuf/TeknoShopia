@@ -2,7 +2,7 @@
   padding: 2rem 1rem;
   max-width: 1200px;
   margin: 0 auto;
-  min-height: 100vh
+  min-height: 100vh;
 }
 
 .orders-container {
@@ -40,11 +40,22 @@
   display: block;
 }
 @keyframes electro-bounce {
-  0%, 100% { transform: translateY(0); }
-  20% { transform: translateY(-8px) scale(1.05); }
-  40% { transform: translateY(0); }
-  60% { transform: translateY(-4px) scale(1.03); }
-  80% { transform: translateY(0); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  20% {
+    transform: translateY(-8px) scale(1.05);
+  }
+  40% {
+    transform: translateY(0);
+  }
+  60% {
+    transform: translateY(-4px) scale(1.03);
+  }
+  80% {
+    transform: translateY(0);
+  }
 }
 
 .orders-list {
@@ -93,7 +104,7 @@
 
 .order-header:hover {
   background: linear-gradient(90deg, #e9ecef 60%, #f8fafc 100%);
-  box-shadow: 0 2px 12px rgba(60, 72, 88, 0.10);
+  box-shadow: 0 2px 12px rgba(60, 72, 88, 0.1);
 }
 
 .order-image {
@@ -335,4 +346,16 @@
     font-size: 0.95rem;
     margin: 0 6px;
   }
+}
+
+.clickable-product-image {
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.clickable-product-image:hover {
+  transform: scale(1.05); /* Resmin üzerine gelince biraz büyüt */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Hafif bir gölge ekle */
+  z-index: 10; /* Diğer resimlerin üzerine çıkmasını sağla */
+  position: relative; /* z-index'in çalışması için gerekli */
 }

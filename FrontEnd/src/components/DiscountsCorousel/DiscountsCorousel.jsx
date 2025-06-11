@@ -1,57 +1,96 @@
 import { useState, useEffect } from "react";
-import { getDiscountedProducts } from "../../allAPIs/product"; // API fonksiyonunu ekledik
 import "bootstrap/dist/css/bootstrap.min.css";
 import StarIcon from "@mui/icons-material/Star";
-import { HeartOutlined, HeartFilled } from "@ant-design/icons"; // Import heart icons
+import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import "./DiscountsCorousel.css";
+
+// YENİ: Gerekli importlar
+import { useAuth } from "../../context/AuthContext";
+import { getDiscountedProducts } from "../../allAPIs/product";
 import { useGoToProductDetail } from "../GoToProductDetailFunction/GoToProductDetail";
+import {
+  addProductToFavorites,
+  removeProductFromFavorites,
+  getFavoriteProductIds,
+} from "../../allAPIs/favorites";
+import { message } from "antd";
 
 function DiscountsCarousel() {
   const [products, setProducts] = useState([]);
   const [itemsPerSlide, setItemsPerSlide] = useState(4);
-  const [favorites, setFavorites] = useState([]);
+  const [favoriteIds, setFavoriteIds] = useState(new Set()); // Eski 'favorites' state'i yerine bu geldi
   const goToProductDetail = useGoToProductDetail();
+  const { user } = useAuth(); // Giriş yapmış kullanıcıyı al
 
+  // Bileşen yüklendiğinde ve kullanıcı değiştiğinde verileri çek
   useEffect(() => {
-    const fetchDiscountedProducts = async () => {
-      const data = await getDiscountedProducts();
-      setProducts(data);
-      setFavorites(Array(data.length).fill(false)); // Initialize favorites state
-    };
+    const fetchInitialData = async () => {
+      // 1. İndirimli ürünleri çek
+      const productData = await getDiscountedProducts();
+      setProducts(productData);
 
-    fetchDiscountedProducts();
-  }, []);
-
-  useEffect(() => {
-    const updateItemsPerSlide = () => {
-      if (window.innerWidth < 768) {
-        setItemsPerSlide(1);
-      } else if (window.innerWidth < 992) {
-        setItemsPerSlide(2);
+      // 2. Kullanıcı giriş yapmışsa, favori ürün ID'lerini çek
+      if (user && user.id) {
+        const favIds = await getFavoriteProductIds(user.id);
+        setFavoriteIds(new Set(favIds));
       } else {
-        setItemsPerSlide(4);
+        // Kullanıcı çıkış yapmışsa favori listesini temizle
+        setFavoriteIds(new Set());
       }
     };
 
+    fetchInitialData();
+  }, [user]); // user değişince (login/logout) tekrar çalışır
+
+  // Responsive tasarım için item sayısını güncelleyen useEffect
+  useEffect(() => {
+    const updateItemsPerSlide = () => {
+      if (window.innerWidth < 768) setItemsPerSlide(1);
+      else if (window.innerWidth < 992) setItemsPerSlide(2);
+      else setItemsPerSlide(4);
+    };
     updateItemsPerSlide();
     window.addEventListener("resize", updateItemsPerSlide);
     return () => window.removeEventListener("resize", updateItemsPerSlide);
   }, []);
 
-  const chunkArray = (array, size) => {
-    return array.reduce((acc, _, i) => {
-      if (i % size === 0) acc.push(array.slice(i, i + size));
-      return acc;
-    }, []);
+  // API ile etkileşime giren yeni favori fonksiyonu
+  const handleToggleFavorite = async (productId) => {
+    if (!user) {
+      message.warning("Favorilere eklemek için lütfen giriş yapın!");
+      return;
+    }
+    const isFavorite = favoriteIds.has(productId);
+    try {
+      if (isFavorite) {
+        await removeProductFromFavorites(user.id, productId);
+        setFavoriteIds((prev) => {
+          const newIds = new Set(prev);
+          newIds.delete(productId);
+          return newIds;
+        });
+        message.success("Ürün favorilerden kaldırıldı.");
+      } else {
+        await addProductToFavorites(user.id, productId);
+        setFavoriteIds((prev) => {
+          const newIds = new Set(prev);
+          newIds.add(productId);
+          return newIds;
+        });
+        message.success("Ürün favorilere eklendi!");
+      }
+    } catch (error) {
+      message.error("Bir hata oluştu. Lütfen tekrar deneyin.");
+    }
   };
 
-  const toggleFavorite = (index) => {
-    setFavorites((prevFavorites) => {
-      const newFavorites = [...prevFavorites];
-      newFavorites[index] = !newFavorites[index];
-      return newFavorites;
-    });
+  const chunkArray = (array, size) => {
+    return array.reduce(
+      (acc, _, i) =>
+        i % size === 0 ? [...acc, array.slice(i, i + size)] : acc,
+      []
+    );
   };
 
   const groupedCards = chunkArray(products, itemsPerSlide);
@@ -60,7 +99,7 @@ function DiscountsCarousel() {
     <div>
       <div className="top-picks-and-button d-flex justify-content-between align-items-center container">
         <h2 className="top-picks-title mb-3">
-          <LocalOfferIcon className="top-picks-icon" /> Discounts
+          <LocalOfferIcon className="top-picks-icon" /> Fırsat Ürünleri
         </h2>
       </div>
       <div
@@ -69,14 +108,14 @@ function DiscountsCarousel() {
         data-bs-ride="carousel"
       >
         <div className="carousel-inner">
-          {groupedCards.map((group, index) => (
+          {groupedCards.map((group, groupIndex) => (
             <div
-              key={index}
-              className={`carousel-item ${index === 0 ? "active" : ""}`}
+              key={groupIndex}
+              className={`carousel-item ${groupIndex === 0 ? "active" : ""}`}
             >
               <div className="container">
                 <div className="row">
-                  {group.map((product, productIndex) => (
+                  {group.map((product) => (
                     <div
                       key={product._id}
                       className="col-12 col-sm-6 col-md-6 col-lg-3"
@@ -84,9 +123,10 @@ function DiscountsCarousel() {
                       <div className="card-discount-corousel container">
                         <button
                           className="favorite-button"
-                          onClick={() => toggleFavorite(productIndex)}
+                          onClick={() => handleToggleFavorite(product._id)} // GÜNCELLENDİ
                         >
-                          {favorites[productIndex] ? (
+                          {/* GÜNCELLENDİ: Durum kontrolü favoriteIds Set'i ile yapılıyor */}
+                          {favoriteIds.has(product._id) ? (
                             <HeartFilled
                               style={{ fontSize: "24px", color: "red" }}
                             />
@@ -96,8 +136,10 @@ function DiscountsCarousel() {
                         </button>
                         <img
                           src={product.mainImage}
-                          alt={product.title}
+                          alt={product.name}
                           className="card-image-discount-corousel"
+                          onClick={() => goToProductDetail(product._id)}
+                          style={{ cursor: "pointer" }}
                         />
                         <div className="card-details-discount-corousel">
                           <p className="product-name-discount-corousel">
@@ -109,14 +151,18 @@ function DiscountsCarousel() {
                           >
                             <div className="rating-discount-corousel">
                               <StarIcon />
-                              <p>4.8</p>
+                              <p>{product.ratings?.toFixed(1) || "4.5"}</p>
                             </div>
-                            <div>
-                              <p style={{ color: "red" }}>
-                                <del>1800₺</del>
+                            {/* GÜNCELLENDİ: Fiyatlar artık dinamik */}
+                            <div style={{ textAlign: "right" }}>
+                              <p className="original-price-carousel">
+                                {product.price.toLocaleString("tr-TR")}₺
                               </p>
                               <p className="product-price-discount-corousel">
-                                {product.discountedPrice}₺
+                                {product.discountedPrice.toLocaleString(
+                                  "tr-TR"
+                                )}
+                                ₺
                               </p>
                             </div>
                           </div>

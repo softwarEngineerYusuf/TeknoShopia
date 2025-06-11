@@ -15,7 +15,7 @@ import Category from "./pages/Category/Category";
 import Payment from "./pages/Payment/Payment";
 import Brands from "./pages/Brands/Brands";
 import TopPicksMore from "./pages/TopPicksMore/TopPicksMore";
-
+import "antd/dist/reset.css";
 import Navbar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
 import Favorites from "./components/Favorites/Favorites";

@@ -4,28 +4,76 @@ import "./TopPicks.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 import { Link } from "react-router-dom";
-import { getTopPicksProducts } from "../../allAPIs/product"; // yolunu projenize göre ayarlayın
-import { useGoToProductDetail } from "../GoToProductDetailFunction/GoToProductDetail";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+
+// YENİ: Gerekli importlar
+import { useAuth } from "../../context/AuthContext"; // AuthContext yolunu kontrol et
+import { getTopPicksProducts } from "../../allAPIs/product";
+import { useGoToProductDetail } from "../GoToProductDetailFunction/GoToProductDetail";
+import {
+  addProductToFavorites,
+  removeProductFromFavorites,
+  getFavoriteProductIds,
+} from "../../allAPIs/favorites";
+import { message } from "antd"; // Ant Design bildirim sistemi
+
 const TopPicks = () => {
   const [products, setProducts] = useState([]);
-  const [favorites, setFavorites] = useState([]);
+  const [favoriteIds, setFavoriteIds] = useState(new Set()); // Favori ID'lerini Set olarak tutmak daha performanslı
   const goToProductDetail = useGoToProductDetail();
-  useEffect(() => {
-    const fetchTopPicks = async () => {
-      const data = await getTopPicksProducts();
-      setProducts(data);
-      setFavorites(Array(data.length).fill(false));
-    };
-    fetchTopPicks();
-  }, []);
+  const { user } = useAuth(); // Giriş yapmış kullanıcıyı al
 
-  const toggleFavorite = (index) => {
-    setFavorites((prev) => {
-      const newFavs = [...prev];
-      newFavs[index] = !newFavs[index];
-      return newFavs;
-    });
+  // Bileşen yüklendiğinde hem ürünleri hem de favori durumunu çek
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      // 1. Top Picks ürünlerini çek
+      const productData = await getTopPicksProducts();
+      setProducts(productData);
+
+      // 2. Kullanıcı giriş yapmışsa, favori ürün ID'lerini çek
+      if (user && user.id) {
+        const favIds = await getFavoriteProductIds(user.id);
+        setFavoriteIds(new Set(favIds)); // Gelen ID dizisini Set'e çevir
+      }
+    };
+
+    fetchInitialData();
+  }, [user]); // useEffect, kullanıcı bilgisi değiştiğinde (login/logout) tekrar çalışır
+
+  // Kalp ikonuna tıklama fonksiyonu
+  const handleToggleFavorite = async (productId) => {
+    // Kullanıcı giriş yapmamışsa uyarı ver ve işlemi durdur
+    if (!user) {
+      message.warning("Favorilere eklemek için lütfen giriş yapın!");
+      return;
+    }
+
+    const isFavorite = favoriteIds.has(productId);
+
+    try {
+      if (isFavorite) {
+        // Favorilerdeyse, kaldır
+        await removeProductFromFavorites(user.id, productId);
+        setFavoriteIds((prevIds) => {
+          const newIds = new Set(prevIds);
+          newIds.delete(productId);
+          return newIds;
+        });
+        message.success("Ürün favorilerden kaldırıldı.");
+      } else {
+        // Favorilerde değilse, ekle
+        await addProductToFavorites(user.id, productId);
+        setFavoriteIds((prevIds) => {
+          const newIds = new Set(prevIds);
+          newIds.add(productId);
+          return newIds;
+        });
+        message.success("Ürün favorilere eklendi!");
+      }
+      // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+      message.error("Bir hata oluştu. Lütfen tekrar deneyin.");
+    }
   };
 
   return (
@@ -42,14 +90,15 @@ const TopPicks = () => {
       </div>
 
       <div className="row">
-        {products.map((product, index) => (
+        {products.map((product) => (
           <div key={product._id} className="col-md-3 mb-4">
             <div className="card-top-picks container">
               <button
                 className="favorite-button"
-                onClick={() => toggleFavorite(index)}
+                onClick={() => handleToggleFavorite(product._id)} // GÜNCELLENDİ
               >
-                {favorites[index] ? (
+                {/* GÜNCELLENDİ: Favori durumunu `favoriteIds` Set'i ile kontrol et */}
+                {favoriteIds.has(product._id) ? (
                   <HeartFilled style={{ fontSize: "24px", color: "red" }} />
                 ) : (
                   <HeartOutlined style={{ fontSize: "24px" }} />

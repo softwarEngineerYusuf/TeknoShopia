@@ -1,80 +1,25 @@
-import React from 'react';
-import './MyOrders.css';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Rating from '@mui/material/Rating';
-import StarIcon from '@mui/icons-material/Star';
-
-const mockOrders = [
-  {
-    id: 1,
-    date: '2024-03-15',
-    orderNumber: 'ORD-2024-001',
-    orderImage: 'https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/129743-1_large.jpg',
-    orderImage2: 'https://cdn.vatanbilgisayar.com/Upload/PRODUCT/asus/thumb/150368-1_large.jpg',
-    status: 'Teslim Edildi',
-    total: 1299.99,
-    items: [
-      { 
-        name: 'iPhone Case', 
-        quantity: 1, 
-        price: 299.99,
-        image: 'https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/129743-1_large.jpg'
-      },
-      { 
-        name: 'AirPods Pro', 
-        quantity: 1, 
-        price: 1000.00,
-        image: 'https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/129743-1_large.jpg'
-      }
-    ]
-  },
-  {
-    id: 2,
-    date: '2024-03-10',
-    orderNumber: 'ORD-2024-002',
-    orderImge: 'https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/129743-1_large.jpg',
-    status: 'Kargoda',
-    total: 799.50,
-    items: [
-      { 
-        name: 'Samsung Galaxy S24 Kılıf', 
-        quantity: 1, 
-        price: 799.50,
-        image: 'https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/129743-1_large.jpg'
-      }
-    ]
-  },
-  {
-    id: 3,
-    date: '2024-03-05',
-    orderNumber: 'ORD-2024-003',
-    orderImge: 'https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/129743-1_large.jpg',
-    status: 'İşleme Alındı',
-    total: 2499.99,
-    items: [
-      { 
-        name: 'iPad Mini', 
-        quantity: 1, 
-        price: 2499.99,
-        image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=120&h=120&fit=crop'
-      }
-    ]
-  }
-];
-
+import React, { useState, useEffect } from "react";
+import "./MyOrders.css";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Rating from "@mui/material/Rating";
+import StarIcon from "@mui/icons-material/Star";
+import { getOrdersByUserId } from "../../allAPIs/order";
+import { useAuth } from "../../context/AuthContext";
+import { useGoToProductDetail } from "../../components/GoToProductDetailFunction/GoToProductDetail";
 function ReviewModal({ open, onClose, onSubmit }) {
+  // ... (Bu component içeriği aynı kalıyor, kopyalamaya gerek yok)
   const [rating, setRating] = React.useState(0);
-  const [comment, setComment] = React.useState('');
+  const [comment, setComment] = React.useState("");
 
   React.useEffect(() => {
     if (open) {
       setRating(0);
-      setComment('');
+      setComment("");
     }
   }, [open]);
 
@@ -82,14 +27,24 @@ function ReviewModal({ open, onClose, onSubmit }) {
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle>Evaluate the product</DialogTitle>
       <DialogContent>
-        <div style={{ display: 'flex', justifyContent: 'center', margin: '12px 0' }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            margin: "12px 0",
+          }}
+        >
           <Rating
             name="product-rating"
             value={rating}
             onChange={(_, newValue) => setRating(newValue)}
             size="large"
-            icon={<StarIcon style={{ fontSize: 44, color: '#FFD700' }} />}         // Sarı yıldız
-            emptyIcon={<StarIcon style={{ fontSize: 44, color: '#FFD700', opacity: 0.3 }} />}
+            icon={<StarIcon style={{ fontSize: 44, color: "#FFD700" }} />}
+            emptyIcon={
+              <StarIcon
+                style={{ fontSize: 44, color: "#FFD700", opacity: 0.3 }}
+              />
+            }
           />
         </div>
         <TextField
@@ -98,12 +53,17 @@ function ReviewModal({ open, onClose, onSubmit }) {
           minRows={3}
           fullWidth
           value={comment}
-          onChange={e => setComment(e.target.value)}
+          onChange={(e) => setComment(e.target.value)}
           variant="outlined"
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="secondary" style={{ backgroundColor: 'red', color: 'white' }} variant="contained">
+        <Button
+          onClick={onClose}
+          color="secondary"
+          style={{ backgroundColor: "red", color: "white" }}
+          variant="contained"
+        >
           Cancel
         </Button>
         <Button
@@ -114,7 +74,8 @@ function ReviewModal({ open, onClose, onSubmit }) {
           color="primary"
           variant="contained"
           disabled={rating === 0}
-         style={{ backgroundColor: 'green', color: 'white' }}>
+          style={{ backgroundColor: "green", color: "white" }}
+        >
           Send
         </Button>
       </DialogActions>
@@ -122,59 +83,111 @@ function ReviewModal({ open, onClose, onSubmit }) {
   );
 }
 
+// OrderCard componenti API verisine uyumlu hale getirildi.
 function OrderCard({ order }) {
   const [isExpanded, setIsExpanded] = React.useState(false);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState(null);
-
+  const goToProductDetail = useGoToProductDetail();
   const handleReviewClick = (item) => {
     setSelectedItem(item);
     setModalOpen(true);
   };
-
+  const handleImageClick = (e, productId) => {
+    // Parent element'in onClick'ini (kartı genişletme) tetiklemesini engelle
+    e.stopPropagation();
+    goToProductDetail(productId);
+  };
   const handleReviewSubmit = ({ rating, comment }) => {
-    // Burada API'ye gönderme işlemi yapılabilir
-    // console.log('Yıldız:', rating, 'Yorum:', comment, 'Ürün:', selectedItem);
-    alert(`Yıldız: ${rating}\nYorum: ${comment}\nÜrün: ${selectedItem?.name}`);
+    alert(
+      `Yıldız: ${rating}\nYorum: ${comment}\nÜrün: ${selectedItem?.product.name}`
+    );
+  };
+
+  // API'den gelen durumları Türkçe ve stil uyumlu hale getirelim.
+  const getStatusText = (status) => {
+    switch (status) {
+      case "Processing":
+        return "İşleme Alındı";
+      case "Shipped":
+        return "Kargoda";
+      case "Delivered":
+        return "Teslim Edildi";
+      case "Cancelled":
+        return "İptal Edildi";
+      default:
+        return status;
+    }
   };
 
   return (
     <div className="order-card">
       <div className="order-header" onClick={() => setIsExpanded(!isExpanded)}>
-        <div className='order-image'>
-          <img src={order.orderImage} alt="Order" />
-          {order.orderImage2 && <img src={order.orderImage2} alt="Order" />}
+        <div className="order-image">
+          {/* GÜNCELLENDİ: Header'daki resimlere onClick eklendi */}
+          {order.orderItems[0]?.product.mainImage && (
+            <img
+              src={order.orderItems[0].product.mainImage}
+              alt={order.orderItems[0].product.name}
+              className="clickable-product-image" // Stil için class eklendi
+              onClick={(e) =>
+                handleImageClick(e, order.orderItems[0].product._id)
+              }
+            />
+          )}
+          {order.orderItems[1]?.product.mainImage && (
+            <img
+              src={order.orderItems[1].product.mainImage}
+              alt={order.orderItems[1].product.name}
+              className="clickable-product-image" // Stil için class eklendi
+              onClick={(e) =>
+                handleImageClick(e, order.orderItems[1].product._id)
+              }
+            />
+          )}
         </div>
         <div className="order-main-info">
-          <span className="order-number">{order.orderNumber}</span>
-          <span className="order-date">{order.date}</span>
+          <span className="order-number">Sipariş No: {order._id}</span>
+          <span className="order-date">
+            {new Date(order?.createdAt).toLocaleDateString("tr-TR")}
+          </span>
         </div>
         <div className="order-status-price">
-          <span className={`order-status status-${order.status.toLowerCase().replace(/\s+/g, '-')}`}>
-            {order.status}
+          <span
+            className={`order-status status-${order.status
+              .toLowerCase()
+              .replace(/\s+/g, "-")}`}
+          >
+            {getStatusText(order?.status)}
           </span>
-          <span className="order-total">{order.total.toFixed(2)} ₺</span>
+          <span className="order-total">{order.totalPrice.toFixed(2)} ₺</span>
         </div>
       </div>
-      
+
       {isExpanded && (
         <div className="order-details">
           <h4>Sipariş Detayları</h4>
           <div className="order-items">
-            {order.items.map((item, index) => (
-              <div key={index} className="order-item">
+            {order.orderItems.map((item) => (
+              <div key={item._id} className="order-item">
                 <div className="item-info">
-                  <img src={item.image} alt={item.name} className="item-image" />
-                  <span className="item-name">{item.name}</span>
+                  {/* GÜNCELLENDİ: Detaydaki resme onClick eklendi */}
+                  <img
+                    src={item.product.mainImage}
+                    alt={item.product.name}
+                    className="item-image clickable-product-image" // Stil için class eklendi
+                    onClick={() => goToProductDetail(item.product._id)}
+                  />
+                  <span className="item-name">{item.product.name}</span>
                 </div>
                 <button
-                  className='review-star-button'
-                  onClick={e => {
+                  className="review-star-button"
+                  onClick={(e) => {
                     e.stopPropagation();
                     handleReviewClick(item);
                   }}
                 >
-                  Review & Star
+                  Değerlendir
                 </button>
                 <span className="item-quantity">x{item.quantity}</span>
                 <span className="item-price">{item.price.toFixed(2)} ₺</span>
@@ -192,31 +205,107 @@ function OrderCard({ order }) {
   );
 }
 
+// MyOrders ana componenti
 function MyOrders() {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { user } = useAuth(); // AuthContext'ten kullanıcıyı al
+
+  useEffect(() => {
+    // Kullanıcı bilgisi varsa ve ID'si mevcutsa siparişleri çek
+    if (user && user.id) {
+      const fetchOrders = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const userOrders = await getOrdersByUserId(user.id);
+          setOrders(userOrders);
+        } catch (err) {
+          setError(
+            "Siparişleriniz yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+          );
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchOrders();
+    } else {
+      // Eğer kullanıcı yoksa veya bilgileri yüklenmemişse, yüklemeyi durdur.
+      setLoading(false);
+    }
+  }, [user]); // useEffect, user nesnesi değiştiğinde tekrar çalışacak.
+
   return (
     <div className="orders-page">
       <div className="orders-container">
         <h1>
-          <span>My Orders</span>
-          <span className="electro-anim" aria-label="Order Animation" title="Order Animation">
-            {/* Elektronik alışveriş temalı SVG animasyon */}
-            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="6" y="16" width="36" height="22" rx="4" fill="#4F8EF7"/>
-              <rect x="10" y="20" width="28" height="14" rx="2" fill="#fff"/>
-              <rect x="18" y="28" width="12" height="4" rx="2" fill="#4F8EF7"/>
-              <circle cx="16" cy="40" r="3" fill="#FFD600"/>
-              <circle cx="32" cy="40" r="3" fill="#FFD600"/>
-              <rect x="20" y="10" width="8" height="8" rx="2" fill="#FFD600" stroke="#4F8EF7" strokeWidth="1.5"/>
-              <path d="M24 10v-3" stroke="#4F8EF7" strokeWidth="2" strokeLinecap="round"/>
-              <path d="M24 7h2.5" stroke="#4F8EF7" strokeWidth="2" strokeLinecap="round"/>
-              <path d="M24 7h-2.5" stroke="#4F8EF7" strokeWidth="2" strokeLinecap="round"/>
+          <span>Siparişlerim</span>
+          <span
+            className="electro-anim"
+            aria-label="Order Animation"
+            title="Order Animation"
+          >
+            {/* SVG kısmı aynı kalabilir */}
+            <svg
+              viewBox="0 0 48 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect x="6" y="16" width="36" height="22" rx="4" fill="#4F8EF7" />
+              <rect x="10" y="20" width="28" height="14" rx="2" fill="#fff" />
+              <rect x="18" y="28" width="12" height="4" rx="2" fill="#4F8EF7" />
+              <circle cx="16" cy="40" r="3" fill="#FFD600" />
+              <circle cx="32" cy="40" r="3" fill="#FFD600" />
+              <rect
+                x="20"
+                y="10"
+                width="8"
+                height="8"
+                rx="2"
+                fill="#FFD600"
+                stroke="#4F8EF7"
+                strokeWidth="1.5"
+              />
+              <path
+                d="M24 10v-3"
+                stroke="#4F8EF7"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <path
+                d="M24 7h2.5"
+                stroke="#4F8EF7"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <path
+                d="M24 7h-2.5"
+                stroke="#4F8EF7"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
             </svg>
           </span>
         </h1>
         <div className="orders-list">
-          {mockOrders.map(order => (
-            <OrderCard key={order.id} order={order} />
-          ))}
+          {loading && (
+            <p style={{ textAlign: "center" }}>Siparişleriniz yükleniyor...</p>
+          )}
+          {error && (
+            <p style={{ textAlign: "center", color: "red" }}>{error}</p>
+          )}
+          {!loading &&
+            !error &&
+            (orders.length > 0 ? (
+              orders.map((order) => <OrderCard key={order._id} order={order} />)
+            ) : (
+              <p style={{ textAlign: "center" }}>
+                Henüz hiç sipariş vermediniz.
+              </p>
+            ))}
         </div>
       </div>
     </div>
