@@ -6,13 +6,20 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import StarIcon from "@mui/icons-material/Star"; // Örnek için kalabilir
+import StarIcon from "@mui/icons-material/Star";
 import { HeartOutlined, HeartFilled } from "@ant-design/icons";
-import { Empty } from "antd";
+import { Empty, message } from "antd"; // YENİ: message import edildi
 import { useCompare } from "../../context/CompareContext";
 import "./Compare.css";
-import Navbar2 from "../../components/Navbar2/Navbar2.jsx";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react"; // YENİ: useEffect import edildi
+
+// YENİ: Gerekli importlar
+import { useAuth } from "../../context/AuthContext";
+import {
+  addProductToFavorites,
+  removeProductFromFavorites,
+  getFavoriteProductIds,
+} from "../../allAPIs/favorites";
 
 // TabPanel ve a11yProps fonksiyonları aynı kalacak
 function TabPanel(props) {
@@ -51,18 +58,56 @@ const Compare = () => {
   const theme = useTheme();
   const { compareList } = useCompare();
 
-  // Favori butonu için state (her ürün için ayrı)
-  const [favorites, setFavorites] = useState(compareList.map(() => false));
-  const toggleFavorite = (index) => {
-    setFavorites((prev) => {
-      const newFavs = [...prev];
-      newFavs[index] = !newFavs[index];
-      return newFavs;
-    });
+  // YENİ: Favori state yönetimi
+  const { user } = useAuth();
+  const [favoriteIds, setFavoriteIds] = useState(new Set());
+
+  // YENİ: Bileşen yüklendiğinde ve kullanıcı değiştiğinde favori durumunu çek
+  useEffect(() => {
+    // Sadece kullanıcı varsa favori ID'lerini çek
+    if (user && user.id) {
+      getFavoriteProductIds(user.id).then((ids) => {
+        setFavoriteIds(new Set(ids));
+      });
+    } else {
+      // Kullanıcı yoksa (çıkış yapmışsa) favori listesini temizle
+      setFavoriteIds(new Set());
+    }
+  }, [user]); // user state'i değiştiğinde bu effect tekrar çalışır
+
+  // YENİ: API ile çalışan favori toggle fonksiyonu
+  const handleToggleFavorite = async (productId) => {
+    if (!user) {
+      message.warning("Favorilere eklemek için lütfen giriş yapın!");
+      return;
+    }
+
+    const isFavorite = favoriteIds.has(productId);
+    try {
+      if (isFavorite) {
+        await removeProductFromFavorites(user.id, productId);
+        setFavoriteIds((prev) => {
+          const newIds = new Set(prev);
+          newIds.delete(productId);
+          return newIds;
+        });
+        message.success("Ürün favorilerden kaldırıldı.");
+      } else {
+        await addProductToFavorites(user.id, productId);
+        setFavoriteIds((prev) => {
+          const newIds = new Set(prev);
+          newIds.add(productId);
+          return newIds;
+        });
+        message.success("Ürün favorilere eklendi!");
+      }
+    } catch (error) {
+      message.error("Bir hata oluştu. Lütfen tekrar deneyin.");
+    }
   };
 
   const features = useMemo(() => {
-    // ... (bu kısımda değişiklik yok, zaten dinamik)
+    // ... (bu kısımda değişiklik yok)
     if (compareList.length < 2) return [];
     const [p1, p2] = compareList;
     const allKeys = new Set([
@@ -78,7 +123,7 @@ const Compare = () => {
     }));
   }, [compareList]);
 
-  // Bu fonksiyon da dinamik olduğu için bir değişiklik gerekmiyor.
+  // Bu fonksiyonda değişiklik yok
   const renderAllRows = () => {
     if (features.length === 0) {
       return <Empty description="Karşılaştırılacak özellik bulunamadı." />;
@@ -98,31 +143,25 @@ const Compare = () => {
         className="compare-container"
         style={{ textAlign: "center", marginTop: "50px" }}
       >
-        <Navbar2 />
         <Empty description="Lütfen karşılaştırmak için en az 2 ürün seçin." />
       </Box>
     );
   }
 
-  // Yeterli ürün varsa, ilk iki ürünü değişkene atayalım
   const [product1, product2] = compareList;
 
   return (
     <Box className="compare-container">
-      <div className="navbar2Home">
-        <Navbar2 />
-      </div>
-
       <div className="compare-cards-wrapper">
-        {/* compareList üzerinden map ile dinamik olarak kartları oluştur */}
         {compareList.map((product, index) => (
           <div key={product.id} className="compare-card">
+            {/* GÜNCELLENDİ: Favori butonu */}
             <button
               className="favorite-button"
-              onClick={() => toggleFavorite(index)}
+              onClick={() => handleToggleFavorite(product.id)}
               aria-label="Favorilere ekle/kaldır"
             >
-              {favorites[index] ? (
+              {favoriteIds.has(product.id) ? (
                 <HeartFilled style={{ fontSize: "24px", color: "red" }} />
               ) : (
                 <HeartOutlined style={{ fontSize: "24px" }} />
@@ -163,6 +202,7 @@ const Compare = () => {
                     : `${product.price} `}
                 </p>
               </div>
+              {/* Bu butona dokunulmadı */}
               <button className="buy-button">SEPETE EKLE</button>
             </div>
           </div>
@@ -194,16 +234,13 @@ const Compare = () => {
         </div>
       </AppBar>
 
-      {/* --- DİNAMİK ÖZELLİK TABLOLARI --- */}
       <TabPanel value={1} index={1} dir={theme.direction}>
         <div className="feature-table">
-          {/* Dinamik Tablo Başlığı */}
           <div className="feature-row header">
             <div className="feature-title">Özellik</div>
             <div className="feature-value">{product1.name}</div>
             <div className="feature-value">{product2.name}</div>
           </div>
-          {/* Sadece tüm özellikleri gösteren fonksiyonu çağırıyoruz */}
           {renderAllRows()}
         </div>
       </TabPanel>
