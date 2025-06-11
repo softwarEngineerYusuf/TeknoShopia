@@ -8,12 +8,11 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import StarIcon from "@mui/icons-material/Star";
 import { HeartOutlined, HeartFilled } from "@ant-design/icons";
-import { Empty, message } from "antd"; // YENİ: message import edildi
+import { Empty, message } from "antd";
 import { useCompare } from "../../context/CompareContext";
 import "./Compare.css";
-import { useMemo, useState, useEffect } from "react"; // YENİ: useEffect import edildi
+import { useMemo, useState, useEffect } from "react";
 
-// YENİ: Gerekli importlar
 import { useAuth } from "../../context/AuthContext";
 import {
   addProductToFavorites,
@@ -21,7 +20,6 @@ import {
   getFavoriteProductIds,
 } from "../../allAPIs/favorites";
 
-// TabPanel ve a11yProps fonksiyonları aynı kalacak
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
   return (
@@ -58,24 +56,19 @@ const Compare = () => {
   const theme = useTheme();
   const { compareList } = useCompare();
 
-  // YENİ: Favori state yönetimi
   const { user } = useAuth();
   const [favoriteIds, setFavoriteIds] = useState(new Set());
 
-  // YENİ: Bileşen yüklendiğinde ve kullanıcı değiştiğinde favori durumunu çek
   useEffect(() => {
-    // Sadece kullanıcı varsa favori ID'lerini çek
     if (user && user.id) {
       getFavoriteProductIds(user.id).then((ids) => {
         setFavoriteIds(new Set(ids));
       });
     } else {
-      // Kullanıcı yoksa (çıkış yapmışsa) favori listesini temizle
       setFavoriteIds(new Set());
     }
-  }, [user]); // user state'i değiştiğinde bu effect tekrar çalışır
+  }, [user]);
 
-  // YENİ: API ile çalışan favori toggle fonksiyonu
   const handleToggleFavorite = async (productId) => {
     if (!user) {
       message.warning("Favorilere eklemek için lütfen giriş yapın!");
@@ -107,7 +100,6 @@ const Compare = () => {
   };
 
   const features = useMemo(() => {
-    // ... (bu kısımda değişiklik yok)
     if (compareList.length < 2) return [];
     const [p1, p2] = compareList;
     const allKeys = new Set([
@@ -123,7 +115,6 @@ const Compare = () => {
     }));
   }, [compareList]);
 
-  // Bu fonksiyonda değişiklik yok
   const renderAllRows = () => {
     if (features.length === 0) {
       return <Empty description="Karşılaştırılacak özellik bulunamadı." />;
@@ -155,7 +146,6 @@ const Compare = () => {
       <div className="compare-cards-wrapper">
         {compareList.map((product, index) => (
           <div key={product.id} className="compare-card">
-            {/* GÜNCELLENDİ: Favori butonu */}
             <button
               className="favorite-button"
               onClick={() => handleToggleFavorite(product.id)}
@@ -202,7 +192,7 @@ const Compare = () => {
                     : `${product.price} `}
                 </p>
               </div>
-              {/* Bu butona dokunulmadı */}
+
               <button className="buy-button">SEPETE EKLE</button>
             </div>
           </div>

@@ -3,14 +3,13 @@ import "./Favorites.css";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
-// YENİ: Gerekli importlar
 import { useAuth } from "../../context/AuthContext";
 import {
   getFavoriteProducts,
   removeProductFromFavorites,
 } from "../../allAPIs/favorites";
 import { useGoToProductDetail } from "../GoToProductDetailFunction/GoToProductDetail";
-import { Modal, message } from "antd"; // Ant Design Modal ve message
+import { Modal, message } from "antd";
 
 const { confirm } = Modal;
 
@@ -20,7 +19,6 @@ function Favorites() {
   const { user } = useAuth();
   const goToProductDetail = useGoToProductDetail();
 
-  // Bileşen yüklendiğinde kullanıcının favori ürünlerini çek
   useEffect(() => {
     if (user && user.id) {
       setLoading(true);
@@ -36,12 +34,10 @@ function Favorites() {
           setLoading(false);
         });
     } else {
-      // Kullanıcı yoksa veya bilgisi henüz gelmediyse, yüklemeyi durdur.
       setLoading(false);
     }
   }, [user]);
 
-  // Favorilerden kaldırma fonksiyonu
   const handleRemoveFromFavorites = (productId, productName) => {
     confirm({
       title: "Emin misiniz?",
@@ -64,7 +60,6 @@ function Favorites() {
     });
   };
 
-  // Yükleme durumu için
   if (loading) {
     return (
       <div className="favorites-container">
@@ -73,7 +68,6 @@ function Favorites() {
     );
   }
 
-  // Kullanıcı giriş yapmamışsa
   if (!user) {
     return (
       <div className="favorites-container empty-favorites">
@@ -113,14 +107,13 @@ function Favorites() {
                 src={item.mainImage}
                 alt={item.name}
                 className="favorite-image"
-                onClick={() => goToProductDetail(item._id)} // Resme tıklayınca detaya git
+                onClick={() => goToProductDetail(item._id)}
                 style={{ cursor: "pointer" }}
               />
               <div className="favorite-content">
                 <h3 className="favorite-name">{item.name}</h3>
                 {item.discountedPrice ? (
                   <p className="favorite-price">
-                    {/* Üstünü çizmek için inline style eklendi */}
                     <span
                       className="original-price"
                       style={{
@@ -131,7 +124,7 @@ function Favorites() {
                     >
                       {item.price.toLocaleString("tr-TR")} ₺
                     </span>
-                    {/* İndirimli fiyatı vurgulamak için stil eklendi */}
+
                     <span
                       className="discounted-price"
                       style={{
@@ -158,7 +151,7 @@ function Favorites() {
                 <div className="favorite-actions">
                   <button
                     className="add-to-cart"
-                    onClick={() => goToProductDetail(item._id)} // GÜNCELLENDİ
+                    onClick={() => goToProductDetail(item._id)}
                   >
                     <ShoppingCartIcon style={{ fontSize: "1.3rem" }} />{" "}
                     Detayları Gör
@@ -167,7 +160,7 @@ function Favorites() {
                     className="remove-favorite"
                     onClick={() =>
                       handleRemoveFromFavorites(item._id, item.name)
-                    } // GÜNCELLENDİ
+                    }
                   >
                     <div className="remove-icon-favs">
                       <DeleteIcon style={{ fontSize: "2rem" }} />

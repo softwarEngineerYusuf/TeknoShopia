@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom"; // useNavigate eklendi
+import { useLocation, useNavigate } from "react-router-dom";
 import { Pencil, Trash2, MapPin, Plus, CreditCard } from "lucide-react";
 import { Spin, Modal } from "antd";
 
-// CONTEXT & API'LER
 import { useAuth } from "../../context/AuthContext";
 import {
   getAddressesByUserId,
@@ -19,22 +18,17 @@ import {
 } from "../../allAPIs/card";
 import { getCartByUserId } from "../../allAPIs/cart";
 import { createOrder } from "../../allAPIs/order";
-// YENİ: Sipariş oluşturma API'sini import ettiğinizi varsayıyorum
-// import { createOrder } from "../../allAPIs/order";
 
-// BİLEŞENLER & STİL
 import "./Payment.css";
 import AddressModal from "../../components/AddressModal/AddressModal";
 import CardModal from "../../components/CardModal/CardModal";
 import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 
 const Payment = () => {
-  // --- HOOKS & CONTEXT ---
   const { user } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate(); // YENİ: Sipariş sonrası yönlendirme için
+  const navigate = useNavigate();
 
-  // --- TÜM STATE'LER ---
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
   const [addressError, setAddressError] = useState(null);
@@ -55,9 +49,8 @@ const Payment = () => {
 
   const [orderSummary, setOrderSummary] = useState(null);
   const [loadingSummary, setLoadingSummary] = useState(true);
-  const [isPlacingOrder, setIsPlacingOrder] = useState(false); // YENİ: Ödeme butonu için yükleme durumu
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
-  // --- VERİ ÇEKME (useEffect) ---
   useEffect(() => {
     if (user && user.id) {
       const fetchInitialData = async () => {
@@ -65,7 +58,6 @@ const Payment = () => {
         setLoadingCards(true);
         setLoadingSummary(true);
 
-        // Sepet verisini al
         let cartData = location.state?.cartData;
         if (!cartData) {
           try {
@@ -75,7 +67,6 @@ const Payment = () => {
           }
         }
 
-        // Eğer sepet boşsa veya alınamadıysa, kullanıcıyı sepete geri yönlendir
         if (!cartData || cartData.cartItems.length === 0) {
           navigate("/basket");
           return;
@@ -84,7 +75,6 @@ const Payment = () => {
         setOrderSummary(cartData);
         setLoadingSummary(false);
 
-        // Adres ve kartları paralel olarak çek
         try {
           const [addresses, cards] = await Promise.all([
             getAddressesByUserId(user.id),
@@ -106,9 +96,6 @@ const Payment = () => {
     }
   }, [user, location.state, navigate]);
 
-  // --- TÜM FONKSİYONLAR ---
-
-  // ADRES FONKSİYONLARI (EKSİKSİZ)
   const handleOpenAddAddressModal = () => {
     setEditingAddress(null);
     setShowAddressModal(true);
@@ -165,7 +152,6 @@ const Payment = () => {
   const handleSelectAddress = (address) =>
     setSelectedAddress(selectedAddress?._id === address._id ? null : address);
 
-  // KART FONKSİYONLARI (EKSİKSİZ)
   const handleOpenAddCardModal = () => {
     setEditingCard(null);
     setShowCardModal(true);
@@ -215,7 +201,6 @@ const Payment = () => {
   const handleSelectCard = (card) =>
     setSelectedCard(selectedCard?._id === card._id ? null : card);
 
-  // ÖDEME VE HESAPLAMA MANTIĞI (DÜZELTİLMİŞ)
   const handleProceedToCheckout = async () => {
     if (!selectedAddress || !selectedCard || !orderSummary) {
       Modal.warning({
@@ -243,7 +228,7 @@ const Payment = () => {
         content: `Sipariş numaranız: ${response.order._id}. Detaylar e-posta adresinize gönderildi.`,
         onOk() {
           navigate("/myorders");
-        }, // Kullanıcıyı Siparişlerim sayfasına yönlendir
+        },
       });
     } catch (error) {
       Modal.error({ title: "Sipariş Oluşturulamadı", content: error.message });
@@ -252,20 +237,14 @@ const Payment = () => {
     }
   };
 
-  // HESAPLAMA BÖLÜMÜ (DÜZELTİLMİŞ)
-  // Sepetten gelen totalPrice, vergisi dahil nihai fiyattır.
   const finalTotal = orderSummary?.totalPrice || 0;
 
-  // Ara toplam, ürünlerin indirimsiz orijinal fiyatları toplamıdır.
-  // Bu, vergili mi vergisiz mi olduğu ürün fiyatlandırmanıza bağlıdır.
-  // Basket.js'dekiyle aynı mantığı kullanıyoruz.
   const originalSubtotal =
     orderSummary?.cartItems.reduce(
       (sum, item) => sum + item.product.price * item.quantity,
       0
     ) || 0;
 
-  // İndirim miktarı
   const discountAmount = originalSubtotal - finalTotal;
 
   return (

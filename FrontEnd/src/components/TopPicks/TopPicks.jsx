@@ -6,8 +6,7 @@ import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
-// YENİ: Gerekli importlar
-import { useAuth } from "../../context/AuthContext"; // AuthContext yolunu kontrol et
+import { useAuth } from "../../context/AuthContext";
 import { getTopPicksProducts } from "../../allAPIs/product";
 import { useGoToProductDetail } from "../GoToProductDetailFunction/GoToProductDetail";
 import {
@@ -15,34 +14,29 @@ import {
   removeProductFromFavorites,
   getFavoriteProductIds,
 } from "../../allAPIs/favorites";
-import { message } from "antd"; // Ant Design bildirim sistemi
+import { message } from "antd";
 
 const TopPicks = () => {
   const [products, setProducts] = useState([]);
-  const [favoriteIds, setFavoriteIds] = useState(new Set()); // Favori ID'lerini Set olarak tutmak daha performanslı
+  const [favoriteIds, setFavoriteIds] = useState(new Set());
   const goToProductDetail = useGoToProductDetail();
-  const { user } = useAuth(); // Giriş yapmış kullanıcıyı al
+  const { user } = useAuth();
 
-  // Bileşen yüklendiğinde hem ürünleri hem de favori durumunu çek
   useEffect(() => {
     const fetchInitialData = async () => {
-      // 1. Top Picks ürünlerini çek
       const productData = await getTopPicksProducts();
       setProducts(productData);
 
-      // 2. Kullanıcı giriş yapmışsa, favori ürün ID'lerini çek
       if (user && user.id) {
         const favIds = await getFavoriteProductIds(user.id);
-        setFavoriteIds(new Set(favIds)); // Gelen ID dizisini Set'e çevir
+        setFavoriteIds(new Set(favIds));
       }
     };
 
     fetchInitialData();
-  }, [user]); // useEffect, kullanıcı bilgisi değiştiğinde (login/logout) tekrar çalışır
+  }, [user]);
 
-  // Kalp ikonuna tıklama fonksiyonu
   const handleToggleFavorite = async (productId) => {
-    // Kullanıcı giriş yapmamışsa uyarı ver ve işlemi durdur
     if (!user) {
       message.warning("Favorilere eklemek için lütfen giriş yapın!");
       return;
@@ -52,7 +46,6 @@ const TopPicks = () => {
 
     try {
       if (isFavorite) {
-        // Favorilerdeyse, kaldır
         await removeProductFromFavorites(user.id, productId);
         setFavoriteIds((prevIds) => {
           const newIds = new Set(prevIds);
@@ -61,7 +54,6 @@ const TopPicks = () => {
         });
         message.success("Ürün favorilerden kaldırıldı.");
       } else {
-        // Favorilerde değilse, ekle
         await addProductToFavorites(user.id, productId);
         setFavoriteIds((prevIds) => {
           const newIds = new Set(prevIds);
@@ -95,9 +87,8 @@ const TopPicks = () => {
             <div className="card-top-picks container">
               <button
                 className="favorite-button"
-                onClick={() => handleToggleFavorite(product._id)} // GÜNCELLENDİ
+                onClick={() => handleToggleFavorite(product._id)}
               >
-                {/* GÜNCELLENDİ: Favori durumunu `favoriteIds` Set'i ile kontrol et */}
                 {favoriteIds.has(product._id) ? (
                   <HeartFilled style={{ fontSize: "24px", color: "red" }} />
                 ) : (

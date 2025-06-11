@@ -27,7 +27,6 @@ import LoginRequiredModal from "../../components/LoginRequireModal/LoginRequireM
 import { useCompare } from "../../context/CompareContext";
 import { message } from "antd";
 
-// YENİ: Favori API fonksiyonlarını import et
 import {
   addProductToFavorites,
   removeProductFromFavorites,
@@ -45,7 +44,6 @@ function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
 
-  // YENİ: Favori durumunu tutacak state'ler
   const [isFavorite, setIsFavorite] = useState(false);
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
 
@@ -55,7 +53,6 @@ function ProductDetail() {
     const fetchProductAndFavoriteStatus = async () => {
       setLoading(true);
 
-      // Ürün ve favori durumunu paralel olarak çek
       const productPromise = getProductById(id);
       let favoritePromise = Promise.resolve([]);
 
@@ -71,7 +68,6 @@ function ProductDetail() {
       setProduct(productData);
       setCurrentImageIndex(0);
 
-      // Ürünün favori olup olmadığını kontrol et
       if (productData && favoriteIds.length > 0) {
         setIsFavorite(favoriteIds.includes(productData.id));
       } else {
@@ -81,10 +77,9 @@ function ProductDetail() {
       setLoading(false);
     };
     fetchProductAndFavoriteStatus();
-  }, [id, user]); // user değiştiğinde favori durumunu da güncelle
+  }, [id, user]);
 
   const handleAddToCart = async () => {
-    // ... Bu fonksiyon aynı kalıyor ...
     if (user && user.id) {
       setIsAdding(true);
       try {
@@ -125,7 +120,6 @@ function ProductDetail() {
     }
   };
 
-  // YENİ: Favorilere ekleme/çıkarma fonksiyonu
   const handleToggleFavorite = async () => {
     if (!user) {
       message.warning("Bu özelliği kullanmak için lütfen giriş yapın!");
@@ -240,7 +234,6 @@ function ProductDetail() {
                 Kategori: {product.category?.name}
               </Text>
             </div>
-            {/* GÜNCELLENDİ: Butonların bulunduğu bölüm */}
             <div className="product-detail-buttons">
               <Button
                 icon={

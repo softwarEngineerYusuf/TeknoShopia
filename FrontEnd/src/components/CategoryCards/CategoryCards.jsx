@@ -3,10 +3,9 @@ import "./CategoryCards.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import StarIcon from "@mui/icons-material/Star";
 import SortIcon from "@mui/icons-material/Sort";
-import { Dropdown, Menu, Space, message } from "antd"; // message import edildi
+import { Dropdown, Menu, Space, message } from "antd";
 import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 
-// YENİ: Gerekli importlar
 import {
   getProductsByCategory,
   getProductsByBrand,
@@ -19,25 +18,21 @@ import {
 } from "../../allAPIs/favorites";
 import { useGoToProductDetail } from "../GoToProductDetailFunction/GoToProductDetail";
 
-// eslint-disable-next-line react/prop-types
 function CategoryCards({ categoryId, filters }) {
   const [currentSort, setCurrentSort] = useState("price-asc");
   const [products, setProducts] = useState([]);
   const [categoryName, setCategoryName] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // YENİ: State yönetimi
   const [favoriteIds, setFavoriteIds] = useState(new Set());
   const { user } = useAuth();
   const goToProductDetail = useGoToProductDetail();
 
-  // Ürünleri ve favorileri çeken ana useEffect
   useEffect(() => {
     const fetchProductsAndFavorites = async () => {
       try {
         setLoading(true);
 
-        // Önce favori ID'lerini çekelim (paralel istek için)
         let favoriteIdsPromise = Promise.resolve(new Set());
         if (user && user.id) {
           favoriteIdsPromise = getFavoriteProductIds(user.id).then(
@@ -46,7 +41,7 @@ function CategoryCards({ categoryId, filters }) {
         }
 
         let productResponse;
-        // Filtre varsa filtreli ürünleri getir
+
         if (
           // eslint-disable-next-line react/prop-types
           filters.brands.length > 0 ||
@@ -71,13 +66,11 @@ function CategoryCards({ categoryId, filters }) {
             filteredProducts[0]?.category?.name || "Filtrelenmiş Ürünler"
           );
         } else {
-          // Filtre yoksa normal kategori ürünlerini getir
           productResponse = await getProductsByCategory(categoryId);
           setProducts(productResponse.products);
           setCategoryName(productResponse.category);
         }
 
-        // Favori ID'leri isteği tamamlandığında state'i güncelle
         const favIds = await favoriteIdsPromise;
         setFavoriteIds(favIds);
       } catch (error) {
@@ -90,9 +83,7 @@ function CategoryCards({ categoryId, filters }) {
     };
 
     fetchProductsAndFavorites();
-  }, [categoryId, filters, user]); // user'ı dependency array'e ekledik
-
-  // Eski favori useEffect'i artık gerekli değil, kaldırıldı.
+  }, [categoryId, filters, user]);
 
   const handleSortChange = (sortType) => {
     setCurrentSort(sortType);
@@ -106,7 +97,6 @@ function CategoryCards({ categoryId, filters }) {
     setProducts(sorted);
   };
 
-  // YENİ: API ile etkileşime giren favori fonksiyonu
   const handleToggleFavorite = async (productId) => {
     if (!user) {
       message.warning("Favorilere eklemek için lütfen giriş yapın!");
@@ -202,7 +192,7 @@ function CategoryCards({ categoryId, filters }) {
             >
               <button
                 className="favorite-button"
-                onClick={() => handleToggleFavorite(product._id)} // GÜNCELLENDİ
+                onClick={() => handleToggleFavorite(product._id)}
                 style={{
                   position: "absolute",
                   top: 10,
@@ -221,7 +211,6 @@ function CategoryCards({ categoryId, filters }) {
                   cursor: "pointer",
                 }}
               >
-                {/* GÜNCELLENDİ: Durum kontrolü favoriteIds ile yapılıyor */}
                 {favoriteIds.has(product._id) ? (
                   <HeartFilled style={{ fontSize: 24, color: "red" }} />
                 ) : (
@@ -232,7 +221,7 @@ function CategoryCards({ categoryId, filters }) {
                 src={product.mainImage}
                 alt={product.name}
                 className="card-image-category-cards"
-                onClick={() => goToProductDetail(product._id)} // Resme de tıklama eklendi
+                onClick={() => goToProductDetail(product._id)}
                 style={{ cursor: "pointer" }}
               />
               <div className="card-details-category-cards">
@@ -246,7 +235,6 @@ function CategoryCards({ categoryId, filters }) {
                     <p>{product.ratings?.toFixed(1) || "4.5"}</p>
                   </div>
                   <div style={{ textAlign: "right" }}>
-                    {/* İndirim varsa üstü çizili fiyatı göster */}
                     {product.discount > 0 && (
                       <p
                         style={{
@@ -264,7 +252,7 @@ function CategoryCards({ categoryId, filters }) {
                     </p>
                   </div>
                 </div>
-                {/* GÜNCELLENDİ: Butona onClick eklendi */}
+
                 <button
                   className="buy-button-category-cards"
                   onClick={() => goToProductDetail(product._id)}

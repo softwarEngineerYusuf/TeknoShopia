@@ -5,7 +5,6 @@ import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import "./DiscountsCorousel.css";
 
-// YENİ: Gerekli importlar
 import { useAuth } from "../../context/AuthContext";
 import { getDiscountedProducts } from "../../allAPIs/product";
 import { useGoToProductDetail } from "../GoToProductDetailFunction/GoToProductDetail";
@@ -19,31 +18,26 @@ import { message } from "antd";
 function DiscountsCarousel() {
   const [products, setProducts] = useState([]);
   const [itemsPerSlide, setItemsPerSlide] = useState(4);
-  const [favoriteIds, setFavoriteIds] = useState(new Set()); // Eski 'favorites' state'i yerine bu geldi
+  const [favoriteIds, setFavoriteIds] = useState(new Set());
   const goToProductDetail = useGoToProductDetail();
-  const { user } = useAuth(); // Giriş yapmış kullanıcıyı al
+  const { user } = useAuth();
 
-  // Bileşen yüklendiğinde ve kullanıcı değiştiğinde verileri çek
   useEffect(() => {
     const fetchInitialData = async () => {
-      // 1. İndirimli ürünleri çek
       const productData = await getDiscountedProducts();
       setProducts(productData);
 
-      // 2. Kullanıcı giriş yapmışsa, favori ürün ID'lerini çek
       if (user && user.id) {
         const favIds = await getFavoriteProductIds(user.id);
         setFavoriteIds(new Set(favIds));
       } else {
-        // Kullanıcı çıkış yapmışsa favori listesini temizle
         setFavoriteIds(new Set());
       }
     };
 
     fetchInitialData();
-  }, [user]); // user değişince (login/logout) tekrar çalışır
+  }, [user]);
 
-  // Responsive tasarım için item sayısını güncelleyen useEffect
   useEffect(() => {
     const updateItemsPerSlide = () => {
       if (window.innerWidth < 768) setItemsPerSlide(1);
@@ -55,7 +49,6 @@ function DiscountsCarousel() {
     return () => window.removeEventListener("resize", updateItemsPerSlide);
   }, []);
 
-  // API ile etkileşime giren yeni favori fonksiyonu
   const handleToggleFavorite = async (productId) => {
     if (!user) {
       message.warning("Favorilere eklemek için lütfen giriş yapın!");
@@ -80,6 +73,7 @@ function DiscountsCarousel() {
         });
         message.success("Ürün favorilere eklendi!");
       }
+      // eslint-disable-next-line no-unused-vars
     } catch (error) {
       message.error("Bir hata oluştu. Lütfen tekrar deneyin.");
     }
@@ -123,9 +117,8 @@ function DiscountsCarousel() {
                       <div className="card-discount-corousel container">
                         <button
                           className="favorite-button"
-                          onClick={() => handleToggleFavorite(product._id)} // GÜNCELLENDİ
+                          onClick={() => handleToggleFavorite(product._id)}
                         >
-                          {/* GÜNCELLENDİ: Durum kontrolü favoriteIds Set'i ile yapılıyor */}
                           {favoriteIds.has(product._id) ? (
                             <HeartFilled
                               style={{ fontSize: "24px", color: "red" }}
@@ -153,7 +146,7 @@ function DiscountsCarousel() {
                               <StarIcon />
                               <p>{product.ratings?.toFixed(1) || "4.5"}</p>
                             </div>
-                            {/* GÜNCELLENDİ: Fiyatlar artık dinamik */}
+
                             <div style={{ textAlign: "right" }}>
                               <p className="original-price-carousel">
                                 {product.price.toLocaleString("tr-TR")}₺
