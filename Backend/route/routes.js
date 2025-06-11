@@ -14,7 +14,7 @@ const cartRouter = require("./cartRouter");
 const cartItemRouter = require("./cartItemRouter");
 const emailRoutes = require("./emailRouter");
 const cardRouter = require("./cardsRouter.js");
-
+const favoritesRouter = require("./favoritesRouter.js");
 const base = "/api";
 
 router.use(`${base}/auth`, authRouter); //localhost:5000/api/auth
@@ -32,5 +32,5 @@ router.use(`${base}/cart`, cartRouter); //localhost:5000/api/cart
 router.use(`${base}/cartItem`, cartItemRouter); //localhost:5000/api/cartItem
 router.use(`${base}/email`, emailRoutes);
 router.use(`${base}/card`, cardRouter); //localhost:5000/api/card
-
+router.use(`${base}/favorites`, favoritesRouter);
 module.exports = router;
