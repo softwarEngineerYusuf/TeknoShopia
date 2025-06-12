@@ -1,8 +1,35 @@
 import PropTypes from "prop-types";
+import { useEffect } from "react";
 
 function AdCarousel({ images }) {
+  useEffect(() => {
+    // Bootstrap Carousel'ı manuel başlat
+    const carouselEl = document.getElementById("carouselExample");
+    let carouselInstance;
+    if (window.bootstrap && carouselEl) {
+      // Bootstrap 5 için
+      carouselInstance = window.bootstrap.Carousel.getOrCreateInstance(carouselEl, {
+        interval: 3000,
+        ride: "carousel",
+        pause: false,
+        wrap: true,
+      });
+    }
+    // Cleanup: Carousel instance'ı dispose et
+    return () => {
+      if (carouselInstance) {
+        carouselInstance.dispose();
+      }
+    };
+  }, [images]);
+
   return (
-    <div id="carouselExample" className="carousel slide container">
+    <div
+      id="carouselExample"
+      className="carousel slide container"
+      data-bs-ride="carousel"
+      data-bs-interval="3000"
+    >
       <div className="carousel-inner">
         {images.map((imgSrc, index) => (
           <div
@@ -35,9 +62,8 @@ function AdCarousel({ images }) {
   );
 }
 
-// **PropTypes ile props doğrulaması ekleyelim**
 AdCarousel.propTypes = {
-  images: PropTypes.arrayOf(PropTypes.string).isRequired, // images dizisi zorunlu ve string tipinde olmalı
+  images: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
 export default AdCarousel;

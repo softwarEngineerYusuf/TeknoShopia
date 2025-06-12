@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import './Brands.css' 
 import "bootstrap/dist/css/bootstrap.min.css"
 import StarIcon from "@mui/icons-material/Star";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 import SortIcon from "@mui/icons-material/Sort";
 import { Dropdown, Menu, Space } from "antd";
 
@@ -22,6 +22,8 @@ const imageBrand = "https://cdn.vatanbilgisayar.com/Upload/GENERAL/ter-ed-marka/
 function Brands() {
   const [currentSort, setCurrentSort] = useState("price-asc");
   const [sortedBrands, setSortedBrands] = useState([...brands]);
+  // Favori durumlarını tutan state
+  const [favoriteIds, setFavoriteIds] = useState(new Set());
 
   const handleSortChange = (sortType) => {
     setCurrentSort(sortType);
@@ -32,6 +34,19 @@ function Brands() {
       sorted.sort((a, b) => b.discountedPrice - a.discountedPrice);
     }
     setSortedBrands(sorted);
+  };
+
+  // Favori toggle fonksiyonu (sadece görsel)
+  const handleToggleFavorite = (id) => {
+    setFavoriteIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
   };
 
   const ProductSort = () => {
@@ -85,15 +100,27 @@ function Brands() {
                   position: "absolute",
                   top: "10px",
                   right: "10px",
-                  background: "none",
+                  background: "white",
                   border: "none",
+                  borderRadius: "50%",
+                  width: "36px",
+                  height: "36px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                   zIndex: 2,
                   cursor: "pointer",
                   padding: 0,
                 }}
                 aria-label="Favorilere ekle"
+                onClick={() => handleToggleFavorite(brand.id)}
               >
-                <FavoriteBorderIcon style={{ color: "#e74c3c", fontSize: "1.8rem" }} />
+                {favoriteIds.has(brand.id) ? (
+                  <HeartFilled style={{ fontSize: "24px", color: "red" }} />
+                ) : (
+                  <HeartOutlined style={{ fontSize: "24px" }} />
+                )}
               </button>
               <img
                 src={brand.image}

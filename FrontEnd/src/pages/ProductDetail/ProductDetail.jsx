@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import {
   Card,
@@ -32,6 +32,7 @@ import {
   removeProductFromFavorites,
   getFavoriteProductIds,
 } from "../../allAPIs/favorites";
+import Comments from "../../components/Comments/Comments"; // YENİ: Comments componentinin import edilmesi
 
 function ProductDetail() {
   const { id } = useParams();
@@ -48,6 +49,8 @@ function ProductDetail() {
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
 
   const PENDING_CART_ITEM_KEY = "pendingCartItemProductId";
+
+  const commentsRef = useRef(null);
 
   useEffect(() => {
     const fetchProductAndFavoriteStatus = async () => {
@@ -214,7 +217,11 @@ function ProductDetail() {
               {product.name}
             </Title>
             <Rate disabled defaultValue={4} className="product-detail-rate" />
-            <Text className="product-detail-comments"> (Yorumlar)</Text>
+            <Text className="product-detail-comments" onClick={() => {
+              if (commentsRef.current) {
+                commentsRef.current.scrollIntoView({ behavior: 'smooth' });
+              }
+            }} style={{ cursor: 'pointer', color: '#1890ff' }}> Comments</Text>
             <div className="product-detail-pricing">
               {product.discount > 0 && (
                 <p className="product-detail-old-price">
@@ -286,6 +293,10 @@ function ProductDetail() {
         visible={isLoginModalVisible}
         onClose={() => setIsLoginModalVisible(false)}
       />
+      {/* Yorumlar componenti en alta eklendi */}
+      <div style={{ marginTop: 40 }} ref={commentsRef}>
+        <Comments />
+      </div>
     </div>
   );
 }

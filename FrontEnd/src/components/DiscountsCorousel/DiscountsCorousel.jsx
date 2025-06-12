@@ -93,7 +93,7 @@ function DiscountsCarousel() {
     <div>
       <div className="top-picks-and-button d-flex justify-content-between align-items-center container">
         <h2 className="top-picks-title mb-3">
-          <LocalOfferIcon className="top-picks-icon" /> Fırsat Ürünleri
+          <LocalOfferIcon className="top-picks-icon" /> Discounts
         </h2>
       </div>
       <div

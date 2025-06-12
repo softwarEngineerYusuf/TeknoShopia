@@ -11,8 +11,11 @@ import Brands from "../../components/Brands/Brands.jsx";
 function Home() {
   const images = [
     "https://cdn.vatanbilgisayar.com/Upload/BANNER//0banner/2024/011/apple-iphone13-1-11-24-web.jpg",
-    "https://cdn.vatanbilgisayar.com/Upload/BANNER//0banner/2024/011/apple-iphone13-1-11-24-web.jpg",
-    "https://cdn.vatanbilgisayar.com/Upload/BANNER//0banner/2024/011/apple-iphone13-1-11-24-web.jpg",
+    "https://cdn.vatanbilgisayar.com/Upload/BANNER//0banner/2025/006/samsung-tv-10-6-25-web1.jpg",
+    "https://cdn.vatanbilgisayar.com/Upload/BANNER//0banner/2025/004/lg-tv-8-4-25-web.jpg",
+    "https://cdn.vatanbilgisayar.com/Upload/BANNER//0banner/2025/005/huawei-watch-fit4-15-5-25-web1.jpg",
+    "https://cdn.vatanbilgisayar.com/Upload/BANNER//0banner/2025/005/macbook-air-m4-22-5-25-web1.jpg",
+    "https://cdn.vatanbilgisayar.com/Upload/BANNER//0banner/2025/005/genel-web-5-5-25.jpg"
   ];
 
   // Her bir `carousel-item` içinde 4 kart olacak
