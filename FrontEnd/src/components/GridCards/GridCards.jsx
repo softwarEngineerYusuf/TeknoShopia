@@ -1,14 +1,17 @@
 import React from "react";
 import "./GridCards.css";
+import img1 from "../../assets/Ad1.jpg";
+import img2 from "../../assets/Ad2.jpg";
+import img3 from "../../assets/Ad3.jpg";
 
 const GridCards = () => {
   return (
     <div className="grid-container">
       {/* Üst satır */}
       <div className="top-row">
-        <img src="https://cdn.shopify.com/s/files/1/0559/9235/2977/files/Hassas-iPath_-Lazer-Navigasyon.jpg?v=1708423323" alt="Üst Resim 1" />
-        <img src="https://boost-lifestyle.co/cdn/shop/files/Sonic.webp?v=1717165532&width=3240" alt="Üst Resim 2" />
-        <img src="https://xrockergaming.com/cdn/shop/files/2.0714401copy_1000x1000_crop_center.webp?v=1724850525" alt="Üst Resim 3" />
+        <img src={img1} alt="Üst Resim 1" />
+        <img src={img2} alt="Üst Resim 2" />
+        <img src={img3} alt="Üst Resim 3" />
       </div>
 
       {/* Alt satır */}
