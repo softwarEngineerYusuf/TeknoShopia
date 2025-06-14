@@ -12,16 +12,16 @@ const Footer = () => {
             </li>
             <li>
               <div className="social-icons">
-                <a href="#">
+                <a href="https://www.youtube.com/@uskudaruniversitesi">
                   <YouTube className="icon" />
                 </a>
-                <a href="#">
+                <a href="https://www.instagram.com/uskudaruni/">
                   <Instagram className="icon" />
                 </a>
-                <a href="#">
+                <a href="https://www.linkedin.com/school/uskudar-universitesi/posts/?feedView=all">
                   <LinkedIn className="icon" />
                 </a>
-                <a href="#">
+                <a href="https://x.com/uskudaruni?ref_src=twsrc%5Egoogle%7Ctwcamp%5Eserp%7Ctwgr%5Eauthor">
                   <Twitter className="icon" />
                 </a>
               </div>
