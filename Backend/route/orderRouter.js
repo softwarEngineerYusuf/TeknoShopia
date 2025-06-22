@@ -6,11 +6,11 @@ const Address = require("../models/address.js");
 const Cart = require("../models/cart.js");
 const CartItem = require("../models/cartItem.js");
 const sendMail = require("../config/mailService");
-
+const Coupon = require("../models/coupon.js");
 // POST /api/orders/CreateOrder - Yeni bir sipariş oluşturur
 router.post("/CreateOrder", async (req, res) => {
   try {
-    const { userId, addressId, orderItems, totalPrice } = req.body;
+    const { userId, addressId, orderItems, totalPrice, coupon } = req.body;
 
     if (
       !userId ||
@@ -48,9 +48,21 @@ router.post("/CreateOrder", async (req, res) => {
         postalCode: address.postalCode,
       },
       status: "Processing",
+      // DÜZELTME: Gelen kupon bilgisini modeldeki yeni alana doğru şekilde ata
+      coupon: coupon
+        ? {
+            code: coupon.code,
+            discountAmount: coupon.discountAmount,
+          }
+        : undefined,
     });
 
     const savedOrder = await newOrder.save();
+
+    if (coupon && coupon.code) {
+      await Coupon.updateOne({ code: coupon.code }, { $inc: { timesUsed: 1 } });
+    }
+
     user.orders.push(savedOrder._id);
     await user.save();
 
@@ -74,6 +86,15 @@ router.post("/CreateOrder", async (req, res) => {
           "tr-TR",
           { style: "currency", currency: "TRY" }
         )}</strong></p>
+        ${
+          savedOrder.coupon && savedOrder.coupon.code
+            ? `<p style="color: #27ae60;">Kullanılan Kupon: <strong>${
+                savedOrder.coupon.code
+              }</strong> (İndirim: -${savedOrder.coupon.discountAmount.toFixed(
+                2
+              )} TL)</p>`
+            : ""
+        }
         <p>Siparişiniz en kısa sürede hazırlanıp kargoya verilecektir.</p>
       </div>`;
 
@@ -98,7 +119,11 @@ router.post("/CreateOrder", async (req, res) => {
 router.get("/GetOrdersByUserId/:userId", async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.params.userId })
-      .populate("orderItems.product", "name mainImage")
+      .populate({
+        path: "orderItems.product",
+        model: "Product",
+        select: "name mainImage price", // Orijinal fiyatı da alıyoruz!
+      })
       .sort({ createdAt: -1 });
 
     if (!orders) {
@@ -108,10 +133,10 @@ router.get("/GetOrdersByUserId/:userId", async (req, res) => {
     }
     res.status(200).json(orders);
   } catch (error) {
+    console.error("Kullanıcının siparişleri getirilirken hata:", error);
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
   }
 });
-
 // GET /api/orders/GetOrderById/:id - Tek bir siparişi ID ile getirir
 router.get("/GetOrderById/:id", async (req, res) => {
   try {

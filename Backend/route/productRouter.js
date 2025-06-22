@@ -3,7 +3,11 @@ const router = express.Router();
 const Product = require("../models/product.js");
 const Brand = require("../models/brand.js");
 const Category = require("../models/category.js");
+const User = require("../models/user.js");
+const Cart = require("../models/cart.js");
+const CartItem = require("../models/cartItem.js");
 const { v4: uuidv4 } = require("uuid");
+const sendMail = require("../config/mailService");
 const mongoose = require("mongoose");
 router.post("/addProduct", async (req, res) => {
   try {
@@ -203,7 +207,11 @@ router.delete("/deleteProduct/:id", async (req, res) => {
 
 router.put("/updateProduct/:id", async (req, res) => {
   try {
-    console.log("Request Body:", req.body);
+    const productBeforeUpdate = await Product.findById(req.params.id);
+    if (!productBeforeUpdate) {
+      return res.status(404).json({ message: "Ürün bulunamadı." });
+    }
+    const oldDiscount = productBeforeUpdate.discount || 0;
 
     const {
       name,
@@ -223,54 +231,39 @@ router.put("/updateProduct/:id", async (req, res) => {
       category,
     } = req.body;
 
-    // Güncellenen ürünü bul
-    const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: "Ürün bulunamadı." });
-    }
-
-    // Eğer marka adı değişiyorsa, yeni marka bilgisini bul
-    let brandFind = product.brand;
+    let brandFind = productBeforeUpdate.brand;
     if (brand) {
       const foundBrand = await Brand.findOne({ name: brand });
-      if (!foundBrand) {
-        return res
-          .status(404)
-          .json({ message: "Belirtilen marka bulunamadı." });
-      }
-      brandFind = foundBrand._id;
+      if (foundBrand) brandFind = foundBrand._id;
     }
 
-    // Kategori bilgisi değişiyorsa, yeni kategoriyi bul
-    let categoryFind = product.category;
+    let categoryFind = productBeforeUpdate.category;
     if (category) {
       const foundCategory = await Category.findOne({ name: category });
-      if (!foundCategory) {
-        return res
-          .status(404)
-          .json({ message: "Belirtilen kategori bulunamadı." });
-      }
-      categoryFind = foundCategory._id;
+      if (foundCategory) categoryFind = foundCategory._id;
     }
 
-    // Eğer ürün adı ve kategorisi değişiyorsa, bu isimde aynı kategoriye sahip başka bir ürün olup olmadığını kontrol et
-    if (name && categoryFind.toString() !== product.category.toString()) {
+    if (
+      name &&
+      categoryFind.toString() !== productBeforeUpdate.category.toString()
+    ) {
       const existingProduct = await Product.findOne({
         name,
         category: categoryFind,
       });
       if (
         existingProduct &&
-        existingProduct._id.toString() !== product._id.toString()
+        existingProduct._id.toString() !== productBeforeUpdate._id.toString()
       ) {
-        return res.status(400).json({
-          message:
-            "Bu kategori altında aynı isimde başka bir ürün zaten mevcut.",
-        });
+        return res
+          .status(400)
+          .json({
+            message:
+              "Bu kategori altında aynı isimde başka bir ürün zaten mevcut.",
+          });
       }
     }
 
-    // Güncellenmiş ürün verileri
     const updatedProductData = {
       name,
       price,
@@ -289,14 +282,21 @@ router.put("/updateProduct/:id", async (req, res) => {
       category: categoryFind,
     };
 
-    console.log("Updated Product Data:", updatedProductData);
-
-    // Ürünü güncelle
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       updatedProductData,
       { new: true, runValidators: true }
     );
+
+    if (updatedProduct) {
+      const newDiscount = updatedProduct.discount || 0;
+      if (newDiscount > 0 && newDiscount > oldDiscount) {
+        console.log(
+          "İndirim değişikliği algılandı. Bildirimler gönderiliyor..."
+        );
+        sendDiscountNotifications(updatedProduct);
+      }
+    }
 
     res.status(200).json({
       message: "Ürün başarıyla güncellendi.",
@@ -498,4 +498,116 @@ router.get("/topPicks", async (req, res) => {
       .json({ message: "Top picks alınamadı", error: error.message });
   }
 });
+
+router.get("/getProductByBrandID/:brandId", async (req, res) => {
+  try {
+    const { brandId } = req.params;
+
+    // Gönderilen ID ile bir markanın olup olmadığını kontrol edelim.
+    const brand = await Brand.findById(brandId);
+    if (!brand) {
+      return res.status(404).json({ message: "Belirtilen marka bulunamadı." });
+    }
+
+    // Marka ID'sine göre ürünleri bulalım.
+    const products = await Product.find({ brand: brandId })
+      .populate("brand")
+      .populate("category");
+
+    // Başarılı yanıtı gönderelim.
+    res.status(200).json({
+      message: `${brand.name} markasına ait ürünler başarıyla getirildi.`,
+      count: products.length,
+      products: products,
+    });
+  } catch (error) {
+    console.error("Markaya göre ürünler getirilirken hata:", error);
+    res
+      .status(500)
+      .json({ message: "Sunucu hatası oluştu.", error: error.message });
+  }
+});
+
+async function sendDiscountNotifications(product) {
+  try {
+    console.log(`"${product.name}" için indirim bildirimi süreci başlatıldı.`);
+    const productId = product._id;
+
+    // 1. Ürünü favorilerine ekleyen kullanıcıları bul
+    const usersWithFavorite = await User.find({ favorites: productId })
+      .select("_id")
+      .lean();
+    const userIdsFromFavorites = usersWithFavorite.map((u) => u._id);
+
+    // 2. Ürünü sepetinde bulunduran kullanıcıları bul
+    const cartItems = await CartItem.find({ product: productId })
+      .select("cartId")
+      .lean();
+    const cartIds = cartItems.map((item) => item.cartId);
+    const carts = await Cart.find({ _id: { $in: cartIds } })
+      .select("userId")
+      .lean();
+    const userIdsFromCarts = carts.map((cart) => cart.userId);
+
+    // 3. Tüm ilgili kullanıcı ID'lerini birleştir ve tekilleştir
+    const allInterestedUserIds = [
+      ...new Set([
+        ...userIdsFromFavorites.map((id) => id.toString()),
+        ...userIdsFromCarts.map((id) => id.toString()),
+      ]),
+    ];
+
+    if (allInterestedUserIds.length === 0) {
+      console.log("İndirim bildirimi için ilgili kullanıcı bulunamadı.");
+      return;
+    }
+
+    // 4. Kullanıcıların e-posta ve isim bilgilerini çek
+    const usersToSend = await User.find({ _id: { $in: allInterestedUserIds } })
+      .select("name email")
+      .lean();
+
+    // 5. Her kullanıcıya e-posta gönder
+    const emailPromises = usersToSend.map((user) => {
+      const subject = `Fiyat Düştü! 🎉 Beğendiğiniz Ürün İndirimde!`;
+      const template = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+          <h2 style="color: #2c3e50; text-align: center;">Harika Bir Haberimiz Var, ${
+            user.name
+          }!</h2>
+          <p>Takip ettiğiniz veya sepetinize eklediğiniz bir üründe harika bir indirim başladı!</p>
+          <div style="padding: 15px; background-color: #f8f9fa; border-radius: 5px; text-align: center; border: 1px solid #e9ecef;">
+            <img src="${product.mainImage}" alt="${
+        product.name
+      }" style="max-width: 150px; margin-bottom: 10px; border-radius: 5px;"/>
+            <h3 style="margin: 0; color: #34495e;">${product.name}</h3>
+            <p style="text-decoration: line-through; color: #7f8c8d; font-size: 16px; margin: 5px 0;">Eski Fiyat: ${product.price.toFixed(
+              2
+            )} TL</p>
+            <p style="font-size: 24px; font-weight: bold; color: #e74c3c; margin: 5px 0;">Yeni Fiyat: ${product.discountedPrice.toFixed(
+              2
+            )} TL</p>
+            <a href="http://localhost:3000/productDetail/${
+              product._id
+            }" style="display: inline-block; padding: 10px 20px; background-color: #3498db; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px; font-weight: bold;">Ürüne Git</a>
+          </div>
+          <p style="text-align: center; margin-top: 20px; font-size: 12px; color: #95a5a6;">Bu fırsatı kaçırmayın!</p>
+        </div>
+      `;
+      // Güncellenmiş sendMail fonksiyonunu çağırıyoruz
+      return sendMail(user.email, subject, template);
+    });
+
+    await Promise.all(emailPromises);
+    console.log(
+      `${usersToSend.length} kullanıcıya indirim bildirimi başarıyla gönderildi.`
+    );
+  } catch (error) {
+    console.error(
+      "İndirim bildirimi gönderme sırasında bir hata oluştu:",
+      error
+    );
+  }
+}
+
 module.exports = router;

@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 // Sipariş içindeki her bir ürünü temsil eden alt şema
+// Bu şemada bir değişiklik yapmıyoruz, zaten doğru.
 const OrderItemSchema = new Schema({
   product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
   quantity: { type: Number, required: true, min: 1 },
@@ -25,6 +26,11 @@ const orderSchema = new Schema(
       type: String,
       enum: ["Processing", "Shipped", "Delivered", "Cancelled"],
       default: "Processing",
+    },
+
+    coupon: {
+      code: { type: String },
+      discountAmount: { type: Number },
     },
   },
   { timestamps: true }
