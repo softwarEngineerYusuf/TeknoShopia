@@ -9,6 +9,7 @@ import { HeartFilled } from "@ant-design/icons";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
+import { message } from "antd";
 function Navbar() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -16,6 +17,7 @@ function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const ClearUser = () => {
+    message.success("Başarıyla çıkış yapıldı!");
     if (logout) logout();
     navigate("/");
   };
@@ -77,14 +79,18 @@ function Navbar() {
             <span className="cart-badge">{cartItemCount}</span>
           )}
         </Link>
-        <Link to="/favorites" className="navbar-button">
-          <HeartFilled className="iconNav" />
-          <span>Favoriler</span>
-        </Link>
-        <Link to="/myorders" className="navbar-button">
-          <ViewListIcon className="iconNav" />
-          <span>Siparişlerim</span>
-        </Link>
+        {user && (
+          <>
+            <Link to="/favorites" className="navbar-button">
+              <HeartFilled className="iconNav" />
+              <span>Favoriler</span>
+            </Link>
+            <Link to="/myorders" className="navbar-button">
+              <ViewListIcon className="iconNav" />
+              <span>Siparişlerim</span>
+            </Link>
+          </>
+        )}
       </div>
     </nav>
   );

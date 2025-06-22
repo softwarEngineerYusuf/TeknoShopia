@@ -1,52 +1,104 @@
-import React, { useState } from 'react'
-import './Brands.css' 
-import "bootstrap/dist/css/bootstrap.min.css"
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import "./Brands.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 import StarIcon from "@mui/icons-material/Star";
 import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 import SortIcon from "@mui/icons-material/Sort";
-import { Dropdown, Menu, Space } from "antd";
+import { Dropdown, Menu, Space, Spin, message } from "antd";
 
-const brands = [
-  { id: 1, name: "Apple", image: "https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/0006-mlpg3tu-a_small.jpg", price: 45000, discountedPrice: 42200, rating: 4.8 },
-  { id: 2, name: "Apple", image: "https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/0008-mlpf3tu-a_small.jpg", price: 52000, discountedPrice: 48000, rating: 4.8 },
-  { id: 3, name: "Apple", image: "https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/1-295_small.jpg", price: 50440, discountedPrice: 45200, rating: 4.8 },
-  { id: 4, name: "Apple", image: "https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/0003-mpuf3tu-a_small.jpg", price: 50000, discountedPrice: 48899, rating: 4.8 },
-  { id: 5, name: "Apple", image: "https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/1-246_small.jpg", price: 50000, discountedPrice: 45000, rating: 4.8 },
-  { id: 6, name: "Apple", image: "https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/0006-mlpg3tu-a_small.jpg", price: 50000, discountedPrice: 55000, rating: 4.8 },
-  { id: 7, name: "Apple", image: "https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/0006-mlpg3tu-a_small.jpg", price: 50000, discountedPrice: 65000, rating: 4.8 },
-  { id: 8, name: "Apple", image: "https://cdn.vatanbilgisayar.com/Upload/PRODUCT/apple/thumb/0006-mlpg3tu-a_small.jpg", price: 50000, discountedPrice: 70000, rating: 4.8 },
-];
-
-const imageBrand = "https://cdn.vatanbilgisayar.com/Upload/GENERAL/ter-ed-marka/apple.png";
+// API fonksiyonlarını import et
+import { getBrandById } from "../../allAPIs/brand";
+import { getProductsByBrandID } from "../../allAPIs/product";
+// Favori işlemleri ve kullanıcı kontrolü için gerekli importlar
+import { useAuth } from "../../context/AuthContext";
+import LoginRequiredModal from "../../components/LoginRequireModal/LoginRequireModal";
+import {
+  addProductToFavorites,
+  removeProductFromFavorites,
+  getFavoriteProductIds,
+} from "../../allAPIs/favorites";
 
 function Brands() {
+  const { brandId } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const [brandInfo, setBrandInfo] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [sortedProducts, setSortedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [currentSort, setCurrentSort] = useState("price-asc");
-  const [sortedBrands, setSortedBrands] = useState([...brands]);
-  // Favori durumlarını tutan state
   const [favoriteIds, setFavoriteIds] = useState(new Set());
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [brandData, productData] = await Promise.all([
+          getBrandById(brandId),
+          getProductsByBrandID(brandId),
+        ]);
+
+        setBrandInfo(brandData);
+        setProducts(productData || []);
+        setSortedProducts(productData || []);
+
+        if (user && user.id) {
+          const favIds = await getFavoriteProductIds(user.id);
+          setFavoriteIds(new Set(favIds));
+        } else {
+          setFavoriteIds(new Set());
+        }
+      } catch (error) {
+        message.error("Veriler çekilirken bir hata oluştu.");
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [brandId, user]);
 
   const handleSortChange = (sortType) => {
     setCurrentSort(sortType);
-    let sorted = [...sortedBrands];
-    if (sortType === "price-asc") {
-      sorted.sort((a, b) => a.discountedPrice - b.discountedPrice);
-    } else if (sortType === "price-desc") {
-      sorted.sort((a, b) => b.discountedPrice - a.discountedPrice);
-    }
-    setSortedBrands(sorted);
+    const sorted = [...products].sort((a, b) => {
+      const priceA = a.discountedPrice || a.price;
+      const priceB = b.discountedPrice || b.price;
+      if (sortType === "price-asc") return priceA - priceB;
+      if (sortType === "price-desc") return priceB - priceA;
+      return 0;
+    });
+    setSortedProducts(sorted);
   };
 
-  // Favori toggle fonksiyonu (sadece görsel)
-  const handleToggleFavorite = (id) => {
-    setFavoriteIds((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id);
+  const handleToggleFavorite = async (productId) => {
+    if (!user) {
+      message.warning("Favorilere eklemek için lütfen giriş yapın!");
+      setIsLoginModalVisible(true);
+      return;
+    }
+
+    const isFavorite = favoriteIds.has(productId);
+    try {
+      if (isFavorite) {
+        await removeProductFromFavorites(user.id, productId);
+        setFavoriteIds((prev) => {
+          const newIds = new Set(prev);
+          newIds.delete(productId);
+          return newIds;
+        });
+        message.success("Ürün favorilerden kaldırıldı.");
       } else {
-        newSet.add(id);
+        await addProductToFavorites(user.id, productId);
+        setFavoriteIds((prev) => new Set(prev).add(productId));
+        message.success("Ürün favorilere eklendi!");
       }
-      return newSet;
-    });
+    } catch (error) {
+      message.error("Bir hata oluştu, lütfen tekrar deneyin.");
+    }
   };
 
   const ProductSort = () => {
@@ -67,95 +119,139 @@ function Brands() {
         overlay={menu}
         trigger={["click"]}
         open={open}
-        onOpenChange={(flag) => setOpen(flag)}
+        onOpenChange={setOpen}
       >
-        <a onClick={e => e.preventDefault()}>
+        <a onClick={(e) => e.preventDefault()}>
           <Space style={{ cursor: "pointer" }}>
-            <SortIcon style={{ fontSize: "2rem", color: "#000", verticalAlign: "middle" }} />
+            <SortIcon
+              style={{
+                fontSize: "2rem",
+                color: "#000",
+                verticalAlign: "middle",
+              }}
+            />
           </Space>
         </a>
       </Dropdown>
     );
   };
 
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "80vh",
+        }}
+      >
+        <Spin size="large" tip="Yükleniyor..." />
+      </div>
+    );
+  }
+
+  if (!brandInfo) {
+    return (
+      <div style={{ textAlign: "center", marginTop: "50px" }}>
+        <h1>Marka bulunamadı.</h1>
+      </div>
+    );
+  }
+
   return (
-    <div className="container-md">
-      <div className="brands-cards-and-sort d-flex justify-content-between align-items-center">
-       
-        <h2 style={{marginBottom: "1rem"}} className="brands-cards-title">Apple </h2> <img src={imageBrand} alt="" />
-        
+    <div className="container-md mt-4">
+      {/* BAŞLIK BÖLÜMÜ GÜNCELLENDİ */}
+      <div className="brands-cards-and-sort d-flex justify-content-between align-items-center mb-4">
+        {/* Sol taraf: Başlık ve Logo için bir sarmalayıcı div */}
+        <div
+          className="d-flex align-items-center justify-between"
+          style={{ gap: "15px", width: "50%" }}
+        >
+          <h2 className="brands-cards-title m-0">{brandInfo.name}</h2>
+          <img
+            src={brandInfo.logo.url}
+            alt={`${brandInfo.name} logo`}
+            style={{ height: "40px" }}
+          />
+        </div>
+
+        {/* Sağ taraf: Sıralama kontrolleri */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "0.9rem", color: "#666" }}>Sort:</span>
+          <span style={{ fontSize: "0.9rem", color: "#666" }}>Sırala:</span>
           <ProductSort />
         </div>
       </div>
+      {/* ÜRÜN KARTLARI */}
       <div className="row">
-        {sortedBrands.map((brand) => (
-          <div className="col-md-3 mb-4" key={brand.id}>
-            <div className="brands-cards container" style={{ position: "relative" }}>
-              {/* Kalp ikonu */}
-              <button
-                className="favorite-btn-brands"
-                style={{
-                  position: "absolute",
-                  top: "10px",
-                  right: "10px",
-                  background: "white",
-                  border: "none",
-                  borderRadius: "50%",
-                  width: "36px",
-                  height: "36px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                  zIndex: 2,
-                  cursor: "pointer",
-                  padding: 0,
-                }}
-                aria-label="Favorilere ekle"
-                onClick={() => handleToggleFavorite(brand.id)}
+        {sortedProducts.length > 0 ? (
+          sortedProducts.map((product) => (
+            <div className="col-lg-3 col-md-4 col-sm-6 mb-4" key={product._id}>
+              <div
+                className="brands-cards container"
+                style={{ position: "relative" }}
               >
-                {favoriteIds.has(brand.id) ? (
-                  <HeartFilled style={{ fontSize: "24px", color: "red" }} />
-                ) : (
-                  <HeartOutlined style={{ fontSize: "24px" }} />
-                )}
-              </button>
-              <img
-                src={brand.image}
-                alt={brand.name}
-                className="card-image-brands-cards"
-                style={{ height: "180px", objectFit: "contain", background: "#fff", width: "100%" }}
-              />
-              <div className="card-details-brands-cards text-center">
-                <p className="product-name-brands-cards">{brand.name}</p>
-                <div className="d-flex justify-content-between" style={{ padding: "0rem 1rem" }}>
-                  <div className="rating-brands-cards" style={{ fontSize: "1.2rem" }}>
-                    <StarIcon style={{ fontSize: "1.5rem", color: "#FFD700" }} />
-                    <p style={{ margin: 0, fontWeight: "500", fontSize: "1.1rem" }}>{brand.rating}</p>
-                  </div>
-                  <div>
-                    {brand.discountedPrice < brand.price ? (
-                      <p style={{ color: "red", textDecoration: "line-through", fontSize: "1rem" }}>
-                        ₺{brand.price.toFixed(2)}
+                <button
+                  className="favorite-btn-brands"
+                  aria-label="Favorilere ekle"
+                  onClick={() => handleToggleFavorite(product._id)}
+                >
+                  {favoriteIds.has(product._id) ? (
+                    <HeartFilled style={{ fontSize: "24px", color: "red" }} />
+                  ) : (
+                    <HeartOutlined
+                      style={{ fontSize: "24px", color: "#888" }}
+                    />
+                  )}
+                </button>
+                <img
+                  src={product.mainImage}
+                  alt={product.name}
+                  className="card-image-brands-cards"
+                  onClick={() => navigate(`/productDetail/${product._id}`)}
+                  style={{ cursor: "pointer" }}
+                />
+                <div className="card-details-brands-cards text-center">
+                  <p className="product-name-brands-cards">{product.name}</p>
+                  <div
+                    className="d-flex justify-content-between align-items-center"
+                    style={{ padding: "0rem 1rem" }}
+                  >
+                    <div className="rating-brands-cards">
+                      <StarIcon style={{ color: "#FFD700" }} />
+                      <p>{product.ratings?.toFixed(1) || "N/A"}</p>
+                    </div>
+                    <div>
+                      {product.discount > 0 && (
+                        <p className="old-price">₺{product.price.toFixed(2)}</p>
+                      )}
+                      <p className="product-price-brands-cards">
+                        ₺{(product.discountedPrice || product.price).toFixed(2)}
                       </p>
-                    ) : (
-                      <p style={{ visibility: "hidden", fontSize: "1rem" }}>₺{brand.price.toFixed(2)}</p>
-                    )}
-                    <p className="product-price-brands-cards" style={{ fontSize: "1.2rem", fontWeight: "600" }}>
-                      ₺{brand.discountedPrice.toFixed(2)}
-                    </p>
+                    </div>
                   </div>
+                  <button
+                    className="buy-button-brands-cards"
+                    onClick={() => navigate(`/productDetail/${product._id}`)}
+                  >
+                    İncele
+                  </button>
                 </div>
-                <button className="buy-button-brands-cards">İncele</button>
               </div>
             </div>
+          ))
+        ) : (
+          <div className="col-12">
+            <p className="text-center mt-5">Bu markaya ait ürün bulunamadı.</p>
           </div>
-        ))}
+        )}
       </div>
+      <LoginRequiredModal
+        visible={isLoginModalVisible}
+        onClose={() => setIsLoginModalVisible(false)}
+      />
     </div>
-  )
+  );
 }
 
-export default Brands
+export default Brands;

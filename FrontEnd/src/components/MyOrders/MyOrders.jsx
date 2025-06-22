@@ -11,8 +11,9 @@ import StarIcon from "@mui/icons-material/Star";
 import { getOrdersByUserId } from "../../allAPIs/order";
 import { useAuth } from "../../context/AuthContext";
 import { useGoToProductDetail } from "../../components/GoToProductDetailFunction/GoToProductDetail";
+
+// ReviewModal component'i
 function ReviewModal({ open, onClose, onSubmit }) {
-  // ... (Bu component içeriği aynı kalıyor, kopyalamaya gerek yok)
   const [rating, setRating] = React.useState(0);
   const [comment, setComment] = React.useState("");
 
@@ -25,7 +26,7 @@ function ReviewModal({ open, onClose, onSubmit }) {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>Evaluate the product</DialogTitle>
+      <DialogTitle>Ürünü Değerlendir</DialogTitle>
       <DialogContent>
         <div
           style={{
@@ -48,7 +49,7 @@ function ReviewModal({ open, onClose, onSubmit }) {
           />
         </div>
         <TextField
-          label="Comment.."
+          label="Yorumunuz.."
           multiline
           minRows={3}
           fullWidth
@@ -64,7 +65,7 @@ function ReviewModal({ open, onClose, onSubmit }) {
           style={{ backgroundColor: "red", color: "white" }}
           variant="contained"
         >
-          Cancel
+          İptal
         </Button>
         <Button
           onClick={() => {
@@ -76,25 +77,25 @@ function ReviewModal({ open, onClose, onSubmit }) {
           disabled={rating === 0}
           style={{ backgroundColor: "green", color: "white" }}
         >
-          Send
+          Gönder
         </Button>
       </DialogActions>
     </Dialog>
   );
 }
 
-// OrderCard componenti API verisine uyumlu hale getirildi.
+// OrderCard component'i
 function OrderCard({ order }) {
   const [isExpanded, setIsExpanded] = React.useState(false);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState(null);
   const goToProductDetail = useGoToProductDetail();
+
   const handleReviewClick = (item) => {
     setSelectedItem(item);
     setModalOpen(true);
   };
   const handleImageClick = (e, productId) => {
-    // Parent element'in onClick'ini (kartı genişletme) tetiklemesini engelle
     e.stopPropagation();
     goToProductDetail(productId);
   };
@@ -104,7 +105,6 @@ function OrderCard({ order }) {
     );
   };
 
-  // API'den gelen durumları Türkçe ve stil uyumlu hale getirelim.
   const getStatusText = (status) => {
     switch (status) {
       case "Processing":
@@ -120,26 +120,43 @@ function OrderCard({ order }) {
     }
   };
 
+  // Siparişin indirimsiz orijinal fiyatını hesapla
+  const originalTotalPrice = order.orderItems.reduce((sum, item) => {
+    if (item.product && typeof item.product.price === "number") {
+      return sum + item.product.price * item.quantity;
+    }
+    return sum + item.price * item.quantity;
+  }, 0);
+
+  // Siparişin kupon uygulanmadan önceki ara toplamını hesapla (ürün indirimleri dahil)
+  const subtotalBeforeCoupon = order.orderItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  // İndirim olup olmadığını kontrol et
+  const showOriginalPrice =
+    Math.round(originalTotalPrice * 100) > Math.round(order.totalPrice * 100);
+
   return (
     <div className="order-card">
       <div className="order-header" onClick={() => setIsExpanded(!isExpanded)}>
         <div className="order-image">
-          {/* GÜNCELLENDİ: Header'daki resimlere onClick eklendi */}
-          {order.orderItems[0]?.product.mainImage && (
+          {order.orderItems[0]?.product?.mainImage && (
             <img
               src={order.orderItems[0].product.mainImage}
               alt={order.orderItems[0].product.name}
-              className="clickable-product-image" // Stil için class eklendi
+              className="clickable-product-image"
               onClick={(e) =>
                 handleImageClick(e, order.orderItems[0].product._id)
               }
             />
           )}
-          {order.orderItems[1]?.product.mainImage && (
+          {order.orderItems[1]?.product?.mainImage && (
             <img
               src={order.orderItems[1].product.mainImage}
               alt={order.orderItems[1].product.name}
-              className="clickable-product-image" // Stil için class eklendi
+              className="clickable-product-image"
               onClick={(e) =>
                 handleImageClick(e, order.orderItems[1].product._id)
               }
@@ -149,7 +166,7 @@ function OrderCard({ order }) {
         <div className="order-main-info">
           <span className="order-number">Sipariş No: {order._id}</span>
           <span className="order-date">
-            {new Date(order?.createdAt).toLocaleDateString("tr-TR")}
+            {new Date(order.createdAt).toLocaleDateString("tr-TR")}
           </span>
         </div>
         <div className="order-status-price">
@@ -158,41 +175,72 @@ function OrderCard({ order }) {
               .toLowerCase()
               .replace(/\s+/g, "-")}`}
           >
-            {getStatusText(order?.status)}
+            {getStatusText(order.status)}
           </span>
-          <span className="order-total">{order.totalPrice.toFixed(2)} ₺</span>
+          <div className="price-section">
+            {showOriginalPrice && (
+              <span className="order-original-price">
+                {originalTotalPrice.toFixed(2)} ₺
+              </span>
+            )}
+            <span className="order-total">{order.totalPrice.toFixed(2)} ₺</span>
+          </div>
         </div>
       </div>
 
       {isExpanded && (
         <div className="order-details">
           <h4>Sipariş Detayları</h4>
+
           <div className="order-items">
-            {order.orderItems.map((item) => (
-              <div key={item._id} className="order-item">
-                <div className="item-info">
-                  {/* GÜNCELLENDİ: Detaydaki resme onClick eklendi */}
-                  <img
-                    src={item.product.mainImage}
-                    alt={item.product.name}
-                    className="item-image clickable-product-image" // Stil için class eklendi
-                    onClick={() => goToProductDetail(item.product._id)}
-                  />
-                  <span className="item-name">{item.product.name}</span>
-                </div>
-                <button
-                  className="review-star-button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleReviewClick(item);
-                  }}
-                >
-                  Değerlendir
-                </button>
-                <span className="item-quantity">x{item.quantity}</span>
-                <span className="item-price">{item.price.toFixed(2)} ₺</span>
+            {order.orderItems.map(
+              (item) =>
+                item.product && (
+                  <div key={item._id} className="order-item">
+                    <div className="item-info">
+                      <img
+                        src={item.product.mainImage}
+                        alt={item.product.name}
+                        className="item-image clickable-product-image"
+                        onClick={() => goToProductDetail(item.product._id)}
+                      />
+                      <span className="item-name">{item.product.name}</span>
+                    </div>
+                    <button
+                      className="review-star-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleReviewClick(item);
+                      }}
+                    >
+                      Değerlendir
+                    </button>
+                    <span className="item-quantity">x{item.quantity}</span>
+                    <span className="item-price">
+                      {item.price.toFixed(2)} ₺
+                    </span>
+                  </div>
+                )
+            )}
+          </div>
+
+          {/* Sipariş detayının altına finansal özet ekliyoruz */}
+          <div className="order-details-summary">
+            <div className="summary-row">
+              <span>Ara Toplam</span>
+              <span>{subtotalBeforeCoupon.toFixed(2)} ₺</span>
+            </div>
+            {order.coupon && order.coupon.code && (
+              <div className="summary-row discount">
+                <span>Kupon ({order.coupon.code})</span>
+                <span>-{order.coupon.discountAmount.toFixed(2)} ₺</span>
               </div>
-            ))}
+            )}
+            <div className="summary-divider"></div>
+            <div className="summary-row total">
+              <strong>Genel Toplam</strong>
+              <strong>{order.totalPrice.toFixed(2)} ₺</strong>
+            </div>
           </div>
         </div>
       )}
@@ -210,16 +258,16 @@ function MyOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { user } = useAuth(); // AuthContext'ten kullanıcıyı al
+  const { user } = useAuth();
 
   useEffect(() => {
-    // Kullanıcı bilgisi varsa ve ID'si mevcutsa siparişleri çek
     if (user && user.id) {
       const fetchOrders = async () => {
         setLoading(true);
         setError(null);
         try {
           const userOrders = await getOrdersByUserId(user.id);
+          console.log("MyOrders - GÜNCEL Sipariş Verileri:", userOrders);
           setOrders(userOrders);
         } catch (err) {
           setError(
@@ -230,13 +278,11 @@ function MyOrders() {
           setLoading(false);
         }
       };
-
       fetchOrders();
     } else {
-      // Eğer kullanıcı yoksa veya bilgileri yüklenmemişse, yüklemeyi durdur.
       setLoading(false);
     }
-  }, [user]); // useEffect, user nesnesi değiştiğinde tekrar çalışacak.
+  }, [user]);
 
   return (
     <div className="orders-page">
@@ -248,7 +294,6 @@ function MyOrders() {
             aria-label="Order Animation"
             title="Order Animation"
           >
-            {/* SVG kısmı aynı kalabilir */}
             <svg
               viewBox="0 0 48 48"
               fill="none"

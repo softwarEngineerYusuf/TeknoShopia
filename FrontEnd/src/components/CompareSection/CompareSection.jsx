@@ -1,15 +1,16 @@
 import "./CompareSection.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useCompare } from "../../context/CompareContext";
+
 // eslint-disable-next-line react/prop-types
 function CompareSection() {
   const { compareList, removeFromCompare, clearCompareList } = useCompare();
   const navigate = useNavigate();
-
+  const location = useLocation();
   const handleCompare = () => {
     navigate("/compare");
   };
-  if (compareList.length === 0) {
+  if (compareList.length === 0 || location.pathname === "/compare") {
     return null;
   }
   return (

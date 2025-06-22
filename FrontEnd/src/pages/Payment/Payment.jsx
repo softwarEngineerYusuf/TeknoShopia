@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Pencil, Trash2, MapPin, Plus, CreditCard } from "lucide-react";
-import { Spin, Modal } from "antd";
-
+import { Spin, Modal, Tag } from "antd"; // Tag eklendi
 import { useAuth } from "../../context/AuthContext";
 import {
   getAddressesByUserId,
@@ -18,7 +17,6 @@ import {
 } from "../../allAPIs/card";
 import { getCartByUserId } from "../../allAPIs/cart";
 import { createOrder } from "../../allAPIs/order";
-
 import "./Payment.css";
 import AddressModal from "../../components/AddressModal/AddressModal";
 import CardModal from "../../components/CardModal/CardModal";
@@ -29,6 +27,7 @@ const Payment = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Adres State'leri
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
   const [addressError, setAddressError] = useState(null);
@@ -38,6 +37,7 @@ const Payment = () => {
   const [showAddressConfirmModal, setShowAddressConfirmModal] = useState(false);
   const [addressToDelete, setAddressToDelete] = useState(null);
 
+  // Kart State'leri
   const [savedCards, setSavedCards] = useState([]);
   const [loadingCards, setLoadingCards] = useState(true);
   const [cardError, setCardError] = useState(null);
@@ -47,9 +47,11 @@ const Payment = () => {
   const [showCardConfirmModal, setShowCardConfirmModal] = useState(false);
   const [cardToDelete, setCardToDelete] = useState(null);
 
+  // Sipariş Özeti ve Kupon State'leri
   const [orderSummary, setOrderSummary] = useState(null);
   const [loadingSummary, setLoadingSummary] = useState(true);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
 
   useEffect(() => {
     if (user && user.id) {
@@ -58,7 +60,11 @@ const Payment = () => {
         setLoadingCards(true);
         setLoadingSummary(true);
 
+        // location.state'den hem sepeti hem de kuponu al
         let cartData = location.state?.cartData;
+        let couponData = location.state?.couponInfo;
+        setAppliedCoupon(couponData); // Kupon state'ine atandı
+
         if (!cartData) {
           try {
             cartData = await getCartByUserId(user.id);
@@ -67,7 +73,11 @@ const Payment = () => {
           }
         }
 
-        if (!cartData || cartData.cartItems.length === 0) {
+        if (
+          !cartData ||
+          !cartData.cartItems ||
+          cartData.cartItems.length === 0
+        ) {
           navigate("/basket");
           return;
         }
@@ -96,6 +106,7 @@ const Payment = () => {
     }
   }, [user, location.state, navigate]);
 
+  // Adres Yönetimi Fonksiyonları
   const handleOpenAddAddressModal = () => {
     setEditingAddress(null);
     setShowAddressModal(true);
@@ -152,6 +163,7 @@ const Payment = () => {
   const handleSelectAddress = (address) =>
     setSelectedAddress(selectedAddress?._id === address._id ? null : address);
 
+  // Kart Yönetimi Fonksiyonları
   const handleOpenAddCardModal = () => {
     setEditingCard(null);
     setShowCardModal(true);
@@ -201,6 +213,18 @@ const Payment = () => {
   const handleSelectCard = (card) =>
     setSelectedCard(selectedCard?._id === card._id ? null : card);
 
+  // Fiyat Hesaplamaları
+  const finalTotal = appliedCoupon
+    ? appliedCoupon.finalPrice
+    : orderSummary?.totalPrice || 0;
+  const originalSubtotal =
+    orderSummary?.cartItems.reduce(
+      (sum, item) => sum + item.product.price * item.quantity,
+      0
+    ) || 0;
+  const discountAmount = originalSubtotal - finalTotal;
+
+  // Sipariş Oluşturma Fonksiyonu
   const handleProceedToCheckout = async () => {
     if (!selectedAddress || !selectedCard || !orderSummary) {
       Modal.warning({
@@ -214,13 +238,19 @@ const Payment = () => {
       const orderPayload = {
         userId: user.id,
         addressId: selectedAddress._id,
-        cartId: user.cart,
         orderItems: orderSummary.cartItems.map((item) => ({
           product: item.product._id,
           quantity: item.quantity,
-          price: item.subtotal / item.quantity,
+          price: item.price, // Backend'den gelen güncel birim fiyatı
         })),
-        totalPrice: finalTotal,
+        totalPrice: finalTotal, // Kupon uygulanmış son fiyat
+        // Kupon bilgilerini sipariş kaydına ekle
+        coupon: appliedCoupon
+          ? {
+              code: appliedCoupon.coupon.code,
+              discountAmount: appliedCoupon.discountAmount,
+            }
+          : undefined,
       };
       const response = await createOrder(orderPayload);
       Modal.success({
@@ -231,30 +261,23 @@ const Payment = () => {
         },
       });
     } catch (error) {
-      Modal.error({ title: "Sipariş Oluşturulamadı", content: error.message });
+      Modal.error({
+        title: "Sipariş Oluşturulamadı",
+        content: error.response?.data?.message || error.message,
+      });
     } finally {
       setIsPlacingOrder(false);
     }
   };
 
-  const finalTotal = orderSummary?.totalPrice || 0;
-
-  const originalSubtotal =
-    orderSummary?.cartItems.reduce(
-      (sum, item) => sum + item.product.price * item.quantity,
-      0
-    ) || 0;
-
-  const discountAmount = originalSubtotal - finalTotal;
-
   return (
     <div className="payment-container">
-      <h1 className="payment-title">Payment Information</h1>
+      <h1 className="payment-title">Ödeme Bilgileri</h1>
       <div className="payment-layout">
         <div className="payment-left-panel">
           <div className="payment-section">
             <div className="section-header">
-              <h2>Saved Addresses</h2>
+              <h2>Kayıtlı Adresler</h2>
             </div>
             {loadingAddresses ? (
               <div className="loading-placeholder">
@@ -314,12 +337,12 @@ const Payment = () => {
               onClick={handleOpenAddAddressModal}
             >
               <Plus size={18} />
-              <span>Address</span>
+              <span>Adres Ekle</span>
             </button>
           </div>
           <div className="payment-section">
             <div className="section-header">
-              <h2>Saved Cards</h2>
+              <h2>Kayıtlı Kartlar</h2>
             </div>
             {loadingCards ? (
               <div className="loading-placeholder">
@@ -346,7 +369,7 @@ const Payment = () => {
                     <div className="item-details">
                       <h3>{card.cardHolder}</h3>
                       <p>**** **** **** {card.last4}</p>
-                      <p>Expires: {card.expiryDate}</p>
+                      <p>Son K. T.: {card.expiryDate}</p>
                     </div>
                     <div className="item-actions">
                       <button
@@ -377,13 +400,13 @@ const Payment = () => {
               onClick={handleOpenAddCardModal}
             >
               <Plus size={18} />
-              <span>Card</span>
+              <span>Kart Ekle</span>
             </button>
           </div>
         </div>
         <div className="payment-right-panel">
           <div className="order-summary">
-            <h2>Order Summary</h2>
+            <h2>Sipariş Özeti</h2>
             {loadingSummary ? (
               <div
                 className="loading-placeholder"
@@ -400,7 +423,7 @@ const Payment = () => {
               <>
                 <div className="summary-details">
                   <div className="summary-row">
-                    <span>Subtotal</span>
+                    <span>Ara Toplam</span>
                     <span>
                       {originalSubtotal.toLocaleString("tr-TR", {
                         minimumFractionDigits: 2,
@@ -410,7 +433,7 @@ const Payment = () => {
                   </div>
                   {discountAmount > 0 && (
                     <div className="summary-row discount">
-                      <span>Discount</span>
+                      <span>İndirimler</span>
                       <span>
                         -
                         {discountAmount.toLocaleString("tr-TR", {
@@ -420,9 +443,15 @@ const Payment = () => {
                       </span>
                     </div>
                   )}
+                  {appliedCoupon && (
+                    <div className="summary-row coupon">
+                      <span>Kullanılan Kupon</span>
+                      <Tag color="green">{appliedCoupon.coupon.code}</Tag>
+                    </div>
+                  )}
                   <div className="summary-divider"></div>
                   <div className="summary-row total">
-                    <span>Total</span>
+                    <span>Toplam</span>
                     <strong>
                       {finalTotal.toLocaleString("tr-TR", {
                         minimumFractionDigits: 2,
@@ -436,7 +465,7 @@ const Payment = () => {
                   onClick={handleProceedToCheckout}
                   disabled={!selectedAddress || !selectedCard || isPlacingOrder}
                 >
-                  {isPlacingOrder ? <Spin size="small" /> : "Confirm and Pay"}
+                  {isPlacingOrder ? <Spin size="small" /> : "Onayla ve Öde"}
                 </button>
               </>
             )}

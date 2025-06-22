@@ -48,14 +48,12 @@ function AppRoutes() {
           <Route path="/TopPicksMore" element={<TopPicksMore />} />
           <Route path="/category/:id" element={<Category />} />
           <Route path="/payment" element={<Payment />} />
-          <Route path="/brands" element={<Brands />} />
+          <Route path="/brands/:brandId" element={<Brands />} />
           <Route path="/compare" element={<Compare />} />
           <Route path="/basket" element={<Basket />} />
+          <Route path="/Login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
         </Route>
-
-        <Route path="/Login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/basket" element={<Basket />} />
       </Routes>
 
       {compareList.length > 0 && <CompareSection />}

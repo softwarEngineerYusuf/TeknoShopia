@@ -86,3 +86,16 @@ export const getProductById = async (productId) => {
     return null;
   }
 };
+
+export const getProductsByBrandID = async (brandId) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/getProductByBrandID/${brandId}`
+    );
+    // Backend'den gelen { message, count, products } nesnesinden sadece products dizisini döndürüyoruz.
+    return response.data.products;
+  } catch (error) {
+    console.error(`Marka ${brandId} ürünleri çekilirken hata oluştu:`, error);
+    return []; // Hata durumunda boş bir dizi döndür
+  }
+};

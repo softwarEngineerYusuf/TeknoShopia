@@ -3,21 +3,34 @@ import "./TopPicksMoreCards.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import StarIcon from "@mui/icons-material/Star";
 import SortIcon from "@mui/icons-material/Sort";
-import { Dropdown, Menu, Space } from "antd";
-import { getTopPicksProducts } from "../../allAPIs/product"; // API çağrısını içe aktar
+import { Dropdown, Menu, Space, message } from "antd"; // YENİ: message import edildi
+import { getTopPicksProducts } from "../../allAPIs/product";
 import { HeartOutlined, HeartFilled } from "@ant-design/icons";
+
+// YENİ: Gerekli importlar eklendi
+import { useAuth } from "../../context/AuthContext";
+import LoginRequiredModal from "../../components/LoginRequireModal/LoginRequireModal";
+import {
+  addProductToFavorites,
+  removeProductFromFavorites,
+  getFavoriteProductIds,
+} from "../../allAPIs/favorites";
 
 function TopPicksMoreCards({ selectedBrands }) {
   const [currentSort, setCurrentSort] = useState("price-asc");
   const [products, setProducts] = useState([]);
   const [sortedProducts, setSortedProducts] = useState([]);
-  const [favorites, setFavorites] = useState([]);
 
+  // YENİ: Gerekli state'ler ve context eklendi
+  const { user } = useAuth();
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
+  const [favoriteIds, setFavoriteIds] = useState(new Set());
+
+  // Ürünleri çeken ve sıralayan useEffect
   useEffect(() => {
     const fetchProducts = async () => {
       const data = await getTopPicksProducts(selectedBrands);
       setProducts(data);
-      setFavorites(Array(data.length).fill(false));
       const sorted = [...data].sort((a, b) =>
         currentSort === "price-asc" ? a.price - b.price : b.price - a.price
       );
@@ -27,25 +40,55 @@ function TopPicksMoreCards({ selectedBrands }) {
     fetchProducts();
   }, [selectedBrands, currentSort]);
 
+  // YENİ: Kullanıcının favorilerini çeken useEffect
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      if (user && user.id) {
+        const favIds = await getFavoriteProductIds(user.id);
+        setFavoriteIds(new Set(favIds));
+      } else {
+        setFavoriteIds(new Set());
+      }
+    };
+    fetchFavorites();
+  }, [user]);
+
   const handleSortChange = (sortType) => {
     setCurrentSort(sortType);
-    const sorted = [...products].sort((a, b) => {
-      if (sortType === "price-asc") return a.price - b.price;
-      if (sortType === "price-desc") return b.price - a.price;
-      return 0;
-    });
-    setSortedProducts(sorted);
+    // Sıralama ürünler yüklendikten sonra yapılır, bu yüzden burada tekrar sıralama yapmaya gerek yok
+    // useEffect'deki dependency sayesinde zaten çalışacak.
   };
 
-  const toggleFavorite = (index) => {
-    setFavorites((prev) => {
-      const newFavs = [...prev];
-      newFavs[index] = !newFavs[index];
-      return newFavs;
-    });
+  // YENİ: API ile çalışan favori fonksiyonu
+  const handleToggleFavorite = async (productId) => {
+    if (!user) {
+      message.warning("Favorilere eklemek için lütfen giriş yapın!");
+      setIsLoginModalVisible(true);
+      return;
+    }
+
+    const isFavorite = favoriteIds.has(productId);
+    try {
+      if (isFavorite) {
+        await removeProductFromFavorites(user.id, productId);
+        setFavoriteIds((prev) => {
+          const newIds = new Set(prev);
+          newIds.delete(productId);
+          return newIds;
+        });
+        message.success("Ürün favorilerden kaldırıldı.");
+      } else {
+        await addProductToFavorites(user.id, productId);
+        setFavoriteIds((prev) => new Set(prev).add(productId));
+        message.success("Ürün favorilere eklendi!");
+      }
+    } catch (error) {
+      message.error("Bir hata oluştu, lütfen tekrar deneyin.");
+    }
   };
 
   const ProductSort = () => {
+    // ... Bu component aynı kalabilir ...
     const [open, setOpen] = useState(false);
 
     const menu = (
@@ -82,12 +125,16 @@ function TopPicksMoreCards({ selectedBrands }) {
     );
   };
 
-  const cards = sortedProducts.map((product, index) => (
+  // GÜNCELLENDİ: Kartlar yeni state ve fonksiyonları kullanacak şekilde düzenlendi
+  const cards = sortedProducts.map((product) => (
     <div key={product._id} className="col-md-3 mb-4">
-      <div className="top-picks-more-cards container" style={{ position: "relative" }}>
+      <div
+        className="top-picks-more-cards container"
+        style={{ position: "relative" }}
+      >
         <button
           className="favorite-button"
-          onClick={() => toggleFavorite(index)}
+          onClick={() => handleToggleFavorite(product._id)}
           style={{
             position: "absolute",
             top: 10,
@@ -106,7 +153,7 @@ function TopPicksMoreCards({ selectedBrands }) {
             cursor: "pointer",
           }}
         >
-          {favorites[index] ? (
+          {favoriteIds.has(product._id) ? (
             <HeartFilled style={{ fontSize: 24, color: "red" }} />
           ) : (
             <HeartOutlined style={{ fontSize: 24, color: "#bbb" }} />
@@ -152,6 +199,12 @@ function TopPicksMoreCards({ selectedBrands }) {
         </div>
       </div>
       <div className="row">{cards}</div>
+
+      {/* YENİ: Modal bileşeni eklendi */}
+      <LoginRequiredModal
+        visible={isLoginModalVisible}
+        onClose={() => setIsLoginModalVisible(false)}
+      />
     </div>
   );
 }

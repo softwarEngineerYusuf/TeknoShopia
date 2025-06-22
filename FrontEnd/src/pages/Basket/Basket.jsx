@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { MdDeleteSweep } from "react-icons/md";
-import { Spin, Empty, Button, message } from "antd";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { MdDeleteSweep, MdClear } from "react-icons/md";
+import { Spin, Empty, Button, message, Input } from "antd";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import {
@@ -9,20 +9,24 @@ import {
   removeItemFromCart,
   updateItemQuantity,
 } from "../../allAPIs/cart";
+import { applyCoupon } from "../../allAPIs/coupon";
 import "./Basket.css";
-import { useNavigate } from "react-router-dom";
 
 function Basket() {
   const { user } = useAuth();
   const { cart, setCart, loading } = useCart();
+  const navigate = useNavigate();
 
   const [deletingItemId, setDeletingItemId] = useState(null);
-  const navigate = useNavigate();
   const [updatingItemId, setUpdatingItemId] = useState(null);
+
+  // Kupon State'leri
+  const [couponCode, setCouponCode] = useState("");
+  const [couponInfo, setCouponInfo] = useState(null);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
 
   const handleQuantityChange = async (itemId, newQuantity) => {
     if (newQuantity < 1) return;
-
     setUpdatingItemId(itemId);
     try {
       const response = await updateItemQuantity(user.id, itemId, newQuantity);
@@ -31,44 +35,93 @@ function Basket() {
         message.success(response.message);
       }
     } catch (error) {
-      message.error(error.message || "Miktar güncellenirken bir hata oluştu.");
+      message.error(
+        error.response?.data?.message ||
+          "Miktar güncellenirken bir hata oluştu."
+      );
     } finally {
       setUpdatingItemId(null);
     }
   };
 
-  const handleCheckout = () => {
-    if (!cart || cart.cartItems.length === 0) {
-      message.error("Ödeme sayfasına gitmek için sepette ürün olmalıdır.");
-      return;
-    }
-    navigate("/payment", { state: { cartData: cart } });
-  };
-
   const handleRemoveItem = async (itemId) => {
     if (!user || !user.id) return;
-
     setDeletingItemId(itemId);
-    const response = await removeItemFromCart(user.id, itemId);
-
-    if (response && response.cart) {
-      setCart(response.cart);
-      message.success(response.message);
-    } else {
-      message.error("Ürün silinirken bir hata oluştu.");
-    }
-    setDeletingItemId(null);
-  };
-  const handleClearCart = async () => {
-    if (user && user.id) {
-      const response = await clearCart(user.id);
-      if (response) {
+    try {
+      const response = await removeItemFromCart(user.id, itemId);
+      if (response && response.cart) {
         setCart(response.cart);
+        message.success(response.message);
+        // Ürün silindiğinde, eğer kupon varsa ve sepet tutarı minimumun altına düşerse kuponu kaldır
+        if (
+          couponInfo &&
+          response.cart.totalPrice < couponInfo.minPurchaseAmount
+        ) {
+          handleRemoveCoupon();
+          message.warning(
+            "Sepet tutarınız minimum gereksinimin altına düştüğü için kupon kaldırıldı."
+          );
+        }
+      } else {
+        message.error("Ürün silinirken bir hata oluştu.");
+      }
+    } catch (error) {
+      message.error(
+        error.response?.data?.message || "Ürün silinirken bir hata oluştu."
+      );
+    } finally {
+      setDeletingItemId(null);
+    }
+  };
+
+  const handleClearCart = async () => {
+    if (!user || !user.id) return;
+    try {
+      const response = await clearCart(user.id);
+      if (response && response.cart) {
+        setCart(response.cart);
+        handleRemoveCoupon(); // Sepet temizlenince kuponu da kaldır
         message.success("Sepet başarıyla temizlendi.");
       } else {
         message.error("Sepet temizlenirken bir hata oluştu.");
       }
+    } catch (error) {
+      message.error(
+        error.response?.data?.message || "Sepet temizlenirken bir hata oluştu."
+      );
     }
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      message.warning("Lütfen bir kupon kodu girin.");
+      return;
+    }
+    setIsApplyingCoupon(true);
+    try {
+      const result = await applyCoupon(couponCode, cart._id);
+      setCouponInfo(result);
+      message.success(result.message);
+    } catch (error) {
+      message.error(error.response?.data?.message || "Kupon uygulanamadı.");
+      setCouponInfo(null);
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setCouponInfo(null);
+    setCouponCode("");
+    message.info("Kupon kaldırıldı.");
+  };
+
+  const handleCheckout = () => {
+    if (!cart || !cart.cartItems || cart.cartItems.length === 0) {
+      message.error("Ödeme sayfasına gitmek için sepette ürün olmalıdır.");
+      return;
+    }
+    navigate("/payment", { state: { cartData: cart, couponInfo: couponInfo } });
   };
 
   if (loading) {
@@ -105,7 +158,8 @@ function Basket() {
     (sum, item) => sum + item.product.price * item.quantity,
     0
   );
-  const totalDiscountAmount = totalOriginalPrice - cart.totalPrice;
+  const finalPrice = couponInfo ? couponInfo.finalPrice : cart.totalPrice;
+  const totalDiscountAmount = totalOriginalPrice - finalPrice;
 
   return (
     <div className="basketAllMainPage">
@@ -114,42 +168,31 @@ function Basket() {
           <h3 className="orderDetailHeading">
             Sepetim ({cart.cartItems.length} ürün)
           </h3>
-          <button
-            className="clear-cart-btn"
-            onClick={handleClearCart}
-            aria-label="Clear entire basket"
-          >
-            <MdDeleteSweep size={20} />
-            Clean the basket
+          <button className="clear-cart-btn" onClick={handleClearCart}>
+            <MdDeleteSweep size={20} /> Sepeti Temizle
           </button>
         </div>
         {cart.cartItems.map((item) => (
           <div className="summaryBasketList" key={item._id}>
             <div className="summaryBasketProductImage">
-              <Link
-                to={`/productDetail/${item.product._id}`}
-                className="summaryBasketProductImage"
-              >
+              <Link to={`/productDetail/${item.product._id}`}>
                 <img src={item.product.mainImage} alt={item.product.name} />
               </Link>
             </div>
-
             <div className="summaryBasketProductDetails">
               <p className="brand">
                 {item.product.brand?.name || "Marka Bilgisi Yok"}
               </p>
               <p className="productName">{item.product.name}</p>
               <p className="color">Renk: {item.product.color}</p>
-
               <div className="pieceOfProductBasketDetail">
                 <p>Adet:</p>
                 <button
                   onClick={() =>
                     handleQuantityChange(item._id, item.quantity - 1)
                   }
-                  className="quantityButton"
-                  aria-label="Decrease quantity"
                   disabled={item.quantity <= 1 || updatingItemId === item._id}
+                  className="quantityButton"
                 >
                   −
                 </button>
@@ -164,15 +207,13 @@ function Basket() {
                   onClick={() =>
                     handleQuantityChange(item._id, item.quantity + 1)
                   }
-                  className="quantityButton"
-                  aria-label="Increase quantity"
                   disabled={updatingItemId === item._id}
+                  className="quantityButton"
                 >
                   +
                 </button>
               </div>
             </div>
-
             <div className="priceOfProductBasket">
               {item.product.discount > 0 && (
                 <p className="originalPrice">
@@ -184,11 +225,9 @@ function Basket() {
                 {item.subtotal.toLocaleString("tr-TR")} TL
               </p>
             </div>
-
             <button
               className="trash-icon-btn"
               onClick={() => handleRemoveItem(item._id)}
-              aria-label="Remove item from basket"
               disabled={deletingItemId === item._id}
             >
               {deletingItemId === item._id ? (
@@ -207,16 +246,35 @@ function Basket() {
           Ara Toplam:{" "}
           <span>{totalOriginalPrice.toLocaleString("tr-TR")} TL</span>
         </p>
-
         <div className="couponCodeEnterArea">
-          <input
-            type="text"
+          <Input
             placeholder="İndirim Kodu"
-            aria-label="Coupon Code"
+            value={couponCode}
+            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+            disabled={!!couponInfo}
           />
-          <button className="useCouponButton">Kullan</button>
+          <Button
+            className="useCouponButton"
+            onClick={handleApplyCoupon}
+            loading={isApplyingCoupon}
+            disabled={!!couponInfo}
+          >
+            Kullan
+          </Button>
         </div>
-
+        {couponInfo && (
+          <div className="applied-coupon-info">
+            <p>
+              Uygulanan Kupon: <strong>{couponInfo.coupon.code}</strong>
+              <MdClear
+                onClick={handleRemoveCoupon}
+                className="remove-coupon-icon"
+                title="Kuponu Kaldır"
+              />
+            </p>
+            <span>{couponInfo.coupon.description}</span>
+          </div>
+        )}
         {totalDiscountAmount > 0 && (
           <p className="discount-summary">
             İndirimler:{" "}
@@ -224,8 +282,7 @@ function Basket() {
           </p>
         )}
         <p className="finalPrice">
-          Genel Toplam:{" "}
-          <span>{cart.totalPrice.toLocaleString("tr-TR")} TL</span>
+          Genel Toplam: <span>{finalPrice.toLocaleString("tr-TR")} TL</span>
         </p>
         <button className="checkoutButton" onClick={handleCheckout}>
           Ödemeye Geç

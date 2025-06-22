@@ -11,3 +11,16 @@ export const getAllBrands = async () => {
     return [];
   }
 };
+
+export const getBrandById = async (brandId) => {
+  try {
+    // DÜZELTME: URL'ye "/getBrandById" eklendi
+    const response = await axios.get(`${API_URL}/getBrandById/${brandId}`);
+    return response.data;
+  } catch (error) {
+    // Hata mesajı zaten bu fonksiyonda loglanıyor, bu yüzden component'te tekrar loglamaya gerek yok.
+    console.error(`Marka ${brandId} çekilirken hata oluştu:`, error);
+    // Hata durumunda null döndürmek, component'te kontrol yapmayı kolaylaştırır.
+    return null;
+  }
+};
