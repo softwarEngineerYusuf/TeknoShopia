@@ -99,7 +99,7 @@ function CategoryCards({ categoryId, filters }) {
 
   const handleToggleFavorite = async (productId) => {
     if (!user) {
-      message.warning("Favorilere eklemek için lütfen giriş yapın!");
+      message.warning("Please log in to manage favorites.");
       return;
     }
     const isFavorite = favoriteIds.has(productId);
@@ -111,7 +111,7 @@ function CategoryCards({ categoryId, filters }) {
           newIds.delete(productId);
           return newIds;
         });
-        message.success("Ürün favorilerden kaldırıldı.");
+        message.success("Product removed from favorites.");
       } else {
         await addProductToFavorites(user.id, productId);
         setFavoriteIds((prev) => {
@@ -119,11 +119,11 @@ function CategoryCards({ categoryId, filters }) {
           newIds.add(productId);
           return newIds;
         });
-        message.success("Ürün favorilere eklendi!");
+        message.success("Product added to favorites!");
       }
       // eslint-disable-next-line no-unused-vars
     } catch (error) {
-      message.error("Bir hata oluştu. Lütfen tekrar deneyin.");
+      message.error("An error occurred, please try again.");
     }
   };
 
@@ -136,8 +136,8 @@ function CategoryCards({ categoryId, filters }) {
           setOpen(false);
         }}
       >
-        <Menu.Item key="price-asc">Fiyat: Düşük-Yüksek</Menu.Item>
-        <Menu.Item key="price-desc">Fiyat: Yüksek-Düşük</Menu.Item>
+        <Menu.Item key="price-asc">Price: Low-High</Menu.Item>
+        <Menu.Item key="price-desc">Price: High-Low</Menu.Item>
       </Menu>
     );
     return (
@@ -163,12 +163,12 @@ function CategoryCards({ categoryId, filters }) {
   };
 
   if (loading) {
-    return <div className="text-center py-5">Yükleniyor...</div>;
+    return <div className="text-center py-5">Loading...</div>;
   }
   if (!products.length) {
     return (
       <div className="text-center py-5">
-        Bu kriterlere uygun ürün bulunamadı.
+        No products found for this criteria.
       </div>
     );
   }
@@ -178,7 +178,7 @@ function CategoryCards({ categoryId, filters }) {
       <div className="category-cards-and-sort d-flex justify-content-between align-items-center">
         <h2 className="category-cards-title">{categoryName}</h2>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "0.9rem", color: "#666" }}>Sırala:</span>
+          <span style={{ fontSize: "0.9rem", color: "#666" }}>Sort by:</span>
           <ProductSort />
         </div>
       </div>

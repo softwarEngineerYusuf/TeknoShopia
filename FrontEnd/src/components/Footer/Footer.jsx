@@ -26,7 +26,7 @@ const Footer = () => {
                 </a>
               </div>
             </li>
-            <li className="fs-5" >Müşteri Hattı: 0850 666 19 07</li>
+            <li className="fs-5" >Customer Service: 0850 666 19 07</li>
           </ul>
         </nav>
       </div>
@@ -36,27 +36,27 @@ const Footer = () => {
           <h3>TeknoShopia</h3>
           <ul>
             <li>
-              <a href="#">Hakkımızda</a>
+              <a href="#">About Us</a>
             </li>
             <li>
-              <a href="#">İletişim</a>
+              <a href="#">Contact</a>
             </li>
             <li>
-              <a href="#">Gizlilik Politikamız</a>
+              <a href="#">Privacy Policy</a>
             </li>
             <li>
-              <a href="#">İnsan Kaynaklarımız</a>
+              <a href="#">Our Human Resources</a>
             </li>
           </ul>
         </div>
         <div className="footer-section">
-          <h3>Kategoriler</h3>
+          <h3>Categories</h3>
           <ul>
             <li>
-              <a href="#">Bilgisayar</a>
+              <a href="#">Computer</a>
             </li>
             <li>
-              <a href="#">Cep Telefonu</a>
+              <a href="#">Mobile Phone</a>
             </li>
             <li>
               <a href="#">Tablet</a>
@@ -65,48 +65,48 @@ const Footer = () => {
               <a href="#">Laptop</a>
             </li>
             <li>
-              <a href="#">Televizyon</a>
+              <a href="#">Television</a>
             </li>
             <li>
-              <a href="#">Akıllı Saat</a>
+              <a href="#">Smart Watch</a>
             </li>
             <li>
-              <a href="#">Yazıcı</a>
+              <a href="#">Printer</a>
             </li>
             <li>
-              <a href="#">Hoparlör</a>
+              <a href="#">Speaker</a>
             </li>
             <li>
-              <a href="#">Oyuncu Koltuğu</a>
+              <a href="#">Gaming Chair</a>
             </li>
             <li>
-              <a href="#">Oyun Konsolu</a>
+              <a href="#">Game Console</a>
             </li>
             <li>
-              <a href="#">Kulaklık</a>
+              <a href="#">Headphones</a>
             </li>
             <li>
-              <a href="#">Kamera</a>
+              <a href="#">Camera</a>
             </li>
           </ul>
         </div>
         <div className="footer-section">
-          <h3>Müşteri Hizmetleri</h3>
+          <h3>Customer Service</h3>
           <ul>
             <li>
-              <a href="#">İşlem Rehberi</a>
+              <a href="#">Process Guide</a>
             </li>
             <li>
-              <a href="#">İptal ve İade</a>
+              <a href="#">Cancellation and Return</a>
             </li>
             <li>
-              <a href="#">Ödeme Seçenekleri</a>
+              <a href="#">Payment Options</a>
             </li>
             <li>
-              <a href="#">Garanti</a>
+              <a href="#">Warranty</a>
             </li>
             <li>
-              <a href="#">E-Fatura</a>
+              <a href="#">E-Invoice</a>
             </li>
           </ul>
         </div>

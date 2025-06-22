@@ -76,7 +76,7 @@ function Brands() {
 
   const handleToggleFavorite = async (productId) => {
     if (!user) {
-      message.warning("Favorilere eklemek için lütfen giriş yapın!");
+      message.warning("Please log in to manage favorites.");
       setIsLoginModalVisible(true);
       return;
     }
@@ -90,14 +90,14 @@ function Brands() {
           newIds.delete(productId);
           return newIds;
         });
-        message.success("Ürün favorilerden kaldırıldı.");
+        message.success("Product removed from favorites.");
       } else {
         await addProductToFavorites(user.id, productId);
         setFavoriteIds((prev) => new Set(prev).add(productId));
-        message.success("Ürün favorilere eklendi!");
+        message.success("Product added to favorites!");
       }
     } catch (error) {
-      message.error("Bir hata oluştu, lütfen tekrar deneyin.");
+      message.error("An error occurred, please try again.");
     }
   };
 
@@ -110,8 +110,8 @@ function Brands() {
           setOpen(false);
         }}
       >
-        <Menu.Item key="price-asc">Fiyat: Düşük-Yüksek</Menu.Item>
-        <Menu.Item key="price-desc">Fiyat: Yüksek-Düşük</Menu.Item>
+        <Menu.Item key="price-asc">Price: Low-High</Menu.Item>
+        <Menu.Item key="price-desc">Price: High-Low</Menu.Item>
       </Menu>
     );
     return (
@@ -146,7 +146,7 @@ function Brands() {
           height: "80vh",
         }}
       >
-        <Spin size="large" tip="Yükleniyor..." />
+        <Spin size="large" tip="Loading..." />
       </div>
     );
   }
@@ -154,7 +154,7 @@ function Brands() {
   if (!brandInfo) {
     return (
       <div style={{ textAlign: "center", marginTop: "50px" }}>
-        <h1>Marka bulunamadı.</h1>
+        <h1>Brand not found.</h1>
       </div>
     );
   }
@@ -192,8 +192,8 @@ function Brands() {
                 style={{ position: "relative" }}
               >
                 <button
-                  className="favorite-btn-brands"
-                  aria-label="Favorilere ekle"
+                  className="favorite-button-brands"
+                  aria-label="Add to favorites"
                   onClick={() => handleToggleFavorite(product._id)}
                 >
                   {favoriteIds.has(product._id) ? (
@@ -242,7 +242,7 @@ function Brands() {
           ))
         ) : (
           <div className="col-12">
-            <p className="text-center mt-5">Bu markaya ait ürün bulunamadı.</p>
+            <p className="text-center mt-5">No products found for this brand.</p>
           </div>
         )}
       </div>

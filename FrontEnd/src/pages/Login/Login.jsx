@@ -53,12 +53,12 @@ function Login() {
   const handleLogin = async () => {
     try {
       await login(email, password);
-      message.success("Başarıyla giriş yapıldı!");
+      message.success("Logged In Successfully!");
       navigate("/");
       // eslint-disable-next-line no-unused-vars
     } catch (error) {
-      setError("E-posta adresi veya şifre yanlış.");
-      message.error("E-posta adresi veya şifre yanlış.");
+      setError("Email or password is incorrect.");
+      message.error("Email or password is incorrect.");
     }
   };
   return (
@@ -89,7 +89,7 @@ function Login() {
             marginBottom: 8,
           }}
         >
-          TeknoShopia Giriş
+          TeknoShopia Login
         </Typography.Title>
         <Divider style={{ margin: "12px 0 24px 0" }} />
         <div
@@ -140,13 +140,13 @@ function Login() {
             name="email"
             initialValue={email}
             rules={[
-              { required: true, message: "E-posta zorunlu" },
-              { type: "email", message: "Geçerli bir e-posta girin" },
+              { required: true, message: "Email is required" },
+              { type: "email", message: "Please enter a valid email" },
             ]}
           >
             <Input
               prefix={<MailOutlined />}
-              placeholder="E-Posta"
+              placeholder="Email"
               size="large"
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -154,11 +154,11 @@ function Login() {
           <Form.Item
             name="password"
             initialValue={password}
-            rules={[{ required: true, message: "Şifre zorunlu" }]}
+            rules={[{ required: true, message: "Password is required" }]}
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="Şifre"
+              placeholder="Password"
               size="large"
               iconRender={(visible) =>
                 visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
@@ -191,7 +191,7 @@ function Login() {
             Forgot Password?
           </a>
         </div>
-        <Divider plain>veya</Divider>
+        <Divider plain>or</Divider>
         <Button
           icon={<GoogleOutlined />}
           block
@@ -204,7 +204,7 @@ function Login() {
           }}
           onClick={handleGoogleLogin}
         >
-          Google ile Giriş Yap
+          Login with Google
         </Button>
       </Card>
     </div>

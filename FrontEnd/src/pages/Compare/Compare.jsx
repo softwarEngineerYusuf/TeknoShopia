@@ -71,7 +71,7 @@ const Compare = () => {
 
   const handleToggleFavorite = async (productId) => {
     if (!user) {
-      message.warning("Favorilere eklemek için lütfen giriş yapın!");
+      message.warning("Please log in to manage favorites.");
       return;
     }
 
@@ -84,7 +84,7 @@ const Compare = () => {
           newIds.delete(productId);
           return newIds;
         });
-        message.success("Ürün favorilerden kaldırıldı.");
+        message.success("Product removed from favorites.");
       } else {
         await addProductToFavorites(user.id, productId);
         setFavoriteIds((prev) => {
@@ -92,10 +92,10 @@ const Compare = () => {
           newIds.add(productId);
           return newIds;
         });
-        message.success("Ürün favorilere eklendi!");
+        message.success("Product added to favorites.");
       }
     } catch (error) {
-      message.error("Bir hata oluştu. Lütfen tekrar deneyin.");
+      message.error("An error occurred, please try again.");
     }
   };
 
@@ -117,7 +117,7 @@ const Compare = () => {
 
   const renderAllRows = () => {
     if (features.length === 0) {
-      return <Empty description="Karşılaştırılacak özellik bulunamadı." />;
+      return <Empty description="No features found for comparison." />;
     }
     return features.map((feature, index) => (
       <div className="feature-row" key={index}>
@@ -193,7 +193,7 @@ const Compare = () => {
                 </p>
               </div>
 
-              <button className="buy-button">SEPETE EKLE</button>
+              <button className="buy-button">ADD TO CART</button>
             </div>
           </div>
         ))}
@@ -227,7 +227,7 @@ const Compare = () => {
       <TabPanel value={1} index={1} dir={theme.direction}>
         <div className="feature-table">
           <div className="feature-row header">
-            <div className="feature-title">Özellik</div>
+            <div className="feature-title">Feature</div>
             <div className="feature-value">{product1.name}</div>
             <div className="feature-value">{product2.name}</div>
           </div>

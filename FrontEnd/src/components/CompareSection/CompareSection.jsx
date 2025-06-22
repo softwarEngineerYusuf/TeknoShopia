@@ -15,7 +15,7 @@ function CompareSection() {
   }
   return (
     <div className="compare-section">
-      <h2>Karşılaştırma Listesi ({compareList.length}/2)</h2>
+      <h2>Compare List ({compareList.length}/2)</h2>
       <div className="compare-items-wrapper">
         <div className="compare-items">
           {compareList.map((product) => (
@@ -23,7 +23,7 @@ function CompareSection() {
               <button
                 className="remove-btn"
                 onClick={() => removeFromCompare(product.id)}
-                title="Listeden Kaldır"
+                title="Remove from list"
               >
                 ×
               </button>
@@ -42,7 +42,7 @@ function CompareSection() {
               key={`placeholder-${index}`}
               className="compare-item placeholder"
             >
-              <p>Ürün ekleyin</p>
+              <p>Add a product</p>
             </div>
           ))}
         </div>
@@ -52,10 +52,10 @@ function CompareSection() {
             onClick={handleCompare}
             disabled={compareList.length < 2} // 2'den az ürün varsa butonu devre dışı bırak
           >
-            Karşılaştır
+            Compare
           </button>
           <button className="action-btn clear" onClick={clearCompareList}>
-            Temizle
+            Clear
           </button>
         </div>
       </div>

@@ -88,18 +88,18 @@ function ProductDetail() {
       try {
         const response = await addCart(user.id, product.id, 1);
         if (response && response.cart) {
-          message.success(`${product.name} başarıyla sepete eklendi!`);
+          message.success(`${product.name} Added to cart successfully!`);
         } else {
-          message.error("Ürün sepete eklenirken bir sorun oluştu.");
+          message.error("There was a problem adding the product to the cart.");
         }
       } catch (error) {
-        message.error("Bir hata oluştu. Lütfen tekrar deneyin.");
+        message.error("An error occurred, please try again.");
       } finally {
         setIsAdding(false);
       }
     } else {
       localStorage.setItem(PENDING_CART_ITEM_KEY, product._id);
-      message.info("Giriş yaptıktan sonra bu ürün sepetinize eklenecektir.");
+      message.info("This product will be added to your cart after logging in.");
       setIsLoginModalVisible(true);
     }
   };
@@ -125,7 +125,7 @@ function ProductDetail() {
 
   const handleToggleFavorite = async () => {
     if (!user) {
-      message.warning("Bu özelliği kullanmak için lütfen giriş yapın!");
+      message.warning("Please log in to manage favorites.");
       setIsLoginModalVisible(true);
       return;
     }
@@ -134,15 +134,15 @@ function ProductDetail() {
     try {
       if (isFavorite) {
         await removeProductFromFavorites(user.id, product.id);
-        message.success(`${product.name} favorilerden kaldırıldı.`);
+        message.success(`${product.name} removed from favorites.`);
         setIsFavorite(false);
       } else {
         await addProductToFavorites(user.id, product.id);
-        message.success(`${product.name} favorilere eklendi!`);
+        message.success(`${product.name} added to favorites.`);
         setIsFavorite(true);
       }
     } catch (error) {
-      message.error("Bir hata oluştu, lütfen tekrar deneyin.");
+      message.error("An error occurred, please try again.");
     } finally {
       setIsFavoriteLoading(false);
     }
@@ -160,8 +160,8 @@ function ProductDetail() {
       );
   };
 
-  if (loading) return <Spin tip="Yükleniyor..." fullscreen />;
-  if (!product) return <p>Ürün bulunamadı.</p>;
+  if (loading) return <Spin tip="Loading..." fullscreen />;
+  if (!product) return <p>Product not found.</p>;
 
   const images =
     product && product.mainImage
@@ -234,11 +234,11 @@ function ProductDetail() {
                   : `${product.price} TL`}
               </Title>
               <Text type="secondary" className="product-detail-brand">
-                Marka: {product.brand?.name}
+                Brand: {product.brand?.name}
               </Text>
               <br />
               <Text type="secondary" className="product-detail-category">
-                Kategori: {product.category?.name}
+                Category: {product.category?.name}
               </Text>
             </div>
             <div className="product-detail-buttons">
@@ -277,7 +277,7 @@ function ProductDetail() {
               </Button>
             </div>
             <div className="product-detail-specs">
-              <Title level={4}>Teknik Özellikler</Title>
+              <Title level={4}>Technical Specifications</Title>
               <Table
                 dataSource={specifications}
                 columns={columns}

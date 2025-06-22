@@ -17,7 +17,7 @@ function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const ClearUser = () => {
-    message.success("Başarıyla çıkış yapıldı!");
+    message.success("Logged Out Successfully!");
     if (logout) logout();
     navigate("/");
   };
@@ -40,7 +40,7 @@ function Navbar() {
           <input
             type="search"
             name="Search"
-            placeholder="Ürün, marka veya kategori ara..."
+            placeholder="Search the products..."
             className="navbar-search-input"
           />
         </div>
@@ -66,14 +66,14 @@ function Navbar() {
         ) : (
           <Link to="/Login" className="navbar-button navbar-login-btn">
             <FaUser className="iconNav" />
-            <span>Giriş Yap</span>
+            <span>Login</span>
           </Link>
         )}
         <Link to="/basket" className="navbar-button navbar-cart-button">
           {" "}
           {/* YENİ: Özel bir class ekledik */}
           <FaShoppingCart className="iconNav" />
-          <span>Sepetim</span>
+          <span>My Cart</span>
           {/* Ürün sayısı 0'dan büyükse rozeti göster */}
           {cartItemCount > 0 && (
             <span className="cart-badge">{cartItemCount}</span>
@@ -83,11 +83,11 @@ function Navbar() {
           <>
             <Link to="/favorites" className="navbar-button">
               <HeartFilled className="iconNav" />
-              <span>Favoriler</span>
+              <span>Favorites</span>
             </Link>
             <Link to="/myorders" className="navbar-button">
               <ViewListIcon className="iconNav" />
-              <span>Siparişlerim</span>
+              <span>My Orders</span>
             </Link>
           </>
         )}
