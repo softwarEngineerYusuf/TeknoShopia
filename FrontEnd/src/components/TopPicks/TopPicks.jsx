@@ -5,7 +5,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-
 import { useAuth } from "../../context/AuthContext";
 import { getTopPicksProducts } from "../../allAPIs/product";
 import { useGoToProductDetail } from "../GoToProductDetailFunction/GoToProductDetail";
@@ -32,7 +31,6 @@ const TopPicks = () => {
         setFavoriteIds(new Set(favIds));
       }
     };
-
     fetchInitialData();
   }, [user]);
 
@@ -41,9 +39,7 @@ const TopPicks = () => {
       message.warning("Favorilere eklemek için lütfen giriş yapın!");
       return;
     }
-
     const isFavorite = favoriteIds.has(productId);
-
     try {
       if (isFavorite) {
         await removeProductFromFavorites(user.id, productId);
@@ -55,14 +51,9 @@ const TopPicks = () => {
         message.success("Ürün favorilerden kaldırıldı.");
       } else {
         await addProductToFavorites(user.id, productId);
-        setFavoriteIds((prevIds) => {
-          const newIds = new Set(prevIds);
-          newIds.add(productId);
-          return newIds;
-        });
+        setFavoriteIds((prevIds) => new Set(prevIds).add(productId));
         message.success("Ürün favorilere eklendi!");
       }
-      // eslint-disable-next-line no-unused-vars
     } catch (error) {
       message.error("Bir hata oluştu. Lütfen tekrar deneyin.");
     }
@@ -83,7 +74,7 @@ const TopPicks = () => {
 
       <div className="row">
         {products.map((product) => (
-          <div key={product._id} className="col-md-3 mb-4">
+          <div key={product._id} className="col-lg-3 col-md-4 col-sm-6 mb-4">
             <div className="card-top-picks container">
               <button
                 className="favorite-button"
@@ -100,6 +91,8 @@ const TopPicks = () => {
                 src={product.mainImage || "/no-image.png"}
                 alt={product.name}
                 className="card-image-top-picks"
+                onClick={() => goToProductDetail(product._id)}
+                style={{ cursor: "pointer" }}
               />
               <div className="card-details-top-picks">
                 <p className="product-name-top-picks">{product.name}</p>
@@ -107,12 +100,25 @@ const TopPicks = () => {
                   className="d-flex justify-content-between"
                   style={{ padding: "0rem 1rem" }}
                 >
+                  {/* =============== RATING KISMI GÜNCELLENDİ =============== */}
                   <div className="rating-discount-corousel">
                     <StarIcon />
-                    <p>{product.ratings?.toFixed(1) || "0.0"}</p>
+                    <p>
+                      {/* Backend'den gelen sanal alanları kullanıyoruz */}
+                      {(product.averageRating || 0).toFixed(1)}
+                      <span
+                        className="review-count"
+                        style={{ marginLeft: "4px", color: "#888" }}
+                      >
+                        ({product.reviewCount || 0})
+                      </span>
+                    </p>
                   </div>
+                  {/* ========================================================== */}
+
                   <p className="product-price-top-picks">
-                    ₺{product.price?.toLocaleString("tr-TR") || "0"}
+                    {/* İndirimli fiyatı göstermek için discountedPrice sanal alanını kullanıyoruz */}
+                    ₺{product.discountedPrice?.toLocaleString("tr-TR") || "0"}
                   </p>
                 </div>
                 <button

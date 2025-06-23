@@ -2,22 +2,21 @@ import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import {
   Card,
-  Row,
-  Col,
   Button,
   Rate,
   Table,
   Image,
   Typography,
   Spin,
+  message,
 } from "antd";
 import {
   LeftOutlined,
   RightOutlined,
   ShoppingCartOutlined,
   SwapOutlined,
-  HeartOutlined, // YENİ: Boş kalp ikonu
-  HeartFilled, // YENİ: Dolu kalp ikonu
+  HeartOutlined,
+  HeartFilled,
 } from "@ant-design/icons";
 import "./ProductDetail.css";
 import { getProductById } from "../../allAPIs/product";
@@ -25,14 +24,12 @@ import { addCart } from "../../allAPIs/cart";
 import { useAuth } from "../../context/AuthContext";
 import LoginRequiredModal from "../../components/LoginRequireModal/LoginRequireModal";
 import { useCompare } from "../../context/CompareContext";
-import { message } from "antd";
-
 import {
   addProductToFavorites,
   removeProductFromFavorites,
   getFavoriteProductIds,
 } from "../../allAPIs/favorites";
-import Comments from "../../components/Comments/Comments"; // YENİ: Comments componentinin import edilmesi
+import Comments from "../../components/Comments/Comments";
 
 function ProductDetail() {
   const { id } = useParams();
@@ -44,39 +41,30 @@ function ProductDetail() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
-
   const [isFavorite, setIsFavorite] = useState(false);
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
-
   const PENDING_CART_ITEM_KEY = "pendingCartItemProductId";
-
   const commentsRef = useRef(null);
 
   useEffect(() => {
     const fetchProductAndFavoriteStatus = async () => {
       setLoading(true);
-
       const productPromise = getProductById(id);
       let favoritePromise = Promise.resolve([]);
-
       if (user && user.id) {
         favoritePromise = getFavoriteProductIds(user.id);
       }
-
       const [productData, favoriteIds] = await Promise.all([
         productPromise,
         favoritePromise,
       ]);
-
       setProduct(productData);
       setCurrentImageIndex(0);
-
       if (productData && favoriteIds.length > 0) {
-        setIsFavorite(favoriteIds.includes(productData.id));
+        setIsFavorite(favoriteIds.includes(productData.id || productData._id));
       } else {
         setIsFavorite(false);
       }
-
       setLoading(false);
     };
     fetchProductAndFavoriteStatus();
@@ -86,29 +74,28 @@ function ProductDetail() {
     if (user && user.id) {
       setIsAdding(true);
       try {
-        const response = await addCart(user.id, product.id, 1);
+        const response = await addCart(user.id, product._id, 1);
         if (response && response.cart) {
-          message.success(`${product.name} Added to cart successfully!`);
+          message.success(`${product.name} sepete eklendi!`);
         } else {
-          message.error("There was a problem adding the product to the cart.");
+          message.error("Ürün sepete eklenirken bir sorun oluştu.");
         }
       } catch (error) {
-        message.error("An error occurred, please try again.");
+        message.error("Bir hata oluştu, lütfen tekrar deneyin.");
       } finally {
         setIsAdding(false);
       }
     } else {
       localStorage.setItem(PENDING_CART_ITEM_KEY, product._id);
-      message.info("This product will be added to your cart after logging in.");
+      message.info("Giriş yaptıktan sonra ürün sepete eklenecek.");
       setIsLoginModalVisible(true);
     }
   };
 
   const handleAddToCompare = () => {
-    // ... Bu fonksiyon aynı kalıyor ...
     if (product) {
       const productForCompare = {
-        id: product.id,
+        id: product._id,
         name: product.name,
         image:
           product.mainImage ||
@@ -125,24 +112,23 @@ function ProductDetail() {
 
   const handleToggleFavorite = async () => {
     if (!user) {
-      message.warning("Please log in to manage favorites.");
+      message.warning("Favorileri yönetmek için giriş yapın.");
       setIsLoginModalVisible(true);
       return;
     }
-
     setIsFavoriteLoading(true);
     try {
       if (isFavorite) {
-        await removeProductFromFavorites(user.id, product.id);
-        message.success(`${product.name} removed from favorites.`);
+        await removeProductFromFavorites(user.id, product._id);
+        message.success(`${product.name} favorilerden kaldırıldı.`);
         setIsFavorite(false);
       } else {
-        await addProductToFavorites(user.id, product.id);
-        message.success(`${product.name} added to favorites.`);
+        await addProductToFavorites(user.id, product._id);
+        message.success(`${product.name} favorilere eklendi.`);
         setIsFavorite(true);
       }
     } catch (error) {
-      message.error("An error occurred, please try again.");
+      message.error("Bir hata oluştu, lütfen tekrar deneyin.");
     } finally {
       setIsFavoriteLoading(false);
     }
@@ -160,8 +146,8 @@ function ProductDetail() {
       );
   };
 
-  if (loading) return <Spin tip="Loading..." fullscreen />;
-  if (!product) return <p>Product not found.</p>;
+  if (loading) return <Spin tip="Yükleniyor..." fullscreen />;
+  if (!product) return <p>Ürün bulunamadı.</p>;
 
   const images =
     product && product.mainImage
@@ -179,7 +165,6 @@ function ProductDetail() {
     <div className="product-detail-root">
       <div className="product-detail-flex-row">
         <div className="product-detail-image-side">
-          {/* ... resim galerisi kısmı aynı ... */}
           <div className="product-detail-image-box">
             <Button
               icon={<LeftOutlined />}
@@ -216,12 +201,40 @@ function ProductDetail() {
             <Title level={2} className="product-detail-title">
               {product.name}
             </Title>
-            <Rate disabled defaultValue={4} className="product-detail-rate" />
-            <Text className="product-detail-comments" onClick={() => {
-              if (commentsRef.current) {
-                commentsRef.current.scrollIntoView({ behavior: 'smooth' });
-              }
-            }} style={{ cursor: 'pointer', color: '#1890ff' }}> Comments</Text>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                marginBottom: "16px",
+              }}
+            >
+              <Rate
+                disabled
+                allowHalf
+                value={product.averageRating || 0}
+                className="product-detail-rate"
+              />
+              {product.reviewCount > 0 && (
+                <Text strong style={{ color: "#4a4a4a", fontSize: "1em" }}>
+                  {/* .toFixed(1) ile sayıyı her zaman "4.0", "4.5" gibi tek ondalıklı gösteriyoruz */}
+                  {(product.averageRating || 0).toFixed(1)}
+                </Text>
+              )}
+              <Text
+                className="product-detail-comments"
+                onClick={() => {
+                  if (commentsRef.current) {
+                    commentsRef.current.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                style={{ cursor: "pointer", color: "#1890ff" }}
+              >
+                ({product.reviewCount || 0} Değerlendirme)
+              </Text>
+            </div>
+
             <div className="product-detail-pricing">
               {product.discount > 0 && (
                 <p className="product-detail-old-price">
@@ -284,6 +297,7 @@ function ProductDetail() {
                 pagination={false}
                 size="small"
                 className="product-detail-specs-table"
+                rowKey="key"
               />
             </div>
           </Card>
@@ -293,9 +307,9 @@ function ProductDetail() {
         visible={isLoginModalVisible}
         onClose={() => setIsLoginModalVisible(false)}
       />
-      {/* Yorumlar componenti en alta eklendi */}
+
       <div style={{ marginTop: 40 }} ref={commentsRef}>
-        <Comments />
+        <Comments productId={id} />
       </div>
     </div>
   );

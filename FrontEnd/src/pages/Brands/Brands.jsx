@@ -219,9 +219,17 @@ function Brands() {
                   >
                     <div className="rating-brands-cards">
                       <StarIcon style={{ color: "#FFD700" }} />
-                      <p>{product.ratings?.toFixed(1) || "N/A"}</p>
+                      <p>
+                        {(product.averageRating || 0).toFixed(1)}
+                        <span
+                          className="review-count"
+                          style={{ marginLeft: "4px", color: "#888" }}
+                        >
+                          ({product.reviewCount || 0})
+                        </span>
+                      </p>
                     </div>
-                    <div>
+                    <div className="price-section">
                       {product.discount > 0 && (
                         <p className="old-price">₺{product.price.toFixed(2)}</p>
                       )}
@@ -242,7 +250,9 @@ function Brands() {
           ))
         ) : (
           <div className="col-12">
-            <p className="text-center mt-5">No products found for this brand.</p>
+            <p className="text-center mt-5">
+              No products found for this brand.
+            </p>
           </div>
         )}
       </div>

@@ -144,9 +144,16 @@ function DiscountsCarousel() {
                           >
                             <div className="rating-discount-corousel">
                               <StarIcon />
-                              <p>{product.ratings?.toFixed(1) || "4.5"}</p>
+                              <p>
+                                {(product.averageRating || 0).toFixed(1)}
+                                <span
+                                  className="review-count"
+                                  style={{ marginLeft: "4px", color: "#888" }}
+                                >
+                                  ({product.reviewCount || 0})
+                                </span>
+                              </p>
                             </div>
-
                             <div style={{ textAlign: "right" }}>
                               <p className="original-price-carousel">
                                 {product.price.toLocaleString("tr-TR")}₺

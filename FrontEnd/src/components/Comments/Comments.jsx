@@ -1,53 +1,74 @@
-import React from 'react'
-import './Comments.css'
-import { Rate } from 'antd'
+import React, { useState, useEffect } from "react";
+import "./Comments.css";
+import { Rate, Spin, Empty } from "antd";
+import { getReviewsByProductId } from "../../allAPIs/review";
 
-const sampleComments = [
-  {
-    name: 'Ahmet Yılmaz',
-    comment: 'Ürün beklediğimden çok daha iyi çıktı, hızlı kargo için teşekkürler!',
-    date: '2025-06-10',
-    rating: 2,
-  },
-  {
-    name: 'Zeynep Kaya',
-    comment: 'Fiyat/performans ürünü, tavsiye ederim.',
-    date: '2025-06-08',
-    rating: 4,
-  },
-  {
-    name: 'Mehmet Demir',
-    comment: 'Kargo biraz gecikti ama ürün güzel.',
-    date: '2025-06-05',
-    rating: 3,
-  },
-  {
-    name: 'Elif Çetin',
-    comment: 'Paketleme çok iyiydi, ürün sorunsuz elime ulaştı.',
-    date: '2025-06-03',
-    rating: 5,
-  },
-  {
-    name: 'Burak Şahin',
-    comment: 'Ürün açıklamalardaki gibi, memnun kaldım.',
-    date: '2025-06-01',
-    rating: 4,
-  },
-]
+// Component artık 'productId' prop'unu alıyor.
+function Comments({ productId }) {
+  // Yorumları ve yüklenme durumunu tutmak için state'ler.
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-function Comments() {
+  // productId prop'u her değiştiğinde bu effect çalışacak.
+  useEffect(() => {
+    if (!productId) {
+      setLoading(false);
+      return;
+    }
+    const fetchReviews = async () => {
+      setLoading(true);
+      const data = await getReviewsByProductId(productId);
+      setReviews(data);
+      setLoading(false);
+    };
+    fetchReviews();
+  }, [productId]);
+
+  // Yüklenirken gösterilecek içerik.
+  if (loading) {
+    return (
+      <div
+        className="comments-root"
+        style={{ padding: "50px", textAlign: "center" }}
+      >
+        <Spin tip="Değerlendirmeler yükleniyor..." />
+      </div>
+    );
+  }
+
+  // Yorum yoksa gösterilecek içerik.
+  if (reviews.length === 0) {
+    return (
+      <div className="comments-root">
+        <h2 className="comments-title">Comments & Rating</h2>
+        <Empty description="Bu ürün için henüz değerlendirme yapılmamış." />
+      </div>
+    );
+  }
+
+  // SİZİN JSX YAPINIZIN AYNISI, SADECE VERİ KAYNAĞI DEĞİŞTİ.
   return (
     <div className="comments-root">
-      <h2 className="comments-title">Comments & Rating</h2>
-      <div className="comments-list" style={{
-        maxHeight: sampleComments.length > 4 ? 550 : 'none',
-        overflowY: sampleComments.length > 4 ? 'auto' : 'visible',
-      }}>
-        {sampleComments.map((item, idx) => (
-          <div className="comment-card" key={idx}>
+      <h2 className="comments-title">Comments & Rating ({reviews.length})</h2>
+      <div
+        className="comments-list"
+        style={{
+          maxHeight: reviews.length > 4 ? 550 : "none",
+          overflowY: reviews.length > 4 ? "auto" : "visible",
+        }}
+      >
+        {/* 'sampleComments' yerine 'reviews' state'i kullanılıyor. */}
+        {reviews.map((item) => (
+          // key olarak item._id kullanmak daha güvenlidir.
+          <div className="comment-card" key={item._id}>
             <div className="comment-header">
-              <span className="comment-name">{item.name}</span>
-              <span className="comment-date">{new Date(item.date).toLocaleDateString('tr-TR')}</span>
+              {/* API'den gelen verinin yapısına göre alanlar güncellendi. */}
+              <span className="comment-name">
+                {item.userId?.name || "Kullanıcı"}
+              </span>
+              <span className="comment-date">
+                {new Date(item.date).toLocaleDateString("tr-TR")}
+              </span>
             </div>
             <div className="comment-rating">
               <Rate disabled value={item.rating} />
@@ -57,7 +78,7 @@ function Comments() {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
-export default Comments
+export default Comments;

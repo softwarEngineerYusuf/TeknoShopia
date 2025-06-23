@@ -11,6 +11,7 @@ import StarIcon from "@mui/icons-material/Star";
 import { getOrdersByUserId } from "../../allAPIs/order";
 import { useAuth } from "../../context/AuthContext";
 import { useGoToProductDetail } from "../../components/GoToProductDetailFunction/GoToProductDetail";
+import { addReview } from "../../allAPIs/review"; // GÜNCELLENDİ: API fonksiyonunu import et
 
 // ReviewModal component'i
 function ReviewModal({ open, onClose, onSubmit }) {
@@ -61,7 +62,6 @@ function ReviewModal({ open, onClose, onSubmit }) {
       <DialogActions>
         <Button
           onClick={onClose}
-          color="secondary"
           style={{ backgroundColor: "red", color: "white" }}
           variant="contained"
         >
@@ -72,9 +72,8 @@ function ReviewModal({ open, onClose, onSubmit }) {
             onSubmit({ rating, comment });
             onClose();
           }}
-          color="primary"
           variant="contained"
-          disabled={rating === 0}
+          disabled={!rating || !comment.trim()}
           style={{ backgroundColor: "green", color: "white" }}
         >
           Gönder
@@ -90,19 +89,35 @@ function OrderCard({ order }) {
   const [modalOpen, setModalOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState(null);
   const goToProductDetail = useGoToProductDetail();
+  const { user } = useAuth(); // Kullanıcı bilgilerini al
 
   const handleReviewClick = (item) => {
     setSelectedItem(item);
     setModalOpen(true);
   };
+
   const handleImageClick = (e, productId) => {
     e.stopPropagation();
     goToProductDetail(productId);
   };
-  const handleReviewSubmit = ({ rating, comment }) => {
-    alert(
-      `Yıldız: ${rating}\nYorum: ${comment}\nÜrün: ${selectedItem?.product.name}`
-    );
+
+  // GÜNCELLENDİ: handleReviewSubmit fonksiyonu backend'e istek atacak
+  const handleReviewSubmit = async ({ rating, comment }) => {
+    if (!selectedItem || !user?.id) {
+      console.error("Yorum gönderilemedi: Kullanıcı veya ürün bilgisi eksik.");
+      return;
+    }
+    const reviewData = {
+      productId: selectedItem.product._id,
+      userId: user.id,
+      rating,
+      comment,
+    };
+    try {
+      await addReview(reviewData);
+    } catch (error) {
+      console.error("Değerlendirme gönderilirken bir hata oluştu:", error);
+    }
   };
 
   const getStatusText = (status) => {
@@ -120,23 +135,17 @@ function OrderCard({ order }) {
     }
   };
 
-  // Siparişin indirimsiz orijinal fiyatını hesapla
   const originalTotalPrice = order.orderItems.reduce((sum, item) => {
-    if (item.product && typeof item.product.price === "number") {
-      return sum + item.product.price * item.quantity;
-    }
-    return sum + item.price * item.quantity;
+    return sum + (item.product?.price || item.price) * item.quantity;
   }, 0);
 
-  // Siparişin kupon uygulanmadan önceki ara toplamını hesapla (ürün indirimleri dahil)
   const subtotalBeforeCoupon = order.orderItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
 
-  // İndirim olup olmadığını kontrol et
   const showOriginalPrice =
-    Math.round(originalTotalPrice * 100) > Math.round(order.totalPrice * 100);
+    Math.round(originalTotalPrice) > Math.round(order.totalPrice);
 
   return (
     <div className="order-card">
@@ -187,11 +196,9 @@ function OrderCard({ order }) {
           </div>
         </div>
       </div>
-
       {isExpanded && (
         <div className="order-details">
           <h4>Sipariş Detayları</h4>
-
           <div className="order-items">
             {order.orderItems.map(
               (item) =>
@@ -206,6 +213,7 @@ function OrderCard({ order }) {
                       />
                       <span className="item-name">{item.product.name}</span>
                     </div>
+                    {/* Her durumda değerlendirme butonunu gösteriyoruz (sipariş kontrolü kaldırıldı) */}
                     <button
                       className="review-star-button"
                       onClick={(e) => {
@@ -223,14 +231,12 @@ function OrderCard({ order }) {
                 )
             )}
           </div>
-
-          {/* Sipariş detayının altına finansal özet ekliyoruz */}
           <div className="order-details-summary">
             <div className="summary-row">
               <span>Ara Toplam</span>
               <span>{subtotalBeforeCoupon.toFixed(2)} ₺</span>
             </div>
-            {order.coupon && order.coupon.code && (
+            {order.coupon?.code && (
               <div className="summary-row discount">
                 <span>Kupon ({order.coupon.code})</span>
                 <span>-{order.coupon.discountAmount.toFixed(2)} ₺</span>
@@ -267,12 +273,12 @@ function MyOrders() {
         setError(null);
         try {
           const userOrders = await getOrdersByUserId(user.id);
-          console.log("MyOrders - GÜNCEL Sipariş Verileri:", userOrders);
-          setOrders(userOrders);
-        } catch (err) {
-          setError(
-            "Siparişleriniz yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+          const sortedOrders = userOrders.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
           );
+          setOrders(sortedOrders);
+        } catch (err) {
+          setError("Siparişleriniz yüklenirken bir hata oluştu.");
           console.error(err);
         } finally {
           setLoading(false);
@@ -289,51 +295,6 @@ function MyOrders() {
       <div className="orders-container">
         <h1>
           <span>Siparişlerim</span>
-          <span
-            className="electro-anim"
-            aria-label="Order Animation"
-            title="Order Animation"
-          >
-            <svg
-              viewBox="0 0 48 48"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <rect x="6" y="16" width="36" height="22" rx="4" fill="#4F8EF7" />
-              <rect x="10" y="20" width="28" height="14" rx="2" fill="#fff" />
-              <rect x="18" y="28" width="12" height="4" rx="2" fill="#4F8EF7" />
-              <circle cx="16" cy="40" r="3" fill="#FFD600" />
-              <circle cx="32" cy="40" r="3" fill="#FFD600" />
-              <rect
-                x="20"
-                y="10"
-                width="8"
-                height="8"
-                rx="2"
-                fill="#FFD600"
-                stroke="#4F8EF7"
-                strokeWidth="1.5"
-              />
-              <path
-                d="M24 10v-3"
-                stroke="#4F8EF7"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <path
-                d="M24 7h2.5"
-                stroke="#4F8EF7"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <path
-                d="M24 7h-2.5"
-                stroke="#4F8EF7"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-          </span>
         </h1>
         <div className="orders-list">
           {loading && (
