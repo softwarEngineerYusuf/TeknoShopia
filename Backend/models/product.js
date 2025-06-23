@@ -43,4 +43,23 @@ productSchema.virtual("discountedPrice").get(function () {
   return this.price;
 });
 
+productSchema.virtual("reviewCount").get(function () {
+  if (this.reviews && this.reviews.length > 0) {
+    return this.reviews.length;
+  }
+  return 0;
+});
+
+productSchema.virtual("averageRating").get(function () {
+  if (this.reviews && this.reviews.length > 0) {
+    const sumOfRatings = this.reviews.reduce(
+      (total, review) => total + review.rating,
+      0
+    );
+
+    const average = sumOfRatings / this.reviews.length;
+    return parseFloat(average.toFixed(1));
+  }
+  return 0;
+});
 module.exports = mongoose.model("Product", productSchema);

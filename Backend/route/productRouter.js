@@ -107,7 +107,16 @@ router.get("/getAllProducts", async (req, res) => {
   try {
     const products = await Product.find()
       .populate("brand")
-      .populate("category");
+      .populate("category")
+      .populate({
+        // Bu populate sayesinde sanal alanlar çalışacak
+        path: "reviews",
+        populate: {
+          path: "userId",
+          select: "name",
+        },
+      });
+
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
@@ -118,16 +127,25 @@ router.get("/getProductById/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id)
       .populate("brand")
-      .populate("category");
+      .populate("category")
+      .populate({
+        // Bu populate sayesinde sanal alanlar çalışacak
+        path: "reviews",
+        populate: {
+          path: "userId",
+          select: "name",
+        },
+      });
+
     if (!product) {
       return res.status(404).json({ message: "Ürün bulunamadı." });
     }
+
     res.status(200).json(product);
   } catch (error) {
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
   }
 });
-
 router.get("/getProductDetails/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -255,12 +273,10 @@ router.put("/updateProduct/:id", async (req, res) => {
         existingProduct &&
         existingProduct._id.toString() !== productBeforeUpdate._id.toString()
       ) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Bu kategori altında aynı isimde başka bir ürün zaten mevcut.",
-          });
+        return res.status(400).json({
+          message:
+            "Bu kategori altında aynı isimde başka bir ürün zaten mevcut.",
+        });
       }
     }
 
@@ -307,12 +323,15 @@ router.put("/updateProduct/:id", async (req, res) => {
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
   }
 });
-
 router.get("/getDiscountedProducts", async (req, res) => {
   try {
     const discountedProducts = await Product.find({ discount: { $gt: 0 } })
-      .populate("brand")
-      .populate("category");
+      .populate("brand", "name") // Marka bilgisini al
+      .populate("category", "name") // Kategori bilgisini al
+      .populate({
+        path: "reviews", // Yorumları doldur
+        select: "rating", // Sanal alanların hesaplanması için sadece rating bilgisi yeterli
+      });
 
     res.status(200).json(discountedProducts);
   } catch (error) {
@@ -323,18 +342,19 @@ router.get("/getDiscountedProducts", async (req, res) => {
 router.get("/getProductsByCategory/:categoryId", async (req, res) => {
   try {
     const { categoryId } = req.params;
-
-    // Kategori var mı kontrol et
     const category = await Category.findById(categoryId);
     if (!category) {
       return res.status(404).json({ message: "Kategori bulunamadı." });
     }
 
-    // Kategoriye ait ürünleri getir (populate ile marka ve kategori bilgilerini de al)
+    // Yorumları populate ederek sanal alanların hesaplanmasını sağlıyoruz
     const products = await Product.find({ category: categoryId })
-      .populate("brand", "name") // Sadece marka adını getir
-      .populate("category", "name") // Sadece kategori adını getir
-      .populate("reviews"); // İsteğe bağlı: yorumları da getir
+      .populate("brand", "name")
+      .populate("category", "name")
+      .populate({
+        path: "reviews",
+        select: "rating", // Sadece rating bilgisi yeterli (optimizasyon)
+      });
 
     res.status(200).json({
       message: `${category.name} kategorisindeki ürünler başarıyla getirildi.`,
@@ -343,7 +363,7 @@ router.get("/getProductsByCategory/:categoryId", async (req, res) => {
       products: products,
     });
   } catch (error) {
-    console.error("Error details:", error);
+    console.error("Kategoriye göre ürünler getirilirken hata:", error);
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
   }
 });
@@ -351,42 +371,35 @@ router.get("/getProductsByCategory/:categoryId", async (req, res) => {
 router.get("/getProductsByBrand", async (req, res) => {
   try {
     const brandIds = req.query.brandIds ? req.query.brandIds.split(",") : [];
-    const minPrice = parseFloat(req.query.minPrice);
-    const maxPrice = parseFloat(req.query.maxPrice);
+    // ... (minPrice, maxPrice tanımlamaları sizdeki gibi kalabilir)
 
-    // Marka kontrolü
-    if (brandIds.length > 0) {
-      const brands = await Brand.find({ _id: { $in: brandIds } });
-      if (brands.length !== brandIds.length) {
-        const missingBrands = brandIds.filter(
-          (id) => !brands.some((brand) => brand._id.equals(id))
-        );
-        return res.status(404).json({
-          success: false,
-          message: "Bazı markalar bulunamadı.",
-          missingBrands: missingBrands,
-        });
-      }
-    }
-
-    // Aggregation pipeline oluştur
     const pipeline = [];
 
-    // Marka filtreleme - DÜZELTME: new kullanarak ObjectId oluşturma
     if (brandIds.length > 0) {
       pipeline.push({
         $match: {
-          brand: {
-            $in: brandIds.map((id) => new mongoose.Types.ObjectId(id)), // new eklenerek düzeltildi
-          },
+          brand: { $in: brandIds.map((id) => new mongoose.Types.ObjectId(id)) },
         },
       });
     }
 
-    // İndirimli fiyat hesaplama
+    // --- YORUM BİLGİLERİNİ EKLEMEK İÇİN YENİ ADIMLAR ---
+    // 1. Adım: Yorumlar koleksiyonundan ilgili yorumları getir ($lookup)
+    pipeline.push({
+      $lookup: {
+        from: "reviews", // 'reviews' koleksiyonuna bak
+        localField: "reviews", // product'taki 'reviews' dizisindeki ID'leri
+        foreignField: "_id", // reviews'daki '_id' ile eşleştir
+        as: "reviewDetails", // Sonucu 'reviewDetails' adında yeni bir alana ata
+      },
+    });
+
+    // 2. Adım: Gerekli sanal alanları hesapla ($addFields)
     pipeline.push({
       $addFields: {
-        calculatedDiscountPrice: {
+        reviewCount: { $size: "$reviewDetails" },
+        averageRating: { $ifNull: [{ $avg: "$reviewDetails.rating" }, 0] },
+        discountedPrice: {
           $cond: {
             if: { $gt: ["$discount", 0] },
             then: {
@@ -400,21 +413,9 @@ router.get("/getProductsByBrand", async (req, res) => {
         },
       },
     });
+    // --- YENİ ADIMLARIN SONU ---
 
-    // Fiyat aralığı filtreleme
-    if (!isNaN(minPrice) || !isNaN(maxPrice)) {
-      const priceMatch = {};
-      if (!isNaN(minPrice)) priceMatch.$gte = minPrice;
-      if (!isNaN(maxPrice)) priceMatch.$lte = maxPrice;
-
-      pipeline.push({
-        $match: {
-          calculatedDiscountPrice: priceMatch,
-        },
-      });
-    }
-
-    // Marka ve kategori bilgilerini birleştirme
+    // Marka ve Kategori bilgilerini birleştirme (sizdeki gibi)
     pipeline.push(
       {
         $lookup: {
@@ -438,58 +439,52 @@ router.get("/getProductsByBrand", async (req, res) => {
 
     const products = await Product.aggregate(pipeline);
 
-    res.status(200).json({
-      success: true,
-      count: products.length,
-      products: products.map((product) => ({
-        id: product._id,
+    // Dönen veriyi frontend'e uygun hale getir
+    res.status(200).json(
+      products.map((product) => ({
+        _id: product._id, // _id'yi koru
+        id: product._id, // id'yi de ekle (uyumluluk için)
         name: product.name,
         price: product.price,
-        discountedPrice: product.calculatedDiscountPrice,
-        color: product.color,
+        discount: product.discount,
+        discountedPrice: product.discountedPrice,
         mainImage: product.mainImage,
-        brand: {
-          _id: product.brand._id,
-          name: product.brand.name,
-          logo: product.brand.logo,
-        },
-        category: {
-          _id: product.category._id,
-          name: product.category.name,
-        },
-      })),
-    });
+        brand: product.brand,
+        category: product.category,
+        // Yeni eklenen alanları da yanıta dahil et
+        reviewCount: product.reviewCount,
+        averageRating: parseFloat(product.averageRating.toFixed(1)),
+      }))
+    );
   } catch (error) {
     console.error("Hata:", error);
-    res.status(500).json({
-      success: false,
-      message: "Sunucu hatası",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({ success: false, message: "Sunucu hatası", error: error.message });
   }
 });
 
 router.get("/topPicks", async (req, res) => {
   try {
     const { brands } = req.query; // örn: "Xiaomi,Samsung"
+    let query = { topPick: 1 }; // Temel sorgumuzu oluşturuyoruz
 
-    // Eğer gönderilmemişse tümü
-    if (!brands) {
-      const topProducts = await Product.find({ topPick: 1 });
-      return res.status(200).json(topProducts);
+    // Eğer 'brands' parametresi varsa, sorguya marka filtresini ekliyoruz
+    if (brands) {
+      const brandNames = brands.split(",");
+      const brandDocs = await Brand.find({ name: { $in: brandNames } }, "_id");
+      const brandIds = brandDocs.map((b) => b._id);
+      query.brand = { $in: brandIds };
     }
 
-    const brandNames = brands.split(",");
-
-    // Brand koleksiyonundan bu isimlerin _id'lerini bul
-    const brandDocs = await Brand.find({ name: { $in: brandNames } }, "_id");
-    const brandIds = brandDocs.map((b) => b._id);
-
-    // Product'ları brand id'lerine göre filtrele
-    const topProducts = await Product.find({
-      topPick: 1,
-      brand: { $in: brandIds },
-    });
+    // Sorguyu tek bir yerde çalıştırıp, populate işlemlerini ekliyoruz.
+    // Bu, her iki senaryoda da (markalı veya markasız) yorumların getirilmesini sağlar.
+    const topProducts = await Product.find(query)
+      .populate("brand", "name") // Marka bilgisini al
+      .populate({
+        path: "reviews", // Yorumları doldur
+        select: "rating", // Sanal alanların hesaplanması için sadece rating yeterli (optimizasyon)
+      });
 
     res.status(200).json(topProducts);
   } catch (error) {
@@ -502,19 +497,22 @@ router.get("/topPicks", async (req, res) => {
 router.get("/getProductByBrandID/:brandId", async (req, res) => {
   try {
     const { brandId } = req.params;
-
-    // Gönderilen ID ile bir markanın olup olmadığını kontrol edelim.
     const brand = await Brand.findById(brandId);
     if (!brand) {
       return res.status(404).json({ message: "Belirtilen marka bulunamadı." });
     }
 
-    // Marka ID'sine göre ürünleri bulalım.
+    // Yorumları populate ederek sanal alanların hesaplanmasını sağlıyoruz
     const products = await Product.find({ brand: brandId })
-      .populate("brand")
-      .populate("category");
+      .populate("brand", "name logo") // Marka bilgisini al (logo dahil)
+      .populate("category", "name")
+      .populate({
+        path: "reviews",
+        select: "rating", // Sadece rating bilgisi yeterli (optimizasyon)
+      });
 
-    // Başarılı yanıtı gönderelim.
+    // Başarılı yanıtı gönderelim. Artık `products` dizisindeki her ürün
+    // averageRating ve reviewCount sanal alanlarını içerecek.
     res.status(200).json({
       message: `${brand.name} markasına ait ürünler başarıyla getirildi.`,
       count: products.length,
