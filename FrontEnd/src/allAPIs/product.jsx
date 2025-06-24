@@ -32,7 +32,8 @@ export const getProductsByCategory = async (categoryId) => {
 export const getProductsByBrand = async (
   brandIds = [],
   minPrice = 0,
-  maxPrice = 150000
+  maxPrice = 150000,
+  categoryId = null // <-- Yeni parametre eklendi
 ) => {
   try {
     const params = {};
@@ -40,27 +41,25 @@ export const getProductsByBrand = async (
     if (brandIds.length > 0) {
       params.brandIds = brandIds.join(",");
     }
-
     if (minPrice > 0) {
       params.minPrice = minPrice;
     }
-
     if (maxPrice < 150000) {
       params.maxPrice = maxPrice;
+    }
+    // Yeni parametreyi sorguya ekle
+    if (categoryId) {
+      params.categoryId = categoryId;
     }
 
     const response = await axios.get(`${API_URL}/getProductsByBrand`, {
       params,
     });
-    return response.data;
+    return response.data; // Backend doğrudan dizi döndüreceği için response.data yeterli
   } catch (error) {
     console.error("Markaya göre ürünler çekilirken hata oluştu:", error);
-    return {
-      success: false,
-      message: "Markaya göre ürünler getirilirken hata oluştu",
-      count: 0,
-      products: [],
-    };
+    // Hata durumunda boş bir dizi döndürmek daha güvenlidir
+    return [];
   }
 };
 

@@ -30,46 +30,48 @@ function CategoryCards({ categoryId, filters }) {
 
   useEffect(() => {
     const fetchProductsAndFavorites = async () => {
+      if (!categoryId) return; // categoryId yoksa işlem yapma
+
       try {
         setLoading(true);
 
-        let favoriteIdsPromise = Promise.resolve(new Set());
-        if (user && user.id) {
-          favoriteIdsPromise = getFavoriteProductIds(user.id).then(
-            (ids) => new Set(ids)
-          );
-        }
+        // Favorileri çekme işlemi
+        const favoriteIdsPromise =
+          user && user.id
+            ? getFavoriteProductIds(user.id).then((ids) => new Set(ids))
+            : Promise.resolve(new Set());
 
-        let productResponse;
-
-        if (
-          // eslint-disable-next-line react/prop-types
+        // eslint-disable-next-line react/prop-types
+        const areFiltersActive =
           filters.brands.length > 0 ||
-          // eslint-disable-next-line react/prop-types
           filters.minPrice > 0 ||
-          // eslint-disable-next-line react/prop-types
-          filters.maxPrice < 150000
-        ) {
-          productResponse = await getProductsByBrand(
+          filters.maxPrice < 150000;
+
+        let fetchedProducts;
+
+        if (areFiltersActive) {
+          // Filtreler aktifse, YENİ API'yi tüm parametrelerle çağır
+          fetchedProducts = await getProductsByBrand(
             // eslint-disable-next-line react/prop-types
             filters.brands,
             // eslint-disable-next-line react/prop-types
             filters.minPrice,
             // eslint-disable-next-line react/prop-types
-            filters.maxPrice
+            filters.maxPrice,
+            categoryId // <-- Kategori ID'sini de gönderiyoruz!
           );
-          const filteredProducts = productResponse.products.filter(
-            (p) => p.category._id === categoryId
-          );
-          setProducts(filteredProducts);
+          // Kategori adını ilk üründen al veya varsayılan bir isim ver
           setCategoryName(
-            filteredProducts[0]?.category?.name || "Filtrelenmiş Ürünler"
+            fetchedProducts[0]?.category?.name || "Filtrelenmiş Ürünler"
           );
         } else {
-          productResponse = await getProductsByCategory(categoryId);
-          setProducts(productResponse.products);
+          // Filtre yoksa, sadece kategoriye göre ürünleri getir
+          const productResponse = await getProductsByCategory(categoryId);
+          fetchedProducts = productResponse.products;
           setCategoryName(productResponse.category);
         }
+
+        setProducts(fetchedProducts);
 
         const favIds = await favoriteIdsPromise;
         setFavoriteIds(favIds);
@@ -85,8 +87,9 @@ function CategoryCards({ categoryId, filters }) {
     fetchProductsAndFavorites();
   }, [categoryId, filters, user]);
 
+  // Sıralama fonksiyonu SADECE products state'i üzerinde çalışmalı
   const handleSortChange = (sortType) => {
-    setCurrentSort(sortType);
+    setCurrentSort(sortType); // state'i güncelle
     const sorted = [...products].sort((a, b) => {
       if (sortType === "price-asc")
         return a.discountedPrice - b.discountedPrice;
@@ -94,12 +97,13 @@ function CategoryCards({ categoryId, filters }) {
         return b.discountedPrice - a.discountedPrice;
       return 0;
     });
-    setProducts(sorted);
+    setProducts(sorted); // sıralanmış diziyi state'e ata
   };
 
+  // handleToggleFavorite fonksiyonu aynı kalabilir...
   const handleToggleFavorite = async (productId) => {
     if (!user) {
-      message.warning("Please log in to manage favorites.");
+      message.warning("Favorilerinizi yönetmek için lütfen giriş yapın.");
       return;
     }
     const isFavorite = favoriteIds.has(productId);
@@ -111,7 +115,7 @@ function CategoryCards({ categoryId, filters }) {
           newIds.delete(productId);
           return newIds;
         });
-        message.success("Product removed from favorites.");
+        message.success("Ürün favorilerden kaldırıldı.");
       } else {
         await addProductToFavorites(user.id, productId);
         setFavoriteIds((prev) => {
@@ -119,14 +123,14 @@ function CategoryCards({ categoryId, filters }) {
           newIds.add(productId);
           return newIds;
         });
-        message.success("Product added to favorites!");
+        message.success("Ürün favorilere eklendi!");
       }
-      // eslint-disable-next-line no-unused-vars
     } catch (error) {
-      message.error("An error occurred, please try again.");
+      message.error("Bir hata oluştu, lütfen tekrar deneyin.");
     }
   };
 
+  // ProductSort component'i aynı kalabilir...
   const ProductSort = () => {
     const [open, setOpen] = useState(false);
     const menu = (
@@ -136,8 +140,8 @@ function CategoryCards({ categoryId, filters }) {
           setOpen(false);
         }}
       >
-        <Menu.Item key="price-asc">Price: Low-High</Menu.Item>
-        <Menu.Item key="price-desc">Price: High-Low</Menu.Item>
+        <Menu.Item key="price-asc">Fiyat: Düşük-Yüksek</Menu.Item>
+        <Menu.Item key="price-desc">Fiyat: Yüksek-Düşük</Menu.Item>
       </Menu>
     );
     return (
@@ -162,13 +166,14 @@ function CategoryCards({ categoryId, filters }) {
     );
   };
 
+  // Geri kalan JSX (return kısmı) aynı kalabilir...
   if (loading) {
-    return <div className="text-center py-5">Loading...</div>;
+    return <div className="text-center py-5">Yükleniyor...</div>;
   }
   if (!products.length) {
     return (
       <div className="text-center py-5">
-        No products found for this criteria.
+        Bu kriterlere uygun ürün bulunamadı.
       </div>
     );
   }
@@ -178,7 +183,7 @@ function CategoryCards({ categoryId, filters }) {
       <div className="category-cards-and-sort d-flex justify-content-between align-items-center">
         <h2 className="category-cards-title">{categoryName}</h2>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "0.9rem", color: "#666" }}>Sort by:</span>
+          <span style={{ fontSize: "0.9rem", color: "#666" }}>Sırala:</span>
           <ProductSort />
         </div>
       </div>
@@ -265,7 +270,7 @@ function CategoryCards({ categoryId, filters }) {
                   className="buy-button-category-cards"
                   onClick={() => goToProductDetail(product._id)}
                 >
-                  See Detail
+                  Detayı Gör
                 </button>
               </div>
             </div>

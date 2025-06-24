@@ -62,7 +62,7 @@ function Navbar2() {
           </div>
         ))}
 
-        <a href="#" className="chatbot-link">
+        <a href="chatbot" className="chatbot-link">
           <img
             style={{ width: "50px", height: "50px" }}
             src={Chatbot}

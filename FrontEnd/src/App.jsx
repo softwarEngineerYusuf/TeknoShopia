@@ -22,6 +22,7 @@ import Favorites from "./components/Favorites/Favorites";
 import MyOrders from "./components/MyOrders/MyOrders";
 import CompareSection from "./components/CompareSection/CompareSection";
 import Navbar2 from "./components/Navbar2/Navbar2";
+import Chatbot from "./pages/Chatbot/Chatbot";
 
 function MainLayout() {
   return (
@@ -53,6 +54,7 @@ function AppRoutes() {
           <Route path="/basket" element={<Basket />} />
           <Route path="/Login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/chatbot" element={<Chatbot />} />
         </Route>
       </Routes>
 

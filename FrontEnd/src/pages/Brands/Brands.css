@@ -103,21 +103,21 @@
 }
 .price-section {
   display: flex;
-  flex-direction: column; /* Fiyatları alt alta sıralar */
-  align-items: flex-end; /* Fiyatları sağa yaslar */
-  line-height: 1.2; /* Satır yüksekliğini ayarlar */
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
 }
 
 .old-price {
-  text-decoration: line-through; /* Üstünü çizer */
-  color: #888; /* Rengini soluklaştırır */
-  font-size: 0.9rem; /* Biraz küçültür */
-  margin: 0; /* Altındaki boşluğu kaldırır */
+  text-decoration: line-through;
+  color: #888;
+  font-size: 0.9rem;
+  margin: 0;
 }
 
 .product-price-brands-cards {
-  font-weight: bold; /* Kalın yapar */
-  font-size: 1.1rem; /* Biraz büyütür */
-  color: black; /* Dikkat çekici bir renk (örneğin kırmızı) */
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: black;
   margin: 0;
 }

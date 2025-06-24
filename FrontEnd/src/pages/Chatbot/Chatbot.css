@@ -1,0 +1,130 @@
+.chatbot-page-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(
+    100vh - 160px
+  ); /* Ekran yüksekliğinden Navbar ve Footer yüksekliğini çıkar (tahmini) */
+  max-width: 800px;
+  margin: 20px auto; /* Sayfayı ortala */
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden; /* Kenarlardan taşmayı engelle */
+  background-color: #f9f9f9;
+}
+
+/* Mesajların olduğu alan */
+.chatbot-page-messages {
+  flex-grow: 1; /* Mevcut tüm boşluğu kapla */
+  overflow-y: auto; /* Mesajlar sığmazsa scroll bar çıksın */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Tek bir mesaj balonu (Bu stiller öncekiyle aynı, sadece konteyner adı farklı) */
+.message {
+  max-width: 75%;
+  padding: 12px 18px;
+  border-radius: 22px;
+  word-wrap: break-word;
+  line-height: 1.5;
+}
+
+.message p {
+  margin: 0;
+}
+
+/* Bot mesajları */
+.message.bot {
+  background-color: #ffffff;
+  color: #333;
+  align-self: flex-start;
+  border-bottom-left-radius: 6px;
+  border: 1px solid #e7e7e7;
+}
+
+/* Kullanıcı mesajları */
+.message.user {
+  background-color: #007bff;
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 6px;
+}
+
+/* "Yazıyor..." animasyonu (öncekiyle aynı) */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+}
+.typing-indicator span {
+  height: 8px;
+  width: 8px;
+  background-color: #999;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 0 2px;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+.typing-indicator span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+.typing-indicator span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+@keyframes bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* Mesaj yazma formu */
+.chatbot-page-form {
+  display: flex;
+  padding: 15px 20px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #ffffff;
+}
+
+.chatbot-page-form input {
+  flex-grow: 1;
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  padding: 12px 20px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.chatbot-page-form input:focus {
+  border-color: #007bff;
+}
+
+.chatbot-page-form button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 0 25px;
+  margin-left: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  transition: background-color 0.2s;
+}
+
+.chatbot-page-form button:hover {
+  background-color: #0056b3;
+}
+
+.chatbot-page-form button:disabled {
+  background-color: #a0cfff;
+  cursor: not-allowed;
+}
