@@ -16,6 +16,7 @@ const emailRoutes = require("./emailRouter");
 const cardRouter = require("./cardsRouter.js");
 const favoritesRouter = require("./favoritesRouter.js");
 const couponRouter = require("./couponRouter.js");
+const chatbotRouter = require("./chatbotRouter.js");
 const base = "/api";
 
 router.use(`${base}/auth`, authRouter); //localhost:5000/api/auth
@@ -35,4 +36,5 @@ router.use(`${base}/email`, emailRoutes);
 router.use(`${base}/card`, cardRouter); //localhost:5000/api/card
 router.use(`${base}/favorites`, favoritesRouter);
 router.use(`${base}/coupon`, couponRouter);
+router.use(`${base}/chatbot`, chatbotRouter);
 module.exports = router;

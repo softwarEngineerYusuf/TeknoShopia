@@ -370,50 +370,74 @@ router.get("/getProductsByCategory/:categoryId", async (req, res) => {
 
 router.get("/getProductsByBrand", async (req, res) => {
   try {
+    // 1. Gelen tüm parametreleri alalım ve varsayılan değerler atayalım
     const brandIds = req.query.brandIds ? req.query.brandIds.split(",") : [];
-    // ... (minPrice, maxPrice tanımlamaları sizdeki gibi kalabilir)
+    const categoryId = req.query.categoryId; // <-- Frontend'den kategori ID'sini de alacağız (Adım 2'de göndereceğiz)
+    const minPrice = parseFloat(req.query.minPrice) || 0;
+    const maxPrice = parseFloat(req.query.maxPrice) || Infinity; // Üst limit yoksa sonsuz kabul et
 
     const pipeline = [];
+    const matchConditions = {};
 
-    if (brandIds.length > 0) {
-      pipeline.push({
-        $match: {
-          brand: { $in: brandIds.map((id) => new mongoose.Types.ObjectId(id)) },
-        },
-      });
+    // Kategori ID'si varsa, ilk filtreleme adımı olarak ekle
+    if (categoryId) {
+      matchConditions.category = new mongoose.Types.ObjectId(categoryId);
     }
 
-    // --- YORUM BİLGİLERİNİ EKLEMEK İÇİN YENİ ADIMLAR ---
-    // 1. Adım: Yorumlar koleksiyonundan ilgili yorumları getir ($lookup)
-    pipeline.push({
-      $lookup: {
-        from: "reviews", // 'reviews' koleksiyonuna bak
-        localField: "reviews", // product'taki 'reviews' dizisindeki ID'leri
-        foreignField: "_id", // reviews'daki '_id' ile eşleştir
-        as: "reviewDetails", // Sonucu 'reviewDetails' adında yeni bir alana ata
-      },
-    });
+    // Marka ID'leri varsa, filtreye ekle
+    if (brandIds.length > 0) {
+      matchConditions.brand = {
+        $in: brandIds.map((id) => new mongoose.Types.ObjectId(id)),
+      };
+    }
 
-    // 2. Adım: Gerekli sanal alanları hesapla ($addFields)
-    pipeline.push({
-      $addFields: {
-        reviewCount: { $size: "$reviewDetails" },
-        averageRating: { $ifNull: [{ $avg: "$reviewDetails.rating" }, 0] },
-        discountedPrice: {
-          $cond: {
-            if: { $gt: ["$discount", 0] },
-            then: {
-              $subtract: [
-                "$price",
-                { $multiply: ["$price", { $divide: ["$discount", 100] }] },
-              ],
+    // Eğer filtre koşulu varsa, pipeline'a ilk $match aşamasını ekle
+    if (Object.keys(matchConditions).length > 0) {
+      pipeline.push({ $match: matchConditions });
+    }
+
+    // --- YORUM VE İNDİRİMLİ FİYAT HESAPLAMA KISMI (DEĞİŞİKLİK YOK) ---
+    pipeline.push(
+      {
+        $lookup: {
+          from: "reviews",
+          localField: "reviews",
+          foreignField: "_id",
+          as: "reviewDetails",
+        },
+      },
+      {
+        $addFields: {
+          reviewCount: { $size: "$reviewDetails" },
+          averageRating: { $ifNull: [{ $avg: "$reviewDetails.rating" }, 0] },
+          discountedPrice: {
+            $cond: {
+              if: { $gt: ["$discount", 0] },
+              then: {
+                $subtract: [
+                  "$price",
+                  { $multiply: ["$price", { $divide: ["$discount", 100] }] },
+                ],
+              },
+              else: "$price",
             },
-            else: "$price",
           },
+        },
+      }
+    );
+    // --- HESAPLAMA SONU ---
+
+    // === FİYAT FİLTRESİNİ UYGULAYAN YENİ KISIM (BURASI ÇOK ÖNEMLİ) ===
+    // İndirimli fiyat (`discountedPrice`) hesaplandıktan SONRA fiyat aralığına göre filtrele
+    pipeline.push({
+      $match: {
+        discountedPrice: {
+          $gte: minPrice, // Greater than or equal to minPrice
+          $lte: maxPrice, // Less than or equal to maxPrice
         },
       },
     });
-    // --- YENİ ADIMLARIN SONU ---
+    // === YENİ KISIM SONU ===
 
     // Marka ve Kategori bilgilerini birleştirme (sizdeki gibi)
     pipeline.push(
@@ -425,7 +449,7 @@ router.get("/getProductsByBrand", async (req, res) => {
           as: "brand",
         },
       },
-      { $unwind: "$brand" },
+      { $unwind: { path: "$brand", preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: "categories",
@@ -434,30 +458,20 @@ router.get("/getProductsByBrand", async (req, res) => {
           as: "category",
         },
       },
-      { $unwind: "$category" }
+      { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } }
     );
 
     const products = await Product.aggregate(pipeline);
 
-    // Dönen veriyi frontend'e uygun hale getir
     res.status(200).json(
       products.map((product) => ({
-        _id: product._id, // _id'yi koru
-        id: product._id, // id'yi de ekle (uyumluluk için)
-        name: product.name,
-        price: product.price,
-        discount: product.discount,
-        discountedPrice: product.discountedPrice,
-        mainImage: product.mainImage,
-        brand: product.brand,
-        category: product.category,
-        // Yeni eklenen alanları da yanıta dahil et
-        reviewCount: product.reviewCount,
-        averageRating: parseFloat(product.averageRating.toFixed(1)),
+        ...product, // Gerekli tüm alanları doğrudan kopyala
+        id: product._id, // uyumluluk için
+        averageRating: parseFloat((product.averageRating || 0).toFixed(1)),
       }))
     );
   } catch (error) {
-    console.error("Hata:", error);
+    console.error("Filtreli ürün getirilirken hata:", error);
     res
       .status(500)
       .json({ success: false, message: "Sunucu hatası", error: error.message });

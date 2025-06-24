@@ -62,4 +62,5 @@ productSchema.virtual("averageRating").get(function () {
   }
   return 0;
 });
+productSchema.index({ name: "text", description: "text" });
 module.exports = mongoose.model("Product", productSchema);
