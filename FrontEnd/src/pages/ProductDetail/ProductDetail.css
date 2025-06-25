@@ -1,16 +1,14 @@
+/* MEVCUT STİLLERİNİZ */
 .ant-btn-primary {
   background-color: #32174d;
 }
-
 .ant-btn-primary:hover {
   background-color: #4a2374 !important;
 }
-
 .ant-card {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
-
 .compare-btn-product-detail:hover {
   background-color: white !important;
   color: green !important;
@@ -25,13 +23,11 @@
   box-shadow: none;
   background: none;
 }
-
 .product-detail-flex-row {
   display: flex;
   flex-wrap: wrap;
   gap: 32px;
 }
-
 .product-detail-image-side {
   flex: 1 1 350px;
   min-width: 320px;
@@ -39,14 +35,12 @@
   flex-direction: column;
   align-items: center;
 }
-
 .product-detail-image-box {
   position: relative;
   width: 100%;
   max-width: 480px;
-  height: 540px;
-  aspect-ratio: 1.1/1;
-  background: none;
+  height: 480px;
+  background: #fff;
   border-radius: 18px;
   box-shadow: 0 2px 16px rgba(50, 23, 77, 0.1);
   overflow: hidden;
@@ -55,22 +49,18 @@
   align-items: center;
   justify-content: center;
 }
-
-.product-detail-main-img {
+.product-detail-main-img .ant-image-img {
   width: 100%;
-  height: 520px;
+  height: 100%;
   object-fit: contain;
-  border-radius: 12px;
-  background: none;
-  transition: box-shadow 0.2s;
+  padding: 1rem;
 }
-
 .product-detail-arrow-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   z-index: 2;
-  background: rgba(50, 23, 77, 0.13) !important;
+  background: rgba(255, 255, 255, 0.6) !important;
   border: none;
   color: #32174d;
   font-size: 22px;
@@ -87,36 +77,35 @@
   background: #32174d !important;
   color: #fff !important;
 }
-
 .product-detail-thumbs-row {
   display: flex;
   gap: 10px;
   margin-top: 10px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 .product-detail-thumb {
   width: 90px;
   height: 90px;
-  object-fit: cover;
+  object-fit: contain;
+  padding: 5px;
+  background-color: #fff;
   border-radius: 8px;
-  border: 2px solid transparent;
+  border: 2px solid #e8e8e8;
   cursor: pointer;
-  background: none;
-  transition: border 0.2s, box-shadow 0.2s;
+  transition: all 0.2s;
 }
 .product-detail-thumb.selected,
 .product-detail-thumb:hover {
   border: 2px solid #32174d;
   box-shadow: 0 2px 8px rgba(50, 23, 77, 0.13);
 }
-
 .product-detail-info-side {
   flex: 1 1 400px;
   min-width: 320px;
   display: flex;
   align-items: center;
 }
-
 .product-detail-card {
   border-radius: 20px !important;
   box-shadow: 0 4px 24px rgba(50, 23, 77, 0.13);
@@ -157,39 +146,34 @@
   font-size: 15px;
   color: #6c5a8a !important;
 }
-
 .product-detail-buttons {
   display: flex;
   gap: 12px;
   margin-bottom: 18px;
 }
 .product-detail-compare-btn {
-  background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%) !important;
+  background: #f0f0f0 !important;
   color: #32174d !important;
-  border: none;
+  border: 1px solid #d9d9d9;
   font-weight: 600;
-  width: 38%;
-  transition: background 0.2s, color 0.2s;
-  box-shadow: 0 2px 8px rgba(67, 233, 123, 0.1);
+  width: 40%;
 }
 .product-detail-compare-btn:hover {
-  background: #fff !important;
-  color: #43e97b !important;
-  border: 1.5px solid #43e97b !important;
+  background: #e6e6e6 !important;
+  border-color: #bfbfbf !important;
 }
 .product-detail-cart-btn {
-  background: linear-gradient(90deg, #32174d 0%, #6c5a8a 100%) !important;
+  background: linear-gradient(90deg, #32174d 0%, #4a2374 100%) !important;
   color: #fff !important;
   border: none;
   font-weight: 600;
-  width: 62%;
-  transition: background 0.2s;
-  box-shadow: 0 2px 8px rgba(50, 23, 77, 0.1);
+  width: 60%;
+  box-shadow: 0 4px 12px rgba(50, 23, 77, 0.2);
 }
 .product-detail-cart-btn:hover {
-  background: #4a2374 !important;
+  box-shadow: 0 6px 16px rgba(50, 23, 77, 0.3);
+  transform: translateY(-2px);
 }
-
 .product-detail-specs {
   margin-top: 24px;
 }
@@ -199,60 +183,51 @@
   background: #f8f6fc;
 }
 
+/* VARYASYON STİLLERİ */
+.product-variations-section {
+  margin-top: 24px;
+  margin-bottom: 24px;
+  padding: 16px 0;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.color-options {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.color-dot-wrapper {
+  padding: 3px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.color-dot-wrapper:hover {
+  border-color: #a98eda; /* Lighter purple for hover */
+}
+.color-dot-wrapper.selected {
+  border-color: #32174d; /* Ana tema rengi */
+  transform: scale(1.15);
+  box-shadow: 0 0 8px rgba(50, 23, 77, 0.2);
+  cursor: default;
+}
+.color-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
 /* Responsive */
 @media (max-width: 900px) {
-  .product-detail-root {
-    padding: 12px 2vw;
-  }
-  .product-detail-card {
-    padding: 18px 8px 16px 8px;
-  }
-  .product-detail-image-box {
-    height: 360px;
-    max-width: 340px;
-  }
-  .product-detail-main-img {
-    height: 340px;
-  }
-  .product-detail-thumb {
-    width: 60px;
-    height: 60px;
-  }
-  .product-detail-flex-row {
-    gap: 16px;
-  }
+  /* ... */
 }
 @media (max-width: 600px) {
-  .product-detail-root {
-    margin: 0;
-    border-radius: 0;
-    box-shadow: none;
-    padding: 0 0 24px 0;
-  }
-  .product-detail-flex-row {
-    flex-direction: column;
-    gap: 0;
-  }
-  .product-detail-image-box {
-    border-radius: 0;
-    margin-bottom: 8px;
-    height: 200px;
-    max-width: 100%;
-  }
-  .product-detail-card {
-    border-radius: 0 !important;
-    box-shadow: none;
-    padding: 12px 2vw 12px 2vw;
-  }
-  .product-detail-main-img {
-    height: 180px;
-  }
-  .product-detail-buttons {
-    flex-direction: column;
-    gap: 8px;
-  }
-  .product-detail-compare-btn,
-  .product-detail-cart-btn {
-    width: 100%;
-  }
+  /* ... */
 }

@@ -270,7 +270,7 @@ function CategoryCards({ categoryId, filters }) {
                   className="buy-button-category-cards"
                   onClick={() => goToProductDetail(product._id)}
                 >
-                  Detayı Gör
+                  See Detail
                 </button>
               </div>
             </div>

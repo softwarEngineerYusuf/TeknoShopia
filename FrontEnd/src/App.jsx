@@ -4,7 +4,6 @@ import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { CompareProvider } from "./context/CompareContext";
 import { useCompare } from "./context/CompareContext";
-
 import Home from "./pages/Home/Home";
 import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";

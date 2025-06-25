@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Card,
   Button,
@@ -31,156 +31,225 @@ import {
 } from "../../allAPIs/favorites";
 import Comments from "../../components/Comments/Comments";
 
+const { Title, Text } = Typography;
+
+// Helper function to safely get the color from attributes
+const getProductColor = (product) => {
+  if (!product || !product.attributes) return "Unknown";
+  const attributes = product.attributes;
+  return (
+    attributes.Color ||
+    attributes.color ||
+    attributes.Renk ||
+    attributes.renk ||
+    "Unknown"
+  );
+};
+
 function ProductDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
-  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
-  const { Title, Text } = Typography;
   const { addToCompare } = useCompare();
-  const [product, setProduct] = useState(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // States for dynamic structure
+  const [allVariations, setAllVariations] = useState([]);
+  const [currentProduct, setCurrentProduct] = useState(null);
+
+  // Other states
   const [loading, setLoading] = useState(true);
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAdding, setIsAdding] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
+
   const PENDING_CART_ITEM_KEY = "pendingCartItemProductId";
   const commentsRef = useRef(null);
 
+  // Advanced data fetching logic
   useEffect(() => {
-    const fetchProductAndFavoriteStatus = async () => {
+    const fetchProductGroup = async () => {
+      if (!id) return;
       setLoading(true);
-      const productPromise = getProductById(id);
-      let favoritePromise = Promise.resolve([]);
-      if (user && user.id) {
-        favoritePromise = getFavoriteProductIds(user.id);
-      }
-      const [productData, favoriteIds] = await Promise.all([
-        productPromise,
-        favoritePromise,
-      ]);
-      setProduct(productData);
-      setCurrentImageIndex(0);
-      if (productData && favoriteIds.length > 0) {
-        setIsFavorite(favoriteIds.includes(productData.id || productData._id));
-      } else {
-        setIsFavorite(false);
-      }
-      setLoading(false);
-    };
-    fetchProductAndFavoriteStatus();
-  }, [id, user]);
-
-  const handleAddToCart = async () => {
-    if (user && user.id) {
-      setIsAdding(true);
       try {
-        const response = await addCart(user.id, product._id, 1);
-        if (response && response.cart) {
-          message.success(`${product.name} sepete eklendi!`);
+        const productGroupData = await getProductById(id);
+        if (!productGroupData || productGroupData.length === 0) {
+          message.error("Product not found.");
+          navigate("/");
+          return;
+        }
+
+        setAllVariations(productGroupData);
+        const activeProduct = productGroupData.find((p) => p._id === id);
+
+        if (activeProduct) {
+          setCurrentProduct(activeProduct);
+          if (user?.id) {
+            const favoriteIds = await getFavoriteProductIds(user.id);
+            setIsFavorite(favoriteIds.includes(activeProduct._id));
+          } else {
+            setIsFavorite(false);
+          }
         } else {
-          message.error("Ürün sepete eklenirken bir sorun oluştu.");
+          message.info("Specified variation not found. Redirecting...");
+          navigate(`/productDetail/${productGroupData[0]._id}`, {
+            replace: true,
+          });
         }
       } catch (error) {
-        message.error("Bir hata oluştu, lütfen tekrar deneyin.");
+        console.error("Error fetching product group:", error);
+        message.error("Failed to load product information.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProductGroup();
+  }, [id, user, navigate]);
+
+  useEffect(() => {
+    if (currentProduct) setCurrentImageIndex(0);
+  }, [currentProduct]);
+
+  // Function to switch variants
+  const handleVariantSelect = (variantId) => {
+    if (currentProduct?._id === variantId) return;
+    const newProduct = allVariations.find((p) => p._id === variantId);
+    if (newProduct) {
+      setCurrentProduct(newProduct);
+      navigate(`/productDetail/${variantId}`, { replace: true });
+    }
+  };
+
+  // --- Functions updated to use `currentProduct` ---
+
+  const handleAddToCart = async () => {
+    if (!currentProduct) return;
+    if (user?.id) {
+      setIsAdding(true);
+      try {
+        await addCart(user.id, currentProduct._id, 1);
+        message.success(
+          `${currentProduct.name} (${getProductColor(
+            currentProduct
+          )}) has been added to the cart!`
+        );
+      } catch (error) {
+        message.error("There was a problem adding the product to the cart.");
       } finally {
         setIsAdding(false);
       }
     } else {
-      localStorage.setItem(PENDING_CART_ITEM_KEY, product._id);
-      message.info("Giriş yaptıktan sonra ürün sepete eklenecek.");
+      localStorage.setItem(PENDING_CART_ITEM_KEY, currentProduct._id);
+      message.info("Please log in to add items to your cart.");
       setIsLoginModalVisible(true);
     }
   };
 
+  // Compare function using `currentProduct`
   const handleAddToCompare = () => {
-    if (product) {
+    if (currentProduct) {
       const productForCompare = {
-        id: product._id,
-        name: product.name,
+        id: currentProduct._id,
+        name: currentProduct.name,
         image:
-          product.mainImage ||
-          (product.additionalImages && product.additionalImages[0]) ||
+          currentProduct.mainImage ||
+          (currentProduct.additionalImages &&
+            currentProduct.additionalImages[0]) ||
           "",
-        price: product.discountedPrice
-          ? `${Math.round(product.discountedPrice)} TL`
-          : `${product.price} TL`,
-        attributes: product.attributes,
+        price: currentProduct.discountedPrice
+          ? `${Math.round(currentProduct.discountedPrice)} TL`
+          : `${currentProduct.price} TL`,
+        attributes: currentProduct.attributes,
       };
       addToCompare(productForCompare);
     }
   };
 
   const handleToggleFavorite = async () => {
+    if (!currentProduct) return;
     if (!user) {
-      message.warning("Favorileri yönetmek için giriş yapın.");
+      message.warning("Please log in to manage your favorites.");
       setIsLoginModalVisible(true);
       return;
     }
     setIsFavoriteLoading(true);
     try {
       if (isFavorite) {
-        await removeProductFromFavorites(user.id, product._id);
-        message.success(`${product.name} favorilerden kaldırıldı.`);
+        await removeProductFromFavorites(user.id, currentProduct._id);
+        message.success(
+          `${currentProduct.name} has been removed from favorites.`
+        );
         setIsFavorite(false);
       } else {
-        await addProductToFavorites(user.id, product._id);
-        message.success(`${product.name} favorilere eklendi.`);
+        await addProductToFavorites(user.id, currentProduct._id);
+        message.success(`${currentProduct.name} has been added to favorites.`);
         setIsFavorite(true);
       }
     } catch (error) {
-      message.error("Bir hata oluştu, lütfen tekrar deneyin.");
+      message.error("An error occurred. Please try again.");
     } finally {
       setIsFavoriteLoading(false);
     }
   };
 
+  // Render preparation
+  if (loading) return <Spin tip="Loading..." fullscreen />;
+  if (!currentProduct)
+    return (
+      <div style={{ padding: 50, textAlign: "center" }}>
+        <Title level={3}>Product Not Found.</Title>
+      </div>
+    );
+
+  const images = [
+    currentProduct.mainImage,
+    ...(currentProduct.additionalImages || []),
+  ].filter(Boolean);
+  const specifications = Object.entries(currentProduct.attributes || {}).map(
+    ([key, value]) => ({ key, value })
+  );
+  const columns = [
+    { title: "Specification", dataIndex: "key" },
+    { title: "Value", dataIndex: "value" },
+  ];
+
   const nextImage = () => {
-    if (images.length > 0)
+    if (images.length > 1)
       setCurrentImageIndex((prev) => (prev + 1) % images.length);
   };
-
   const prevImage = () => {
-    if (images.length > 0)
+    if (images.length > 1)
       setCurrentImageIndex(
         (prev) => (prev - 1 + images.length) % images.length
       );
   };
-
-  if (loading) return <Spin tip="Yükleniyor..." fullscreen />;
-  if (!product) return <p>Ürün bulunamadı.</p>;
-
-  const images =
-    product && product.mainImage
-      ? [product.mainImage, ...(product.additionalImages || [])]
-      : [];
-  const specifications = Object.entries(product.attributes || {}).map(
-    ([key, value]) => ({ key, value })
-  );
-  const columns = [
-    { title: "Özellik", dataIndex: "key" },
-    { title: "Değer", dataIndex: "value" },
-  ];
 
   return (
     <div className="product-detail-root">
       <div className="product-detail-flex-row">
         <div className="product-detail-image-side">
           <div className="product-detail-image-box">
-            <Button
-              icon={<LeftOutlined />}
-              className="product-detail-arrow-btn left"
-              onClick={prevImage}
-            />
+            {images.length > 1 && (
+              <Button
+                icon={<LeftOutlined />}
+                className="product-detail-arrow-btn left"
+                onClick={prevImage}
+              />
+            )}
             <Image
               src={images[currentImageIndex]}
-              alt={product.name}
+              alt={currentProduct.name}
               className="product-detail-main-img"
+              preview={false}
             />
-            <Button
-              icon={<RightOutlined />}
-              className="product-detail-arrow-btn right"
-              onClick={nextImage}
-            />
+            {images.length > 1 && (
+              <Button
+                icon={<RightOutlined />}
+                className="product-detail-arrow-btn right"
+                onClick={nextImage}
+              />
+            )}
           </div>
           <div className="product-detail-thumbs-row">
             {images.map((img, index) => (
@@ -188,19 +257,48 @@ function ProductDetail() {
                 src={img}
                 alt={`Thumbnail ${index + 1}`}
                 key={index}
-                className={`product-detail-thumb${
-                  currentImageIndex === index ? " selected" : ""
+                className={`product-detail-thumb ${
+                  currentImageIndex === index ? "selected" : ""
                 }`}
                 onClick={() => setCurrentImageIndex(index)}
               />
             ))}
           </div>
         </div>
+
         <div className="product-detail-info-side">
           <Card className="product-detail-card">
             <Title level={2} className="product-detail-title">
-              {product.name}
+              {currentProduct.name}
             </Title>
+
+            {allVariations.length > 1 && (
+              <div className="product-variations-section">
+                <Text strong style={{ color: "#6c5a8a" }}>
+                  Color: {getProductColor(currentProduct)}
+                </Text>
+                <div className="color-options">
+                  {allVariations.map((variation) => (
+                    <div
+                      key={variation._id}
+                      className={`color-dot-wrapper ${
+                        currentProduct._id === variation._id ? "selected" : ""
+                      }`}
+                      onClick={() => handleVariantSelect(variation._id)}
+                    >
+                      <div
+                        className="color-dot"
+                        style={{
+                          backgroundColor:
+                            getProductColor(variation).toLowerCase(),
+                        }}
+                        title={getProductColor(variation)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div
               style={{
@@ -213,62 +311,53 @@ function ProductDetail() {
               <Rate
                 disabled
                 allowHalf
-                value={product.averageRating || 0}
+                value={currentProduct.averageRating || 0}
                 className="product-detail-rate"
               />
-              {product.reviewCount > 0 && (
-                <Text strong style={{ color: "#4a4a4a", fontSize: "1em" }}>
-                  {/* .toFixed(1) ile sayıyı her zaman "4.0", "4.5" gibi tek ondalıklı gösteriyoruz */}
-                  {(product.averageRating || 0).toFixed(1)}
+              {currentProduct.reviewCount > 0 && (
+                <Text strong>
+                  {(currentProduct.averageRating || 0).toFixed(1)}
                 </Text>
               )}
               <Text
                 className="product-detail-comments"
-                onClick={() => {
-                  if (commentsRef.current) {
-                    commentsRef.current.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}
-                style={{ cursor: "pointer", color: "#1890ff" }}
+                onClick={() =>
+                  commentsRef.current?.scrollIntoView({ behavior: "smooth" })
+                }
+                style={{ cursor: "pointer" }}
               >
-                ({product.reviewCount || 0} Değerlendirme)
+                ({currentProduct.reviewCount || 0} Reviews)
               </Text>
             </div>
 
             <div className="product-detail-pricing">
-              {product.discount > 0 && (
+              {currentProduct.discount > 0 && (
                 <p className="product-detail-old-price">
-                  <del>{product.price}₺</del>
+                  <del>{currentProduct.price} TL</del>
                 </p>
               )}
               <Title level={3} className="product-detail-current-price">
-                {product.discountedPrice
-                  ? `${Math.round(product.discountedPrice)} TL`
-                  : `${product.price} TL`}
+                {currentProduct.discountedPrice
+                  ? `${Math.round(currentProduct.discountedPrice)} TL`
+                  : `${currentProduct.price} TL`}
               </Title>
               <Text type="secondary" className="product-detail-brand">
-                Brand: {product.brand?.name}
+                Brand: {currentProduct.brand?.name}
               </Text>
               <br />
               <Text type="secondary" className="product-detail-category">
-                Category: {product.category?.name}
+                Category: {currentProduct.category?.name}
               </Text>
             </div>
+
             <div className="product-detail-buttons">
               <Button
-                icon={
-                  isFavorite ? (
-                    <HeartFilled style={{ color: "red" }} />
-                  ) : (
-                    <HeartOutlined />
-                  )
-                }
+                icon={<SwapOutlined />}
                 size="large"
-                className="product-detail-favorite-btn"
-                onClick={handleToggleFavorite}
-                loading={isFavoriteLoading}
+                className="product-detail-compare-btn"
+                onClick={handleAddToCompare}
               >
-                {isFavorite ? "Remove Favorite" : "Add Favorite"}
+                COMPARE
               </Button>
               <Button
                 type="primary"
@@ -278,17 +367,25 @@ function ProductDetail() {
                 onClick={handleAddToCart}
                 loading={isAdding}
               >
-                Add Basket
-              </Button>
-              <Button
-                icon={<SwapOutlined />}
-                size="large"
-                className="product-detail-compare-btn"
-                onClick={handleAddToCompare}
-              >
-                Compare
+                ADD TO CART
               </Button>
             </div>
+            <Button
+              icon={
+                isFavorite ? (
+                  <HeartFilled style={{ color: "#c41d7f" }} />
+                ) : (
+                  <HeartOutlined />
+                )
+              }
+              onClick={handleToggleFavorite}
+              loading={isFavoriteLoading}
+              block
+              style={{ marginTop: 8 }}
+            >
+              {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+            </Button>
+
             <div className="product-detail-specs">
               <Title level={4}>Technical Specifications</Title>
               <Table
@@ -303,11 +400,11 @@ function ProductDetail() {
           </Card>
         </div>
       </div>
+
       <LoginRequiredModal
         visible={isLoginModalVisible}
         onClose={() => setIsLoginModalVisible(false)}
       />
-
       <div style={{ marginTop: 40 }} ref={commentsRef}>
         <Comments productId={id} />
       </div>
