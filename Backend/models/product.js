@@ -9,7 +9,6 @@ const productSchema = new Schema(
     category: { type: Schema.Types.ObjectId, ref: "Category", required: true },
     price: { type: Number, required: true },
     stock: { type: Number, required: true },
-    color: { type: String, required: true }, // Renk bilgisi eklendi
     description: { type: String },
     mainImage: { type: String },
     additionalImages: [String],

@@ -14,37 +14,23 @@ const app = express();
 
 // CORS'u tamamen açık hale getir
 const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, origin); // İzin verilen origin'i doğrudan dön
-      } else {
-        callback(new Error("CORS hatası: Bu origin'e izin verilmiyor."));
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
 
-// 🟢 OPTIONS isteği için destek
-app.options("*", cors());
+const corsOptions = {
+  // origin fonksiyonu, gelen isteğin kaynağını kontrol eder.
+  origin: function (origin, callback) {
+    // Eğer istek yapan kaynak izin verilenler listesindeyse veya
+    // bir origin belirtilmemişse (Postman gibi araçlar için) izin ver.
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true); // Hata yok, isteğe izin ver.
+    } else {
+      callback(new Error("Not allowed by CORS")); // Hata var, isteği reddet.
+    }
+  },
+  credentials: true, // Frontend'in cookie gibi bilgileri göndermesine izin ver.
+};
 
-// Manuel CORS header'ları (Bu kısmı ekliyoruz)
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Access-Control-Allow-Credentials", "true");
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization"
-    );
-  }
-  next();
-});
+// CORS middleware'ini bu seçeneklerle kullan
+app.use(cors(corsOptions));
 
 app.use(bodyParser.json());
 app.use(cookieParser());

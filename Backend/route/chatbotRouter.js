@@ -8,11 +8,8 @@ const Product = require("../models/product.js");
 const Category = require("../models/category.js");
 const Brand = require("../models/brand.js");
 
-// === HATA DÜZELTMESİ: genAI burada, tüm fonksiyonların erişebileceği şekilde tanımlanmalı ===
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-// ======================================================================================
 
-// Bot için başlangıç talimatlarını ve genel site bilgilerini hazırlar
 async function initializeChat() {
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 

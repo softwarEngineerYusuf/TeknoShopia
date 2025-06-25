@@ -17,79 +17,73 @@ router.post("/addProduct", async (req, res) => {
       category,
       price,
       stock,
-      color,
+      // color, // 2. DEĞİŞİKLİK: 'color' alanı request body'den kaldırıldı.
       description,
       mainImage,
       additionalImages,
-      imageFiles,
-      additionalImageFiles,
-      attributes,
+      attributes, // Renk bilgisi artık bunun içinde gelecek
       discount,
       topPick = 0,
       discountStartDate,
       discountEndDate,
-      groupId, // Kullanıcıdan groupId gelirse
+      groupId,
     } = req.body;
 
+    // 3. DEĞİŞİKLİK: 'color' zorunlu alan kontrolünden çıkarıldı.
     if (
       !name ||
       !brand ||
       !category ||
       price == null ||
       stock == null ||
-      !color
+      !attributes // Örnek olarak Rengin attributes içinde zorunlu olduğunu varsayalım.
     ) {
-      return res.status(400).json({ message: "Gerekli alanları doldurunuz." });
+      return res.status(400).json({
+        message:
+          "Lütfen isim, marka, kategori, fiyat, stok ve Renk özelliğini içeren attributes alanlarını doldurunuz.",
+      });
     }
 
-    // Marka kontrolü
+    // Marka ve Kategori kontrolü (Değişiklik yok)
     const brandFind = await Brand.findOne({ name: brand });
     if (!brandFind)
       return res.status(404).json({ message: "Belirtilen marka bulunamadı." });
-
-    // Kategori kontrolü
     const categoryFind = await Category.findOne({ name: category });
     if (!categoryFind)
       return res.status(404).json({ message: "Kategori bulunamadı." });
 
-    // **Group ID belirleme**
+    // Group ID belirleme (Değişiklik yok)
     let newGroupId = groupId;
-
-    // Eğer groupId yoksa, aynı isimdeki ilk ürünü bul ve ondan al
     if (!groupId) {
       const existingProduct = await Product.findOne({ name });
-
       if (existingProduct) {
-        newGroupId = existingProduct.groupId; // Aynı ürün grubuna ait olarak ata
+        newGroupId = existingProduct.groupId;
       } else {
-        newGroupId = uuidv4(); // Yeni bir ürün grubuna ait ID oluştur
+        newGroupId = uuidv4();
       }
     }
 
-    // **Yeni Ürün Kaydı**
+    // 4. DEĞİŞİKLİK: Yeni ürün oluşturulurken 'color' alanı artık kullanılmıyor.
     const newProduct = new Product({
       name,
       brand: brandFind._id,
       category: categoryFind._id,
       price,
       stock,
-      color,
+      // color: color, // Kaldırıldı
       description,
       mainImage,
       additionalImages,
-      imageFiles,
-      additionalImageFiles,
-      attributes,
+      attributes, // Gelen attributes objesi doğrudan atanıyor
       discount,
       topPick,
       discountStartDate,
       discountEndDate,
-      groupId: newGroupId, // Ürünün grup kimliği
+      groupId: newGroupId,
     });
 
     await newProduct.save();
 
-    // **Ürünü ilgili kategoriye ekleyelim**
     categoryFind.products.push(newProduct._id);
     await categoryFind.save();
 
@@ -125,24 +119,40 @@ router.get("/getAllProducts", async (req, res) => {
 
 router.get("/getProductById/:id", async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id)
-      .populate("brand")
-      .populate("category")
-      .populate({
-        // Bu populate sayesinde sanal alanlar çalışacak
-        path: "reviews",
-        populate: {
-          path: "userId",
-          select: "name",
-        },
-      });
+    // 1. URL'deki ID ile istenen ürünü bul.
+    const requestedProduct = await Product.findById(req.params.id).lean();
 
-    if (!product) {
+    if (!requestedProduct) {
       return res.status(404).json({ message: "Ürün bulunamadı." });
     }
 
-    res.status(200).json(product);
+    // 2. Eğer ürünün bir groupId'si yoksa, sadece kendisini bir dizi içinde döndür.
+    if (!requestedProduct.groupId) {
+      const fullProduct = await Product.findById(req.params.id)
+        .populate("brand", "name")
+        .populate("category", "name")
+        .populate({
+          path: "reviews",
+          populate: { path: "userId", select: "name" },
+        });
+      return res.status(200).json([fullProduct]);
+    }
+
+    // 3. Ürünün groupId'sini kullanarak, o gruptaki TÜM ürünleri bul.
+    const allVariationsInGroup = await Product.find({
+      groupId: requestedProduct.groupId,
+    })
+      .populate("brand", "name")
+      .populate("category", "name")
+      .populate({
+        path: "reviews",
+        populate: { path: "userId", select: "name" },
+      });
+
+    // 4. Frontend'e tüm ürün grubunu bir dizi olarak gönder.
+    res.status(200).json(allVariationsInGroup);
   } catch (error) {
+    console.error("Error fetching product group by id:", error);
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
   }
 });
