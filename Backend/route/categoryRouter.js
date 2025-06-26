@@ -58,10 +58,6 @@ router.get("/getAllSubCategories", async (req, res) => {
       .populate("parentCategory", "name")
       .exec();
 
-    if (subCategories.length === 0) {
-      return res.status(404).json({ message: "Alt kategori bulunamadı" });
-    }
-
     return res.status(200).json(subCategories);
   } catch (err) {
     console.error(err);
