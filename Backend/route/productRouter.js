@@ -352,20 +352,43 @@ router.get("/getDiscountedProducts", async (req, res) => {
 router.get("/getProductsByCategory/:categoryId", async (req, res) => {
   try {
     const { categoryId } = req.params;
+
+    // 1. Öncelikle gelen ID ile ilgili kategoriyi bulalım.
     const category = await Category.findById(categoryId);
     if (!category) {
       return res.status(404).json({ message: "Kategori bulunamadı." });
     }
 
-    // Yorumları populate ederek sanal alanların hesaplanmasını sağlıyoruz
-    const products = await Product.find({ category: categoryId })
+    let productQuery = {};
+
+    // 2. Kategorinin ana mı yoksa alt kategori mi olduğunu kontrol edelim.
+    if (category.parentCategory === null) {
+      // Bu bir ANA KATEGORİ.
+      // Bu ana kategoriye bağlı TÜM alt kategorilerin ID'lerini kullanarak bir sorgu oluşturuyoruz.
+      // Mongoose'un '$in' operatörü, 'category' alanı, verdiğimiz dizideki ID'lerden BİRİ olan tüm ürünleri bulur.
+      // 'category.subCategories' alanı, modelinizde alt kategori ID'lerini tutan dizidir.
+      productQuery = { category: { $in: category.subCategories } };
+
+      // Önemli Not: Eğer bir ana kategoriye doğrudan ürün eklenme ihtimali de varsa,
+      // ve onları da getirmek isterseniz, sorguyu şöyle güncelleyebilirsiniz:
+      // productQuery = { category: { $in: [categoryId, ...category.subCategories] } };
+    } else {
+      // Bu bir ALT KATEGORİ.
+      // Sadece bu alt kategoriye ait ürünleri getireceğiz (eski mantık).
+      productQuery = { category: categoryId };
+    }
+
+    // 3. Hazırladığımız sorguyu kullanarak ürünleri veritabanından çekelim.
+    // Bu yapı sayesinde .populate() kodunu tekrar etmekten kurtuluruz.
+    const products = await Product.find(productQuery)
       .populate("brand", "name")
       .populate("category", "name")
       .populate({
         path: "reviews",
-        select: "rating", // Sadece rating bilgisi yeterli (optimizasyon)
+        select: "rating",
       });
 
+    // 4. Sonucu istemciye gönderelim.
     res.status(200).json({
       message: `${category.name} kategorisindeki ürünler başarıyla getirildi.`,
       category: category.name,

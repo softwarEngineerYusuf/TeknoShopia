@@ -22,6 +22,11 @@ const orderSchema = new Schema(
       street: { type: String, required: true },
       postalCode: { type: String, required: true },
     },
+    orderNumber: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     status: {
       type: String,
       enum: ["Processing", "Shipped", "Delivered", "Cancelled"],

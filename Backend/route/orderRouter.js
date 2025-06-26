@@ -7,6 +7,17 @@ const Cart = require("../models/cart.js");
 const CartItem = require("../models/cartItem.js");
 const sendMail = require("../config/mailService");
 const Coupon = require("../models/coupon.js");
+
+const generateOrderNumber = () => {
+  const date = new Date();
+  // YYYYMMDD formatında tarih
+  const dateString = `${date.getFullYear()}${(date.getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}${date.getDate().toString().padStart(2, "0")}`;
+  // 5 haneli rastgele alfanümerik karakter
+  const randomString = Math.random().toString(36).substring(2, 7).toUpperCase();
+  return `ORD-${dateString}-${randomString}`;
+};
 // POST /api/orders/CreateOrder - Yeni bir sipariş oluşturur
 router.post("/CreateOrder", async (req, res) => {
   try {
@@ -36,7 +47,11 @@ router.post("/CreateOrder", async (req, res) => {
         .json({ message: "Kullanıcı veya adres bulunamadı." });
     }
 
+    // GÜNCELLEME: Benzersiz sipariş numarası oluştur
+    const orderNumber = generateOrderNumber();
+
     const newOrder = new Order({
+      orderNumber, // YENİ: Oluşturulan numarayı ekle
       userId,
       orderItems,
       totalPrice,
@@ -48,7 +63,6 @@ router.post("/CreateOrder", async (req, res) => {
         postalCode: address.postalCode,
       },
       status: "Processing",
-      // DÜZELTME: Gelen kupon bilgisini modeldeki yeni alana doğru şekilde ata
       coupon: coupon
         ? {
             code: coupon.code,
@@ -73,14 +87,15 @@ router.post("/CreateOrder", async (req, res) => {
       await cart.save();
     }
 
-    const emailSubject = `Siparişiniz Onaylandı! Sipariş No: ${savedOrder._id}`;
+    // GÜNCELLEME: E-postada _id yerine orderNumber kullan
+    const emailSubject = `Siparişiniz Onaylandı! Sipariş No: ${savedOrder.orderNumber}`;
     const emailTemplate = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
         <h2 style="color: #2c3e50; text-align: center;">Teşekkürler, ${
           user.name
         }!</h2>
         <p>Siparişiniz başarıyla alındı. Sipariş Numaranız: <strong>${
-          savedOrder._id
+          savedOrder.orderNumber // GÜNCELLENDİ
         }</strong></p>
         <p>Toplam Tutar: <strong>${savedOrder.totalPrice.toLocaleString(
           "tr-TR",
@@ -108,6 +123,14 @@ router.post("/CreateOrder", async (req, res) => {
       .status(201)
       .json({ message: "Sipariş başarıyla oluşturuldu!", order: savedOrder });
   } catch (error) {
+    // EĞER SİPARİŞ NUMARASI ÇAKIŞMASI OLURSA (çok düşük ihtimal)
+    if (error.code === 11000) {
+      return res
+        .status(500)
+        .json({
+          message: "Sipariş numarası oluşturulamadı, lütfen tekrar deneyin.",
+        });
+    }
     console.error("Sipariş oluşturma hatası:", error);
     res
       .status(500)
