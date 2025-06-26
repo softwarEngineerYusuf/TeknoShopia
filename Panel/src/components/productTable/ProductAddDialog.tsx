@@ -219,16 +219,15 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
               <em>Ana Kategoriler</em>
             </MenuItem>
             {categories.map((category) => (
-              <MenuItem key={category.name} value={category.name}>
+              <MenuItem key={category._id} value={category.name}>
                 {category.name}
               </MenuItem>
             ))}
-
             <MenuItem disabled>
               <em>Alt Kategoriler</em>
             </MenuItem>
             {subCategories.map((subCategory) => (
-              <MenuItem key={subCategory._id} value={subCategory._id}>
+              <MenuItem key={subCategory._id} value={subCategory.name}>
                 {subCategory.name}
               </MenuItem>
             ))}
