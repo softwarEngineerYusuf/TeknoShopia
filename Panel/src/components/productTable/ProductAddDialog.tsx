@@ -223,6 +223,7 @@ const ProductAddDialog: React.FC<ProductAddDialogProps> = ({
                 {category.name}
               </MenuItem>
             ))}
+
             <MenuItem disabled>
               <em>Alt Kategoriler</em>
             </MenuItem>
