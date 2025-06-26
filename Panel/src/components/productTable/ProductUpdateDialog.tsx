@@ -77,31 +77,50 @@ const ProductUpdateDialog: React.FC<ProductUpdateDialogProps> = ({
   useEffect(() => {
     if (open && productId && isCategoriesLoaded) {
       const fetchProduct = async () => {
-        const productData = await getProductById(productId);
-        setProduct(productData);
-        setSelectedBrand(productData.brand.name);
+        try {
+          // 1. API'den ürün dizisini al.
+          const productsArray = await getProductById(productId);
 
-        // Kategori adını belirle
-        const categoryName =
-          categories.find((cat) => cat._id === productData.category._id)
-            ?.name ||
-          subCategories.find((sub) => sub._id === productData.category._id)
-            ?.name ||
-          "";
+          if (productsArray && productsArray.length > 0) {
+            // 2. Gelen dizi içinde, ID'si bizim düzenlemek istediğimiz ürünle eşleşeni bul.
+            const specificProduct = productsArray.find(
+              (p) => p._id === productId
+            );
 
-        setSelectedCategory(categoryName);
+            if (specificProduct) {
+              // 3. Bulunan DOĞRU ürünü state'e ata.
+              setProduct(specificProduct);
 
-        const formattedAttributes = Object.entries(productData.attributes).map(
-          ([key, value]) => ({ key, value })
-        );
-        setAttributes(formattedAttributes);
+              // 4. Artık tüm atamalar doğru nesne üzerinden yapılacak.
+              // Brand ve Category nesne olarak geldiği için .name üzerinden erişim doğru.
+              setSelectedBrand(specificProduct.brand?.name || "");
+              setSelectedCategory(specificProduct.category?.name || "");
 
-        // Set existing additional images
-        setAdditionalImages(
-          productData.additionalImages?.map((image: string) => ({
-            imageUrl: image,
-          })) || []
-        );
+              // Attributes'ı formatla
+              const formattedAttributes = specificProduct.attributes
+                ? Object.entries(specificProduct.attributes).map(
+                    ([key, value]) => ({ key, value })
+                  )
+                : [];
+              setAttributes(formattedAttributes);
+
+              // Ek resimleri ayarla
+              setAdditionalImages(
+                specificProduct.additionalImages?.map((image: string) => ({
+                  imageUrl: image,
+                })) || []
+              );
+            } else {
+              console.error(
+                "Product with the specified ID not found in the returned array."
+              );
+              onClose(); // Ürün bulunamadıysa modal'ı kapat
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch product for update:", error);
+          onClose(); // Hata olursa modal'ı kapat
+        }
       };
 
       fetchProduct();
