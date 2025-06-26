@@ -30,15 +30,14 @@
 }
 
 .navbar-button:hover {
-  background-color: rgba(0, 0, 0, 0); /* Arka plan transparan olacak */
-  opacity: 0.7; /* Opaklık %70 yapılarak transparanlaşma sağlanacak */
+  background-color: rgba(0, 0, 0, 0);
+  opacity: 0.7;
 }
 
 .iconNav {
   margin-right: 0.4rem;
 }
 
-/* Hamburger menu button for mobile */
 .navbar-menu-btn {
   display: none;
   background: none;
@@ -63,6 +62,7 @@
     flex: 1 1 100%;
     margin: 10px 0;
     order: 3;
+    position: relative;
   }
   .navbar-menu-btn {
     display: block;

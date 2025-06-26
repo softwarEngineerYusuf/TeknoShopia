@@ -173,7 +173,7 @@ function OrderCard({ order }) {
           )}
         </div>
         <div className="order-main-info">
-          <span className="order-number">Sipariş No: {order._id}</span>
+          <span className="order-number">Sipariş No: {order.orderNumber}</span>
           <span className="order-date">
             {new Date(order.createdAt).toLocaleDateString("tr-TR")}
           </span>

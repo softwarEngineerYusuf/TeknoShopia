@@ -22,7 +22,7 @@ import MyOrders from "./components/MyOrders/MyOrders";
 import CompareSection from "./components/CompareSection/CompareSection";
 import Navbar2 from "./components/Navbar2/Navbar2";
 import Chatbot from "./pages/Chatbot/Chatbot";
-
+import ScrollToTop from "./components/ScrollToTop";
 function MainLayout() {
   return (
     <>
@@ -39,6 +39,7 @@ function AppRoutes() {
 
   return (
     <>
+      <ScrollToTop />
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />

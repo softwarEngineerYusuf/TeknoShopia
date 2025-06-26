@@ -255,7 +255,7 @@ const Payment = () => {
       const response = await createOrder(orderPayload);
       Modal.success({
         title: "Siparişiniz Başarıyla Alındı!",
-        content: `Sipariş numaranız: ${response.order._id}. Detaylar e-posta adresinize gönderildi.`,
+        content: `Sipariş numaranız: ${response.order.orderNumber}. Detaylar e-posta adresinize gönderildi.`,
         onOk() {
           navigate("/myorders");
         },

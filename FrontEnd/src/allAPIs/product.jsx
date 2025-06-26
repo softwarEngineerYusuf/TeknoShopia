@@ -98,3 +98,14 @@ export const getProductsByBrandID = async (brandId) => {
     return []; // Hata durumunda boş bir dizi döndür
   }
 };
+export const getAllProducts = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/getAllProducts`);
+
+    return response.data;
+  } catch (error) {
+    console.error("Tüm ürünleri çekerken hata oluştu:", error);
+
+    return [];
+  }
+};

@@ -30,6 +30,7 @@ import {
   getFavoriteProductIds,
 } from "../../allAPIs/favorites";
 import Comments from "../../components/Comments/Comments";
+import { getColorCode } from "../../utils/colorUtils";
 
 const { Title, Text } = Typography;
 
@@ -269,7 +270,7 @@ function ProductDetail() {
         <div className="product-detail-info-side">
           <Card className="product-detail-card">
             <Title level={2} className="product-detail-title">
-              {currentProduct.name}
+              {currentProduct.description}
             </Title>
 
             {allVariations.length > 1 && (
@@ -289,8 +290,9 @@ function ProductDetail() {
                       <div
                         className="color-dot"
                         style={{
-                          backgroundColor:
-                            getProductColor(variation).toLowerCase(),
+                          backgroundColor: getColorCode(
+                            getProductColor(variation)
+                          ),
                         }}
                         title={getProductColor(variation)}
                       />
