@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { MdDeleteSweep, MdClear } from "react-icons/md";
 import { Spin, Empty, Button, message, Input } from "antd";
@@ -35,8 +35,15 @@ function Basket() {
   const [couponInfo, setCouponInfo] = useState(null);
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
 
-  // ... (handleQuantityChange, handleRemoveItem, handleClearCart, vb. fonksiyonlar aynı kalabilir)
   const handleQuantityChange = async (itemId, newQuantity) => {
+    const item = cart.cartItems.find((i) => i._id === itemId);
+    if (newQuantity > item.product.stock) {
+      message.warning(
+        `Cannot add more. Only ${item.product.stock} items in stock.`
+      );
+      return;
+    }
+
     if (newQuantity < 1) return;
     setUpdatingItemId(itemId);
     try {
@@ -118,13 +125,76 @@ function Basket() {
   };
 
   const handleCheckout = () => {
-    // Sadece geçerli ürünleri kontrol et
-    const validItems = cart?.cartItems?.filter((item) => item.product);
-    if (!validItems || validItems.length === 0) {
+    // 1. Mevcut ve geçersiz tüm ürünleri ayır
+    const allValidItems = cart?.cartItems?.filter((item) => item.product);
+    if (!allValidItems || allValidItems.length === 0) {
       message.error("Your cart must contain available products to proceed.");
       return;
     }
-    navigate("/payment", { state: { cartData: cart, couponInfo: couponInfo } });
+
+    // 2. Ürünleri stok durumuna göre iki gruba ayır
+    const inStockItems = allValidItems.filter((item) => item.product.stock > 0);
+    const outOfStockItems = allValidItems.filter(
+      (item) => item.product.stock <= 0
+    );
+
+    // 3. Eğer satın alınabilecek HİÇBİR ürün yoksa, işlemi durdur
+    if (inStockItems.length === 0) {
+      message.error(
+        "All items in your cart are out of stock. Please remove them to add new items."
+      );
+      return;
+    }
+
+    // 4. Sadece stoktaki ürünler için geçici bir sepet ve toplam fiyat oluştur
+    const checkoutSubtotal = inStockItems.reduce(
+      (sum, item) => sum + item.subtotal,
+      0
+    );
+    const cartForCheckout = {
+      ...cart,
+      cartItems: inStockItems,
+      totalPrice: checkoutSubtotal, // Kuponsuz yeni ara toplam
+    };
+
+    let couponForCheckout = null;
+
+    // 5. Kuponun, yeni sepet toplamı için hala geçerli olup olmadığını kontrol et
+    if (couponInfo && checkoutSubtotal >= couponInfo.minPurchaseAmount) {
+      // Kupon hala geçerli, ödeme sayfasına göndermek için kopyala
+      couponForCheckout = { ...couponInfo };
+      // Final fiyatı da yeni toplama göre yeniden hesapla
+      let newFinalPrice = checkoutSubtotal;
+      const { type, value } = couponInfo.coupon;
+      if (type === "percentage") {
+        newFinalPrice -= newFinalPrice * (value / 100);
+      } else if (type === "fixed") {
+        newFinalPrice -= value;
+      }
+      couponForCheckout.finalPrice = Math.max(0, newFinalPrice);
+    } else if (couponInfo) {
+      // Kupon vardı ama artık geçersiz, kullanıcıyı bilgilendir
+      message.info(
+        `Coupon '${couponInfo.coupon.code}' was removed as the new total is below the minimum purchase amount.`,
+        5
+      );
+    }
+
+    // 6. Eğer geride bırakılan (stokta olmayan) ürünler varsa, kullanıcıya uyarı ver
+    if (outOfStockItems.length > 0) {
+      const itemNames = outOfStockItems
+        .map((item) => item.product.name)
+        .join(", ");
+      message.warning(
+        `The following items are out of stock and won't be included in your order: ${itemNames}`,
+        6 // Mesaj 6 saniye ekranda kalsın
+      );
+    }
+
+    // 7. Stoktaki ürünleri içeren geçici sepet ve (varsa) geçerli kupon bilgisi ile ödeme sayfasına yönlendir
+    navigate("/payment", {
+      state: { cartData: cartForCheckout, couponInfo: couponForCheckout },
+    });
   };
 
   if (loading) {
@@ -144,7 +214,6 @@ function Basket() {
     );
   }
 
-  // Sepet boş veya sadece geçersiz (silinmiş) ürünler varsa
   const validCartItems = cart?.cartItems?.filter((item) => item.product);
   if (!cart || !validCartItems || validCartItems.length === 0) {
     return (
@@ -159,10 +228,7 @@ function Basket() {
     );
   }
 
-  // --- HATA DÜZELTMESİ 1: .reduce() fonksiyonunu güvenli hale getirme ---
-  // Sadece `item.product`'ın var olduğu ürünleri hesaba kat.
   const totalOriginalPrice = cart.cartItems.reduce((sum, item) => {
-    // Optional Chaining (?.) kullanarak `item.product` null ise çökmesini engelle
     const price = item.product?.price || 0;
     return sum + price * item.quantity;
   }, 0);
@@ -182,9 +248,7 @@ function Basket() {
           </button>
         </div>
 
-        {/* --- HATA DÜZELTMESİ 2: .map() içinde null ürün kontrolü --- */}
         {cart.cartItems.map((item) => {
-          // Eğer ürün silinmişse, özel bir bildirim göster
           if (!item.product) {
             return (
               <div
@@ -206,9 +270,15 @@ function Basket() {
             );
           }
 
-          // Eğer ürün geçerliyse, normal şekilde render et
+          const isOutOfStock = item.product.stock <= 0;
+
           return (
-            <div className="summaryBasketList" key={item._id}>
+            <div
+              className={`summaryBasketList ${
+                isOutOfStock ? "out-of-stock-item" : ""
+              }`}
+              key={item._id}
+            >
               <div className="summaryBasketProductImage">
                 <Link to={`/productDetail/${item.product._id}`}>
                   <img src={item.product.mainImage} alt={item.product.name} />
@@ -220,13 +290,24 @@ function Basket() {
                 </p>
                 <p className="productName">{item.product.name}</p>
                 <p className="color">Color: {getProductColor(item.product)}</p>
+
+                {isOutOfStock && (
+                  <p className="out-of-stock-message">
+                    Out of Stock! Will be removed at checkout.
+                  </p>
+                )}
+
                 <div className="pieceOfProductBasketDetail">
                   <p>Quantity:</p>
                   <button
                     onClick={() =>
                       handleQuantityChange(item._id, item.quantity - 1)
                     }
-                    disabled={item.quantity <= 1 || updatingItemId === item._id}
+                    disabled={
+                      item.quantity <= 1 ||
+                      updatingItemId === item._id ||
+                      isOutOfStock
+                    }
                     className="quantityButton"
                   >
                     −
@@ -242,7 +323,7 @@ function Basket() {
                     onClick={() =>
                       handleQuantityChange(item._id, item.quantity + 1)
                     }
-                    disabled={updatingItemId === item._id}
+                    disabled={updatingItemId === item._id || isOutOfStock}
                     className="quantityButton"
                   >
                     +
@@ -279,7 +360,6 @@ function Basket() {
       </div>
 
       <div className="summaryOrderList">
-        {/* ... (Bu kısım aynı kalabilir) ... */}
         <h3>Order Summary</h3>
         <p>
           Subtotal: <span>{totalOriginalPrice.toLocaleString("en-US")} TL</span>

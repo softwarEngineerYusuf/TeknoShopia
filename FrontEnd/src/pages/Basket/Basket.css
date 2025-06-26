@@ -1,28 +1,28 @@
-
 .basketAllMainPage {
- max-width: 1200px; 
-  margin: 5rem auto;   
+  max-width: 1200px;
+  margin: 5rem auto;
   display: flex;
   gap: 30px;
-  flex-wrap: wrap;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  flex-wrap: wrap; /* Küçük ekranlarda alt alta geçmeyi sağlar */
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: #222;
+  align-items: flex-start; /* Sütunları yukarıdan hizalar */
 }
 
-/* Başlık */
-.orderDetailHeading {
-  width: 100%;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1e1e2f;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #1a237e;
-  padding-bottom: 8px;
+/* YENİ EKLENEN VEYA DEĞİŞTİRİLEN BÖLÜM BAŞLANGICI */
+
+/* Sol Sütun (Sepet Listesi) Konteyneri */
+.basket-left-column {
+  flex: 1 1 60%; /* Sütunun genişliğini belirler (büyüme, küçülme, taban genişlik) */
+  min-width: 300px; /* Sarma davranışı için minimum genişlik */
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Başlık ve ürünler arası boşluk */
 }
 
-/* Ürün Detayları ve Sepet Listesi */
+/* Sepet Listesindeki HER BİR ÜRÜN */
 .summaryBasketList {
-  flex: 1 1 60%;
+  /* BURADAN 'flex: 1 1 60%;' KALDIRILDI! Bu kural artık .basket-left-column'da. */
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(26, 35, 126, 0.15);
@@ -30,13 +30,71 @@
   display: flex;
   align-items: center;
   gap: 25px;
-  min-width: 280px;
+}
+
+/* Sağ Sütun (Sipariş Özeti) */
+.summaryOrderList {
+  flex: 1 1 35%; /* Sütunun genişliğini belirler */
+  min-width: 280px; /* Sarma davranışı için minimum genişlik */
+  background: #f9f9ff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(26, 35, 126, 0.1);
+  padding: 30px 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: sticky; /* Sayfa kaydırılınca sabit kalması için */
+  top: 20px;
+}
+
+/* YENİ EKLENEN VEYA DEĞİŞTİRİLEN BÖLÜM SONU */
+
+/* Başlık */
+.basket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.orderDetailHeading {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1e1e2f;
+  margin: 0;
+  padding-bottom: 8px;
+}
+
+.clear-cart-btn {
+  background-color: transparent;
+  border: 1px solid #e63946;
+  color: #e63946;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.clear-cart-btn:hover {
+  background-color: #e63946;
+  color: white;
+}
+
+/* Mevcut olmayan ürünler için özel stil */
+.unavailable-item {
+  border: 2px dashed #ccc;
+  justify-content: space-between;
+  color: #888;
 }
 
 /* Ürün Resmi */
 .summaryBasketProductImage img {
-  width: 140px;
-  height: 140px;
+  width: 120px;
+  height: 120px;
   border-radius: 16px;
   object-fit: cover;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -52,7 +110,7 @@
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .summaryBasketProductDetails p {
@@ -61,25 +119,26 @@
 }
 
 .brand {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #1a237e;
   letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .productName {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: #333;
 }
 
 .color {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: #666;
 }
 
 /* Adet Kontrolü */
 .pieceOfProductBasketDetail {
-  margin-top: 15px;
+  margin-top: 10px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -88,19 +147,30 @@
 }
 
 .quantityButton {
-  background-color: #1a237e;
-  border: none;
-  color: white;
+  background-color: #f0f2f5;
+  border: 1px solid #d9d9d9;
+  color: #333;
   font-size: 1.3rem;
-  padding: 6px 14px;
+  font-weight: bold;
+  width: 32px;
+  height: 32px;
+  line-height: 30px;
+  text-align: center;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
   user-select: none;
 }
 
-.quantityButton:hover {
-  background-color: #283593;
+.quantityButton:hover:not(:disabled) {
+  background-color: #1a237e;
+  color: white;
+  border-color: #1a237e;
+}
+
+.quantityButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .quantityValue {
@@ -116,36 +186,33 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 6px;
+  gap: 4px;
   min-width: 100px;
 }
 
 .originalPrice {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #999;
   text-decoration: line-through;
   font-weight: 500;
 }
 
 .discountedPrice {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: #e63946;
 }
 
-/* Sipariş Özeti */
-.summaryOrderList {
-  flex: 1 1 35%;
-  background: #f9f9ff;
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(26, 35, 126, 0.1);
-  padding: 30px 25px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  min-width: 280px;
+/* Çöp Kutusu İkonu */
+.trash-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  margin-left: 15px;
 }
 
+/* Sipariş Özeti Başlığı */
 .summaryOrderList h3 {
   font-size: 1.8rem;
   font-weight: 700;
@@ -168,6 +235,10 @@
   color: #1a237e;
 }
 
+.discount-summary span {
+  color: #2a9d8f !important;
+}
+
 /* Kupon Kodu Alanı */
 .couponCodeEnterArea {
   display: flex;
@@ -175,41 +246,53 @@
   margin-top: 10px;
 }
 
-.couponCodeEnterArea input {
-  flex: 1;
-  padding: 10px 12px;
-  border: 2px solid #1a237e;
-  border-radius: 8px;
-  font-size: 1rem;
-  outline-offset: 2px;
-  transition: border-color 0.3s ease;
-}
-
-.couponCodeEnterArea input:focus {
-  border-color: #283593;
-  box-shadow: 0 0 6px rgba(40, 53, 147, 0.5);
-}
-
 .useCouponButton {
   background-color: #1a237e;
   border: none;
   color: white;
-  padding: 10px 18px;
+  padding: 0 18px;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
-.useCouponButton:hover {
+.useCouponButton:hover:not(:disabled) {
   background-color: #283593;
 }
 
-/* İndirim ve Toplam */
+/* Uygulanan Kupon Bilgisi */
+.applied-coupon-info {
+  background-color: #e8f5e9;
+  border-left: 4px solid #4caf50;
+  padding: 10px 15px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+.applied-coupon-info p {
+  font-size: 1rem;
+  color: #2e7d32;
+  align-items: center;
+}
+.applied-coupon-info span {
+  color: #555;
+  font-weight: normal;
+}
+.remove-coupon-icon {
+  margin-left: auto;
+  cursor: pointer;
+  color: #c62828;
+  font-size: 1.2rem;
+}
+
+/* Toplam Fiyat */
 .summaryOrderList .finalPrice {
   font-size: 1.4rem;
   color: #e63946;
   font-weight: 700;
+  border-top: 1px solid #ddd;
+  padding-top: 15px;
+  margin-top: 5px;
 }
 
 /* Satın Alma Butonu */
@@ -223,13 +306,21 @@
   font-size: 1.25rem;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
   box-shadow: 0 6px 12px rgba(26, 35, 126, 0.4);
 }
 
 .checkoutButton:hover {
   background: linear-gradient(90deg, #283593, #0d1333);
   box-shadow: 0 8px 20px rgba(40, 53, 147, 0.6);
+  transform: translateY(-2px);
+}
+
+/* Boş Sepet Durumu */
+.basket-empty-state {
+  width: 100%;
+  text-align: center;
+  padding: 50px 20px;
 }
 
 /* Responsive Tasarım */
@@ -237,12 +328,17 @@
   .basketAllMainPage {
     flex-direction: column;
     align-items: center;
-    width: 90%;
+    width: 95%;
   }
 
-  .summaryBasketList,
+  .basket-left-column,
   .summaryOrderList {
     width: 100%;
+    flex-basis: auto; /* Temel genişliği sıfırla */
+  }
+
+  .summaryOrderList {
+    position: static; /* Küçük ekranda sticky özelliğini kaldır */
   }
 
   .summaryBasketList {
@@ -264,12 +360,29 @@
     justify-content: center;
     gap: 15px;
     margin-top: 15px;
+    width: 100%;
+  }
+
+  .trash-icon-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+
+  .summaryBasketList {
+    position: relative;
   }
 }
 
 @media (max-width: 480px) {
-  .orderDetailHeading {
-    font-size: 1.5rem;
+  .basket-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .summaryBasketList {
+    padding: 20px;
   }
 
   .summaryBasketProductImage img {
@@ -290,4 +403,27 @@
     font-size: 1.1rem;
     padding: 12px 0;
   }
+}
+/* --- YENİ EKLENEN STİLLER --- */
+
+/* Stokta olmayan ürün kartını çevreleyen stil */
+.out-of-stock-item {
+  border: 2px solid #e63946; /* Dikkat çekici kırmızı çerçeve */
+  background-color: #fff1f2; /* Çok açık kırmızı arka plan */
+  position: relative; /* İçerideki mesaj için */
+}
+
+/* Stokta olmayan ürünler için miktar butonlarını devre dışı bırakma görünümü */
+.out-of-stock-item .quantityButton {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Stokta yok uyarı mesajı */
+.out-of-stock-message {
+  color: #e63946; /* Kırmızı metin */
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-top: 8px;
+  width: 100%;
 }

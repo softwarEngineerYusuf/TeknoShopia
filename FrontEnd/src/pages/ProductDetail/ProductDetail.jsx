@@ -9,6 +9,7 @@ import {
   Typography,
   Spin,
   message,
+  Tag,
 } from "antd";
 import {
   LeftOutlined,
@@ -34,7 +35,6 @@ import { getColorCode } from "../../utils/colorUtils";
 
 const { Title, Text } = Typography;
 
-// Helper function to safely get the color from attributes
 const getProductColor = (product) => {
   if (!product || !product.attributes) return "Unknown";
   const attributes = product.attributes;
@@ -53,11 +53,8 @@ function ProductDetail() {
   const { user } = useAuth();
   const { addToCompare } = useCompare();
 
-  // States for dynamic structure
   const [allVariations, setAllVariations] = useState([]);
   const [currentProduct, setCurrentProduct] = useState(null);
-
-  // Other states
   const [loading, setLoading] = useState(true);
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -68,7 +65,6 @@ function ProductDetail() {
   const PENDING_CART_ITEM_KEY = "pendingCartItemProductId";
   const commentsRef = useRef(null);
 
-  // Advanced data fetching logic
   useEffect(() => {
     const fetchProductGroup = async () => {
       if (!id) return;
@@ -112,7 +108,6 @@ function ProductDetail() {
     if (currentProduct) setCurrentImageIndex(0);
   }, [currentProduct]);
 
-  // Function to switch variants
   const handleVariantSelect = (variantId) => {
     if (currentProduct?._id === variantId) return;
     const newProduct = allVariations.find((p) => p._id === variantId);
@@ -122,10 +117,16 @@ function ProductDetail() {
     }
   };
 
-  // --- Functions updated to use `currentProduct` ---
-
   const handleAddToCart = async () => {
     if (!currentProduct) return;
+
+    if (currentProduct.stock <= 0) {
+      message.error(
+        "This product is currently out of stock and cannot be added to the cart."
+      );
+      return;
+    }
+
     if (user?.id) {
       setIsAdding(true);
       try {
@@ -136,7 +137,10 @@ function ProductDetail() {
           )}) has been added to the cart!`
         );
       } catch (error) {
-        message.error("There was a problem adding the product to the cart.");
+        message.error(
+          error.response?.data?.message ||
+            "There was a problem adding the product to the cart."
+        );
       } finally {
         setIsAdding(false);
       }
@@ -147,7 +151,6 @@ function ProductDetail() {
     }
   };
 
-  // Compare function using `currentProduct`
   const handleAddToCompare = () => {
     if (currentProduct) {
       const productForCompare = {
@@ -194,7 +197,6 @@ function ProductDetail() {
     }
   };
 
-  // Render preparation
   if (loading) return <Spin tip="Loading..." fullscreen />;
   if (!currentProduct)
     return (
@@ -202,6 +204,8 @@ function ProductDetail() {
         <Title level={3}>Product Not Found.</Title>
       </div>
     );
+
+  const isOutOfStock = currentProduct.stock <= 0;
 
   const images = [
     currentProduct.mainImage,
@@ -272,6 +276,16 @@ function ProductDetail() {
             <Title level={2} className="product-detail-title">
               {currentProduct.description}
             </Title>
+
+            <div style={{ marginBottom: "16px" }}>
+              {isOutOfStock ? (
+                <Tag color="red">OUT OF STOCK</Tag>
+              ) : (
+                <Tag color="green">
+                  IN STOCK ({currentProduct.stock} available)
+                </Tag>
+              )}
+            </div>
 
             {allVariations.length > 1 && (
               <div className="product-variations-section">
@@ -368,8 +382,9 @@ function ProductDetail() {
                 className="product-detail-cart-btn"
                 onClick={handleAddToCart}
                 loading={isAdding}
+                disabled={isOutOfStock}
               >
-                ADD TO CART
+                {isOutOfStock ? "OUT OF STOCK" : "ADD TO CART"}
               </Button>
             </div>
             <Button

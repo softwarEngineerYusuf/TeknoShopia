@@ -63,11 +63,14 @@ export const getProductsByBrand = async (
   }
 };
 
-export const getTopPicksProducts = async (selectedBrands = []) => {
+export const getTopPicksProducts = async (brandIds = []) => {
   try {
-    const query = selectedBrands.length
-      ? `?brands=${selectedBrands.join(",")}`
-      : "";
+    let query = "";
+    // Eğer gelen dizinin içinde eleman varsa, sorgu parametresini oluştur.
+    if (brandIds.length > 0) {
+      query = `?brands=${brandIds.join(",")}`;
+    }
+    // `query` ya "?brands=id1,id2" olacak ya da boş string ""
     const response = await axios.get(`${API_URL}/topPicks${query}`);
     return response.data;
   } catch (error) {

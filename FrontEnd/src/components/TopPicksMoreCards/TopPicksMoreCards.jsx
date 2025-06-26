@@ -26,9 +26,8 @@ function TopPicksMoreCards({ selectedBrands }) {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      // selectedBrands dizisini virgülle birleştirilmiş bir string'e çeviriyoruz
-      const brandsQuery = selectedBrands.join(",");
-      const data = await getTopPicksProducts(brandsQuery); // API'yi sorgu ile çağırıyoruz
+      const data = await getTopPicksProducts(selectedBrands);
+      console.log("", data); // API'yi sorgu ile çağırıyoruz
       setProducts(data);
     };
     fetchProducts();
@@ -155,7 +154,6 @@ function TopPicksMoreCards({ selectedBrands }) {
             className="d-flex justify-content-between"
             style={{ padding: "0rem 1rem" }}
           >
-            {/* =============== RATING KISMI GÜNCELLENDİ =============== */}
             <div className="rating-top-picks-more-cards">
               <StarIcon />
               <p>
@@ -168,8 +166,6 @@ function TopPicksMoreCards({ selectedBrands }) {
                 </span>
               </p>
             </div>
-
-            {/* =============== FİYAT KISMI GÜNCELLENDİ =============== */}
             <div>
               {product.discount > 0 && (
                 <p
@@ -202,7 +198,7 @@ function TopPicksMoreCards({ selectedBrands }) {
   return (
     <div className="container">
       <div className="top-picks-more-cards-and-sort d-flex justify-content-between align-items-center">
-        <h2 className="top-picks-more-cards-title">Telephones</h2>
+        <h2 className="top-picks-more-cards-title">Top Picks More</h2>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <span style={{ fontSize: "0.9rem", color: "#666" }}>Sort:</span>
           <ProductSort />
