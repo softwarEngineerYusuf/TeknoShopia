@@ -403,33 +403,57 @@ router.get("/getProductsByCategory/:categoryId", async (req, res) => {
 
 router.get("/getProductsByBrand", async (req, res) => {
   try {
-    // 1. Gelen tüm parametreleri alalım ve varsayılan değerler atayalım
     const brandIds = req.query.brandIds ? req.query.brandIds.split(",") : [];
-    const categoryId = req.query.categoryId; // <-- Frontend'den kategori ID'sini de alacağız (Adım 2'de göndereceğiz)
+    const categoryId = req.query.categoryId;
     const minPrice = parseFloat(req.query.minPrice) || 0;
-    const maxPrice = parseFloat(req.query.maxPrice) || Infinity; // Üst limit yoksa sonsuz kabul et
+    const maxPrice = parseFloat(req.query.maxPrice) || Infinity;
 
     const pipeline = [];
     const matchConditions = {};
 
-    // Kategori ID'si varsa, ilk filtreleme adımı olarak ekle
+    // ====================== İSTEDİĞİNİZ ANA/ALT KATEGORİ MANTIĞI ======================
     if (categoryId) {
-      matchConditions.category = new mongoose.Types.ObjectId(categoryId);
+      // 1. Gelen ID'nin geçerli bir ObjectId formatında olduğundan emin olalım.
+      if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+        return res
+          .status(400)
+          .json({ message: "Geçersiz Kategori ID formatı." });
+      }
+
+      // 2. Gelen ID'ye sahip kategoriyi veritabanından bulalım.
+      const category = await Category.findById(categoryId).lean();
+
+      if (category) {
+        if (
+          category.parentCategory === null &&
+          Array.isArray(category.subCategories) &&
+          category.subCategories.length > 0
+        ) {
+          matchConditions.category = {
+            $in: category.subCategories.map(
+              (subId) => new mongoose.Types.ObjectId(subId)
+            ),
+          };
+        } else {
+          matchConditions.category = new mongoose.Types.ObjectId(categoryId);
+        }
+      } else {
+        return res.status(200).json([]);
+      }
     }
 
-    // Marka ID'leri varsa, filtreye ekle
     if (brandIds.length > 0) {
       matchConditions.brand = {
         $in: brandIds.map((id) => new mongoose.Types.ObjectId(id)),
       };
     }
 
-    // Eğer filtre koşulu varsa, pipeline'a ilk $match aşamasını ekle
+    // Eğer filtre koşulu varsa, pipeline'a ilk $match aşamasını ekle (Bu kısım sizin kodunuzla aynı)
     if (Object.keys(matchConditions).length > 0) {
       pipeline.push({ $match: matchConditions });
     }
 
-    // --- YORUM VE İNDİRİMLİ FİYAT HESAPLAMA KISMI (DEĞİŞİKLİK YOK) ---
+    // --- Geri kalan pipeline adımları SİZİN ÇALIŞAN KODUNUZLA BİREBİR AYNI ---
     pipeline.push(
       {
         $lookup: {
@@ -456,24 +480,15 @@ router.get("/getProductsByBrand", async (req, res) => {
             },
           },
         },
-      }
-    );
-    // --- HESAPLAMA SONU ---
-
-    // === FİYAT FİLTRESİNİ UYGULAYAN YENİ KISIM (BURASI ÇOK ÖNEMLİ) ===
-    // İndirimli fiyat (`discountedPrice`) hesaplandıktan SONRA fiyat aralığına göre filtrele
-    pipeline.push({
-      $match: {
-        discountedPrice: {
-          $gte: minPrice, // Greater than or equal to minPrice
-          $lte: maxPrice, // Less than or equal to maxPrice
+      },
+      {
+        $match: {
+          discountedPrice: {
+            $gte: minPrice,
+            $lte: maxPrice,
+          },
         },
       },
-    });
-    // === YENİ KISIM SONU ===
-
-    // Marka ve Kategori bilgilerini birleştirme (sizdeki gibi)
-    pipeline.push(
       {
         $lookup: {
           from: "brands",
@@ -498,8 +513,8 @@ router.get("/getProductsByBrand", async (req, res) => {
 
     res.status(200).json(
       products.map((product) => ({
-        ...product, // Gerekli tüm alanları doğrudan kopyala
-        id: product._id, // uyumluluk için
+        ...product,
+        id: product._id,
         averageRating: parseFloat((product.averageRating || 0).toFixed(1)),
       }))
     );
@@ -513,24 +528,31 @@ router.get("/getProductsByBrand", async (req, res) => {
 
 router.get("/topPicks", async (req, res) => {
   try {
-    const { brands } = req.query; // örn: "Xiaomi,Samsung"
-    let query = { topPick: 1 }; // Temel sorgumuzu oluşturuyoruz
+    const { brands } = req.query; // örn: "60d21b4667d0d8992e610c85,60d21b4667d0d8992e610c86"
 
-    // Eğer 'brands' parametresi varsa, sorguya marka filtresini ekliyoruz
+    // Temel sorgumuz: Sadece topPick değeri 1 olan ürünleri getir.
+    let query = { topPick: 1 };
+
+    // Eğer frontend'den 'brands' parametresi (ID listesi) geldiyse,
+    // sorgumuza marka filtresini ekliyoruz.
     if (brands) {
-      const brandNames = brands.split(",");
-      const brandDocs = await Brand.find({ name: { $in: brandNames } }, "_id");
-      const brandIds = brandDocs.map((b) => b._id);
+      // Frontend'den gelen virgülle ayrılmış ID string'ini bir diziye çeviriyoruz.
+      const brandIds = brands.split(",");
+
+      // Sorgumuza, 'brand' alanı bu ID'lerden herhangi birine eşit olanları
+      // getirecek şekilde $in operatörünü ekliyoruz.
+      //
+      // ÖNCEKİ HATALI KISIM: Marka ID'lerini alıp tekrar isimle aramaya çalışıyordu.
+      // DOĞRU YAKLAŞIM: Gelen ID'leri doğrudan kullanmak.
       query.brand = { $in: brandIds };
     }
 
     // Sorguyu tek bir yerde çalıştırıp, populate işlemlerini ekliyoruz.
-    // Bu, her iki senaryoda da (markalı veya markasız) yorumların getirilmesini sağlar.
     const topProducts = await Product.find(query)
       .populate("brand", "name") // Marka bilgisini al
       .populate({
         path: "reviews", // Yorumları doldur
-        select: "rating", // Sanal alanların hesaplanması için sadece rating yeterli (optimizasyon)
+        select: "rating", // Sanal alanların hesaplanması için sadece rating yeterli
       });
 
     res.status(200).json(topProducts);
@@ -540,7 +562,6 @@ router.get("/topPicks", async (req, res) => {
       .json({ message: "Top picks alınamadı", error: error.message });
   }
 });
-
 router.get("/getProductByBrandID/:brandId", async (req, res) => {
   try {
     const { brandId } = req.params;

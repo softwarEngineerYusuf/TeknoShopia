@@ -7,18 +7,16 @@ const Cart = require("../models/cart.js");
 const CartItem = require("../models/cartItem.js");
 const sendMail = require("../config/mailService");
 const Coupon = require("../models/coupon.js");
-
+const Product = require("../models/product.js");
 const generateOrderNumber = () => {
   const date = new Date();
-  // YYYYMMDD formatında tarih
   const dateString = `${date.getFullYear()}${(date.getMonth() + 1)
     .toString()
     .padStart(2, "0")}${date.getDate().toString().padStart(2, "0")}`;
-  // 5 haneli rastgele alfanümerik karakter
   const randomString = Math.random().toString(36).substring(2, 7).toUpperCase();
   return `ORD-${dateString}-${randomString}`;
 };
-// POST /api/orders/CreateOrder - Yeni bir sipariş oluşturur
+
 router.post("/CreateOrder", async (req, res) => {
   try {
     const { userId, addressId, orderItems, totalPrice, coupon } = req.body;
@@ -35,10 +33,28 @@ router.post("/CreateOrder", async (req, res) => {
         .json({ message: "Eksik veya geçersiz sipariş bilgileri." });
     }
 
-    const [user, address, cart] = await Promise.all([
+    const productIds = orderItems.map((item) => item.product);
+    const productsInDB = await Product.find({ _id: { $in: productIds } });
+
+    const productMap = new Map(productsInDB.map((p) => [p._id.toString(), p]));
+
+    for (const item of orderItems) {
+      const product = productMap.get(item.product.toString());
+      if (!product) {
+        return res
+          .status(404)
+          .json({ message: `Ürün bulunamadı: ID ${item.product}` });
+      }
+      if (product.stock < item.quantity) {
+        return res.status(400).json({
+          message: `Stok yetersiz: ${product.name}. Mevcut stok: ${product.stock}, istenen: ${item.quantity}.`,
+        });
+      }
+    }
+
+    const [user, address] = await Promise.all([
       User.findById(userId),
       Address.findById(addressId),
-      Cart.findOne({ userId: userId }),
     ]);
 
     if (!user || !address) {
@@ -47,11 +63,17 @@ router.post("/CreateOrder", async (req, res) => {
         .json({ message: "Kullanıcı veya adres bulunamadı." });
     }
 
-    // GÜNCELLEME: Benzersiz sipariş numarası oluştur
-    const orderNumber = generateOrderNumber();
+    const stockUpdatePromises = orderItems.map((item) =>
+      Product.updateOne(
+        { _id: item.product },
+        { $inc: { stock: -item.quantity } }
+      )
+    );
+    await Promise.all(stockUpdatePromises);
 
+    const orderNumber = generateOrderNumber();
     const newOrder = new Order({
-      orderNumber, // YENİ: Oluşturulan numarayı ekle
+      orderNumber,
       userId,
       orderItems,
       totalPrice,
@@ -80,14 +102,53 @@ router.post("/CreateOrder", async (req, res) => {
     user.orders.push(savedOrder._id);
     await user.save();
 
-    if (cart) {
-      await CartItem.deleteMany({ _id: { $in: cart.cartItems } });
-      cart.cartItems = [];
-      cart.totalPrice = 0;
+    const cart = await Cart.findOne({ userId: userId });
+    if (cart && cart.cartItems) {
+      // cart.cartItems var mı diye ek kontrol
+      const purchasedProductIds = orderItems.map((item) =>
+        item.product.toString()
+      );
+
+      // ======================= HATAYI DÜZELTEN KISIM =======================
+      // Filtrelemeden önce her bir `item`'ın ve `item.product`'ın var olduğundan emin oluyoruz.
+      cart.cartItems = cart.cartItems.filter((item) => {
+        // Eğer item veya item.product tanımsız/null ise, bu bozuk veriyi sepetten temizle (false döndürerek).
+        if (!item || !item.product) {
+          return false;
+        }
+        // Eğer item geçerliyse, normal kontrolü yap.
+        return !purchasedProductIds.includes(item.product.toString());
+      });
+      // =====================================================================
+
+      // Sepette kalan ürünlerin toplam fiyatını yeniden hesapla
+      if (cart.cartItems.length > 0) {
+        const remainingProductDetails = await Product.find({
+          _id: { $in: cart.cartItems.map((i) => i.product).filter(Boolean) }, // filter(Boolean) ile null/undefined ID'leri kaldır
+        });
+        const remainingProductMap = new Map(
+          remainingProductDetails.map((p) => [
+            p._id.toString(),
+            p.discountedPrice,
+          ])
+        );
+
+        cart.totalPrice = cart.cartItems.reduce((sum, item) => {
+          // item.product'ın varlığını tekrar kontrol et, bu bir ek güvenlik katmanıdır.
+          if (item && item.product) {
+            const price = remainingProductMap.get(item.product.toString()) || 0;
+            return sum + price * item.quantity;
+          }
+          return sum;
+        }, 0);
+      } else {
+        // Eğer sepette hiç ürün kalmadıysa toplam fiyatı sıfırla
+        cart.totalPrice = 0;
+      }
+
       await cart.save();
     }
 
-    // GÜNCELLEME: E-postada _id yerine orderNumber kullan
     const emailSubject = `Siparişiniz Onaylandı! Sipariş No: ${savedOrder.orderNumber}`;
     const emailTemplate = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
@@ -95,7 +156,7 @@ router.post("/CreateOrder", async (req, res) => {
           user.name
         }!</h2>
         <p>Siparişiniz başarıyla alındı. Sipariş Numaranız: <strong>${
-          savedOrder.orderNumber // GÜNCELLENDİ
+          savedOrder.orderNumber
         }</strong></p>
         <p>Toplam Tutar: <strong>${savedOrder.totalPrice.toLocaleString(
           "tr-TR",
@@ -123,7 +184,6 @@ router.post("/CreateOrder", async (req, res) => {
       .status(201)
       .json({ message: "Sipariş başarıyla oluşturuldu!", order: savedOrder });
   } catch (error) {
-    // EĞER SİPARİŞ NUMARASI ÇAKIŞMASI OLURSA (çok düşük ihtimal)
     if (error.code === 11000) {
       return res
         .status(500)
