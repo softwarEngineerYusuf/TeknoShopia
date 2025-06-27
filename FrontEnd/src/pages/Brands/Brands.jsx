@@ -212,7 +212,16 @@ function Brands() {
                   style={{ cursor: "pointer" }}
                 />
                 <div className="card-details-brands-cards text-center">
-                  <p className="product-name-brands-cards">{product.name}</p>
+                  <p
+                    className="product-name-brands-cards"
+                    style={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {product.name}
+                  </p>
                   <div
                     className="d-flex justify-content-between align-items-center"
                     style={{ padding: "0rem 1rem" }}
