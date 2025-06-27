@@ -236,7 +236,7 @@ function CategoryCards({ categoryId, filters }) {
                   style={{ padding: "0rem 1rem",display: "flex", alignItems: "center" }}
                 >
                   <div className="rating-category-cards">
-                    <StarIcon />
+                    <StarIcon style={{ color: '#FFD700' }} />
                     <p>
                       {(product.averageRating || 0).toFixed(1)}
                       <span
@@ -247,14 +247,7 @@ function CategoryCards({ categoryId, filters }) {
                       </span>
                     </p>
                   </div>
-                  <div
-                    style={{
-                      textAlign: "right",
-                      minHeight: 44,
-                      display: product.discount > 0 ? undefined : "flex",
-                      alignItems: product.discount > 0 ? undefined : "center"
-                    }}
-                  >
+                  <div style={{ textAlign: "right", minHeight: 44, display:"flex",alignItems: "center" }}>
                     <p
                       style={{
                         color: "#888",
