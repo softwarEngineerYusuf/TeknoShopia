@@ -64,10 +64,6 @@ router.post("/couponCreate", async (req, res) => {
   }
 });
 
-// --------------------------------------------------
-// 2. KUPONU DOĞRULAMA VE UYGULAMA (Kullanıcı için)
-// Endpoint: /api/coupon/couponApply
-// --------------------------------------------------
 router.post("/couponApply", async (req, res) => {
   try {
     const { code, cartId } = req.body;
@@ -78,6 +74,7 @@ router.post("/couponApply", async (req, res) => {
         .json({ message: "Kupon kodu ve sepet ID'si gereklidir." });
     }
 
+    // `coupon` değişkenini `const` yerine `let` yapalım ki daha sonra atama yapabilelim.
     const coupon = await Coupon.findOne({ code: code.toUpperCase().trim() });
 
     // Kupon Geçerlilik Kontrolleri
@@ -111,6 +108,8 @@ router.post("/couponApply", async (req, res) => {
 
     // İndirim Hesaplaması
     let discountAmount = 0;
+    // DİKKAT: Backend'deki modelinizde "fixedAmount" yazıyor, frontend'de "fixed" bekliyor olabilirsiniz.
+    // Tutarlılık için kontrol edin. Şimdilik backend'e göre bırakıyorum.
     if (coupon.discountType === "percentage") {
       discountAmount = (cart.totalPrice * coupon.discountValue) / 100;
     } else if (coupon.discountType === "fixedAmount") {
@@ -119,15 +118,14 @@ router.post("/couponApply", async (req, res) => {
 
     const finalPrice = Math.max(0, cart.totalPrice - discountAmount);
 
+    // *** ANA DEĞİŞİKLİK BURADA ***
+    // Frontend'e kuponun tüm bilgilerini ve hesaplanmış fiyatları içeren bir nesne gönderiyoruz.
     res.status(200).json({
       message: "Kupon başarıyla uygulandı!",
       originalPrice: cart.totalPrice,
       discountAmount: discountAmount,
       finalPrice: finalPrice,
-      coupon: {
-        code: coupon.code,
-        description: coupon.description,
-      },
+      coupon: coupon, // Kuponun veritabanındaki tam halini gönderiyoruz.
     });
   } catch (error) {
     console.error("Kupon uygulama hatası:", error);
@@ -136,11 +134,6 @@ router.post("/couponApply", async (req, res) => {
       .json({ message: "Sunucu hatası oluştu.", error: error.message });
   }
 });
-
-// --------------------------------------------------
-// 3. TÜM KUPONLARI GETİRME (Admin için)
-// Endpoint: /api/coupon/getAllCoupons
-// --------------------------------------------------
 router.get("/getAllCoupons", async (req, res) => {
   try {
     const coupons = await Coupon.find({});
@@ -151,10 +144,6 @@ router.get("/getAllCoupons", async (req, res) => {
   }
 });
 
-// --------------------------------------------------
-// 4. KUPON GÜNCELLEME (Admin için)
-// Endpoint: /api/coupon/couponUpdate/:id
-// --------------------------------------------------
 router.put("/couponUpdate/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -180,10 +169,6 @@ router.put("/couponUpdate/:id", async (req, res) => {
   }
 });
 
-// --------------------------------------------------
-// 5. KUPON SİLME (Admin için)
-// Endpoint: /api/coupon/couponDelete/:id
-// --------------------------------------------------
 router.delete("/couponDelete/:id", async (req, res) => {
   try {
     const { id } = req.params;
