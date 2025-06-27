@@ -189,12 +189,28 @@ function Brands() {
             <div className="col-lg-3 col-md-4 col-sm-6 mb-4" key={product._id}>
               <div
                 className="brands-cards container"
-                style={{ position: "relative" }}
+                style={{
+                  position: "relative",
+                  minHeight: "480px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                }}
               >
                 <button
                   className="favorite-button-brands"
                   aria-label="Add to favorites"
                   onClick={() => handleToggleFavorite(product._id)}
+                  style={{
+                    position: "absolute",
+                    top: "10px",
+                    right: "10px",
+                    zIndex: 2,
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                  }}
                 >
                   {favoriteIds.has(product._id) ? (
                     <HeartFilled style={{ fontSize: "24px", color: "red" }} />
@@ -224,7 +240,7 @@ function Brands() {
                   </p>
                   <div
                     className="d-flex justify-content-between align-items-center"
-                    style={{ padding: "0rem 1rem" }}
+                    style={{ padding: "1rem 1rem" }}
                   >
                     <div className="rating-brands-cards">
                       <StarIcon style={{ color: "#FFD700" }} />
@@ -238,9 +254,22 @@ function Brands() {
                         </span>
                       </p>
                     </div>
-                    <div className="price-section">
+                    <div
+                      className="price-section"
+                      style={{
+                        minHeight: "44px",
+                        display:
+                          product.discount > 0 ? "block" : "flex",
+                        alignItems:
+                          product.discount > 0 ? undefined : "center",
+                        justifyContent:
+                          product.discount > 0 ? undefined : "center",
+                      }}
+                    >
                       {product.discount > 0 && (
-                        <p className="old-price">₺{product.price.toFixed(2)}</p>
+                        <p className="old-price">
+                          ₺{product.price.toFixed(2)}
+                        </p>
                       )}
                       <p className="product-price-brands-cards">
                         ₺{(product.discountedPrice || product.price).toFixed(2)}

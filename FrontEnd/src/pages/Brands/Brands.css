@@ -20,6 +20,9 @@
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .card-image-brands-cards {
@@ -80,6 +83,22 @@
   transition: all 0.2s;
 }
 
+.favorite-button-brands {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.favorite-button-brands:hover svg {
+  color: #c0392b;
+  transform: scale(1.1);
+  transition: all 0.2s;
+}
+
 /* Responsive styles */
 @media (max-width: 1200px) {
   .col-md-3 {
@@ -106,6 +125,14 @@
   flex-direction: column;
   align-items: flex-end;
   line-height: 1.2;
+  min-height: 44px;
+}
+
+/* Eğer indirim yoksa fiyatı ortalamak için ek stil */
+.price-section.no-discount {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 }
 
 .old-price {

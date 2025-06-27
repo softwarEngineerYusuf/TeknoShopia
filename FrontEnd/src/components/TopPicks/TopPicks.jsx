@@ -98,7 +98,7 @@ const TopPicks = () => {
                 <p className="product-name-top-picks">{product.name}</p>
                 <div
                   className="d-flex justify-content-between"
-                  style={{ padding: "0rem 1rem" }}
+                    style={{ padding: "0rem 1rem" }}
                 >
                   {/* =============== RATING KISMI GÜNCELLENDİ =============== */}
                   <div className="rating-discount-corousel">

@@ -233,7 +233,7 @@ function CategoryCards({ categoryId, filters }) {
                 <p className="product-name-category-cards">{product.name}</p>
                 <div
                   className="d-flex justify-content-between"
-                  style={{ padding: "0rem 1rem" }}
+                  style={{ padding: "0rem 1rem",display: "flex", alignItems: "center" }}
                 >
                   <div className="rating-category-cards">
                     <StarIcon />
@@ -247,20 +247,27 @@ function CategoryCards({ categoryId, filters }) {
                       </span>
                     </p>
                   </div>
-                  <div style={{ textAlign: "right" }}>
-                    {product.discount > 0 && (
-                      <p
-                        style={{
-                          color: "#888",
-                          textDecoration: "line-through",
-                          fontSize: "0.9rem",
-                          marginBottom: "-5px",
-                        }}
-                      >
-                        ₺{product.price.toLocaleString("tr-TR")}
-                      </p>
-                    )}
-                    <p className="product-price-category-cards">
+                  <div
+                    style={{
+                      textAlign: "right",
+                      minHeight: 44,
+                      display: product.discount > 0 ? undefined : "flex",
+                      alignItems: product.discount > 0 ? undefined : "center"
+                    }}
+                  >
+                    <p
+                      style={{
+                        color: "#888",
+                        textDecoration: product.discount > 0 ? "line-through" : "none",
+                        fontSize: "0.9rem",
+                        height: 20,
+                        margin: 0,
+                        visibility: product.discount > 0 ? "visible" : "hidden"
+                      }}
+                    >
+                      ₺{product.price.toLocaleString("tr-TR")}
+                    </p>
+                    <p className="product-price-category-cards" style={{ margin: 0 }}>
                       ₺{product.discountedPrice.toLocaleString("tr-TR")}
                     </p>
                   </div>
