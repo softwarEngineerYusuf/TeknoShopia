@@ -116,7 +116,7 @@ const TopPicks = () => {
                   </div>
                   {/* ========================================================== */}
 
-                  <p className="product-price-top-picks">
+                  <p className="product-price-top-picks" style={{ fontSize: "1.2rem", fontWeight: "bold", color: "black" }}>
                     {/* İndirimli fiyatı göstermek için discountedPrice sanal alanını kullanıyoruz */}
                     ₺{product.discountedPrice?.toLocaleString("tr-TR") || "0"}
                   </p>
