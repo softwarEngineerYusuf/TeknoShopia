@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Pencil, Trash2, MapPin, Plus, CreditCard } from "lucide-react";
-import { Spin, Modal, Tag } from "antd"; // Tag eklendi
+import { Spin, Modal, Tag } from "antd";
 import { useAuth } from "../../context/AuthContext";
 import {
   getAddressesByUserId,
@@ -60,10 +60,9 @@ const Payment = () => {
         setLoadingCards(true);
         setLoadingSummary(true);
 
-        // location.state'den hem sepeti hem de kuponu al
         let cartData = location.state?.cartData;
         let couponData = location.state?.couponInfo;
-        setAppliedCoupon(couponData); // Kupon state'ine atandı
+        setAppliedCoupon(couponData);
 
         if (!cartData) {
           try {
@@ -213,16 +212,13 @@ const Payment = () => {
   const handleSelectCard = (card) =>
     setSelectedCard(selectedCard?._id === card._id ? null : card);
 
-  // Fiyat Hesaplamaları
-  const finalTotal = appliedCoupon
-    ? appliedCoupon.finalPrice
-    : orderSummary?.totalPrice || 0;
-  const originalSubtotal =
-    orderSummary?.cartItems.reduce(
-      (sum, item) => sum + item.product.price * item.quantity,
-      0
-    ) || 0;
-  const discountAmount = originalSubtotal - finalTotal;
+  // *** DEĞİŞİKLİK BAŞLANGICI ***
+  // Fiyat Hesaplamaları - Basket'ten gelen verilere güvenerek yeniden düzenlendi.
+  // Bu, kupon öncesi ve sonrası fiyatların tutarlı olmasını sağlar.
+  const subtotal = orderSummary?.totalPrice || 0;
+  const finalTotal = appliedCoupon ? appliedCoupon.finalPrice : subtotal;
+  const discountAmount = subtotal - finalTotal;
+  // *** DEĞİŞİKLİK SONU ***
 
   // Sipariş Oluşturma Fonksiyonu
   const handleProceedToCheckout = async () => {
@@ -241,14 +237,17 @@ const Payment = () => {
         orderItems: orderSummary.cartItems.map((item) => ({
           product: item.product._id,
           quantity: item.quantity,
-          price: item.price, // Backend'den gelen güncel birim fiyatı
+          // *** DEĞİŞİKLİK: 'price' alanı düzeltildi.
+          // Her bir ürün satırının birim fiyatını (indirimler dahil) hesaplar.
+          price: item.subtotal / item.quantity,
         })),
         totalPrice: finalTotal, // Kupon uygulanmış son fiyat
-        // Kupon bilgilerini sipariş kaydına ekle
         coupon: appliedCoupon
           ? {
               code: appliedCoupon.coupon.code,
-              discountAmount: appliedCoupon.discountAmount,
+              // *** DEĞİŞİKLİK: 'discountAmount' alanı düzeltildi.
+              // Toplam indirim miktarını dinamik olarak hesaplar.
+              discountAmount: discountAmount,
             }
           : undefined,
       };
@@ -424,8 +423,9 @@ const Payment = () => {
                 <div className="summary-details">
                   <div className="summary-row">
                     <span>Ara Toplam</span>
+                    {/* *** DEĞİŞİKLİK: `originalSubtotal` yerine `subtotal` kullanıldı *** */}
                     <span>
-                      {originalSubtotal.toLocaleString("tr-TR", {
+                      {subtotal.toLocaleString("tr-TR", {
                         minimumFractionDigits: 2,
                       })}{" "}
                       TL
